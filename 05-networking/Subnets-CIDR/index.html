@@ -1,0 +1,1646 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subredes, IPv4, CIDR y AWS VPC</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #0073bb;
+        --aws-light-blue: #38bdf8;
+        --aws-green: #10b981;
+        --aws-red: #ef4444;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Sans-Serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HEADER & NAV */
+      header {
+        height: 60px;
+        background: #090d16;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        z-index: 10;
+      }
+      .brand {
+        font-weight: bold;
+        color: var(--aws-orange);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .progress-bar-container {
+        flex-grow: 1;
+        max-width: 400px;
+        height: 8px;
+        background: var(--card-border);
+        border-radius: 4px;
+        margin: 0 1.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--aws-orange),
+          var(--aws-light-blue)
+        );
+        transition: width 0.3s ease;
+      }
+      .header-controls {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+      }
+      .btn:hover {
+        background: #334155;
+        border-color: var(--aws-light-blue);
+      }
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-orange:hover {
+        background: #e68a00;
+      }
+
+      /* LAYOUT SLIDES */
+      main {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .slide-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.4s ease,
+          transform 0.4s ease;
+        transform: scale(0.98);
+        padding: 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow-y: auto;
+      }
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      /* SLIDE COMPONENTS */
+      .slide-header {
+        margin-bottom: 1.5rem;
+      }
+      .slide-num {
+        font-size: 0.85rem;
+        color: var(--aws-orange);
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .slide-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-top: 0.2rem;
+      }
+      .slide-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      }
+      .card-title {
+        color: var(--aws-light-blue);
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .exam-tip {
+        background: rgba(255, 153, 0, 0.1);
+        border-left: 4px solid var(--aws-orange);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+        margin-top: 1rem;
+      }
+      .exam-tip-title {
+        color: var(--aws-orange);
+        font-weight: bold;
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+      }
+
+      /* DIAGRAMS & BITS */
+      .octet-box {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin: 1rem 0;
+      }
+      .octet {
+        background: #0b1120;
+        border: 2px solid var(--aws-light-blue);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        text-align: center;
+        min-width: 90px;
+      }
+      .octet-dec {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--aws-orange);
+      }
+      .octet-bin {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      .bit-bar {
+        display: flex;
+        height: 35px;
+        border-radius: 6px;
+        overflow: hidden;
+        margin: 1rem 0;
+        font-weight: bold;
+        font-family: monospace;
+        font-size: 0.85rem;
+      }
+      .bit-net {
+        background: var(--aws-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: width 0.3s;
+      }
+      .bit-host {
+        background: var(--aws-orange);
+        color: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: width 0.3s;
+      }
+
+      /* TABLES */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--card-border);
+        padding: 0.6rem 0.8rem;
+        text-align: left;
+        font-size: 0.9rem;
+      }
+      th {
+        background: #111827;
+        color: var(--aws-orange);
+      }
+      tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      /* FOOTER NAV */
+      footer {
+        height: 60px;
+        background: #090d16;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+      }
+
+      /* INTERACTIVE INPUTS */
+      input[type="range"] {
+        width: 100%;
+        margin: 1rem 0;
+        accent-color: var(--aws-orange);
+      }
+      input[type="text"],
+      select {
+        background: #0b1120;
+        border: 1px solid var(--card-border);
+        color: white;
+        padding: 0.5rem;
+        border-radius: 6px;
+        font-family: monospace;
+      }
+
+      .quiz-option {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .quiz-option:hover {
+        border-color: var(--aws-light-blue);
+        background: #26334d;
+      }
+      .quiz-option.correct {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--aws-green);
+      }
+      .quiz-option.incorrect {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--aws-red);
+      }
+
+      /* SIDEBAR MENU */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -340px;
+        width: 340px;
+        height: 100%;
+        background: #0d1322;
+        border-left: 1px solid var(--card-border);
+        z-index: 100;
+        transition: right 0.3s ease;
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .sidebar.open {
+        right: 0;
+      }
+      .sidebar-item {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+      .sidebar-item:hover,
+      .sidebar-item.active {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      ul {
+        padding-left: 1.2rem;
+      }
+      li {
+        margin-bottom: 0.4rem;
+        color: #cbd5e1;
+        font-size: 0.95rem;
+      }
+
+      .teacher-controls {
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px dashed var(--aws-light-blue);
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">🌐 Subredes, CIDR y AWS VPC </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="header-controls">
+        <span
+          id="slideCounter"
+          style="font-size: 0.85rem; color: var(--text-muted)"
+          >1 / 16</span
+        >
+        <button class="btn" onclick="toggleSidebar()">☰ Índice</button>
+        <button class="btn" onclick="toggleFullScreen()">
+          ⛶ Pantalla Completa
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="slide-container" id="slideContainer">
+        <!-- SLIDE 1: PORTADA -->
+        <div class="slide active">
+          <div style="text-align: center; max-width: 800px; margin: 0 auto">
+            <span class="slide-num">Clase Visual e Interactiva</span>
+            <h1
+              class="slide-title"
+              style="font-size: 2.8rem; margin-top: 0.5rem"
+            >
+              De Bits IPv4 a AWS VPCs
+            </h1>
+            <p class="slide-subtitle" style="margin-top: 1rem">
+              Comprendiendo la anatomía de las direcciones IP, CIDR y el
+              subnetting desde cero aplicado a AWS Certified Cloud Practitioner.
+            </p>
+            <div style="margin-top: 2.5rem" class="flex-center">
+              <button
+                class="btn btn-orange"
+                style="padding: 0.8rem 2rem; font-size: 1.1rem"
+                onclick="nextSlide()"
+              >
+                Iniciar Clase →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 2: OBJETIVOS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 00</span>
+            <h2 class="slide-title">Objetivos Pedagogicos</h2>
+            <p class="slide-subtitle">
+              Lo que serás capaz de entender y explicar al finalizar esta
+              masterclass
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🎯 Fundamentos de Networking</div>
+              <ul>
+                <li>Anatomía de 32 bits y 4 octetos en una dirección IPv4.</li>
+                <li>Transformación y relación entre decimal y binario.</li>
+                <li>
+                  La clara diferencia entre la parte de Red (Network) y Host.
+                </li>
+                <li>
+                  Por qué las clases históricas (A, B, C) eran ineficientes.
+                </li>
+                <li>
+                  Notación CIDR, sufijos /X y desplazamiento dinámico de bits.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">☁️ Aplicación en AWS Cloud</div>
+              <ul>
+                <li>
+                  Subnetting: División visual de bloques grandes en pequeños.
+                </li>
+                <li>Rangos de IP Privadas (RFC 1918) y su uso en la nube.</li>
+                <li>Definición de VPCs y Subredes mediante bloques CIDR.</li>
+                <li>
+                  Reserva especial de 5 direcciones IP internas en subnets AWS.
+                </li>
+                <li>
+                  Evitar solapamientos CIDR y diseñar pensando en crecimiento.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3: SECCIÓN 1 - ¿QUÉ ES IPV4? -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 01</span>
+            <h2 class="slide-title">Anatomía de una Dirección IPv4</h2>
+            <p class="slide-subtitle">
+              32 Bits divididos exactamente en 4 Octetos (4 × 8 bits = 32 bits)
+            </p>
+          </div>
+          <div style="text-align: center">
+            <p>
+              Ejemplo:
+              <strong style="color: var(--aws-orange); font-size: 1.3rem"
+                >192.168.1.10</strong
+              >
+            </p>
+            <div class="octet-box">
+              <div class="octet">
+                <div class="octet-dec" id="oct1-dec">192</div>
+                <div class="octet-bin" id="oct1-bin">11000000</div>
+              </div>
+              <div class="octet">
+                <div class="octet-dec" id="oct2-dec">168</div>
+                <div class="octet-bin" id="oct2-bin">10101000</div>
+              </div>
+              <div class="octet">
+                <div class="octet-dec" id="oct3-dec">1</div>
+                <div class="octet-bin" id="oct3-bin">00000001</div>
+              </div>
+              <div class="octet">
+                <div class="octet-dec" id="oct4-dec">10</div>
+                <div class="octet-bin" id="oct4-bin">00001010</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-top: 1rem">
+            <div class="card-title">
+              ⚡ Interacción: Experimenta la Conversión Decimal → Binario
+            </div>
+            <p style="font-size: 0.85rem; margin-bottom: 0.5rem">
+              Modifica los octetos (0 a 255) para observar cómo cambia la
+              estructura binaria en tiempo real:
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center">
+              <input
+                type="number"
+                min="0"
+                max="255"
+                value="192"
+                id="in-oct1"
+                oninput="updateIpVisualizer()"
+                style="width: 70px"
+              />
+              <input
+                type="number"
+                min="0"
+                max="255"
+                value="168"
+                id="in-oct2"
+                oninput="updateIpVisualizer()"
+                style="width: 70px"
+              />
+              <input
+                type="number"
+                min="0"
+                max="255"
+                value="1"
+                id="in-oct3"
+                oninput="updateIpVisualizer()"
+                style="width: 70px"
+              />
+              <input
+                type="number"
+                min="0"
+                max="255"
+                value="10"
+                id="in-oct4"
+                oninput="updateIpVisualizer()"
+                style="width: 70px"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4: SECCIÓN 2 - NETWORK VS HOST -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 02</span>
+            <h2 class="slide-title">Network vs Host</h2>
+            <p class="slide-subtitle">
+              La frontera variable que separa la red de los dispositivos
+              individuales
+            </p>
+          </div>
+          <div class="card" style="margin-bottom: 1rem">
+            <div class="card-title">192.168.1.10 / 24</div>
+            <div class="bit-bar">
+              <div class="bit-net" style="width: 75%">
+                NETWORK (24 Bits / 3 Octetos)
+              </div>
+              <div class="bit-host" style="width: 25%">HOST (8 Bits)</div>
+            </div>
+            <p style="font-size: 0.9rem">
+              La parte de <strong>NETWORK</strong> identifica a la autopista principal. La
+              parte de <strong>HOST</strong> identifica la casa específica en esa autopista.
+            </p>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <strong style="color: var(--aws-light-blue)">/ 8</strong>
+              <p style="font-size: 0.85rem; margin-top: 0.3rem">
+                NETWORK: 192<br />HOST: .168.1.10
+              </p>
+              <p style="font-size: 0.75rem; color: var(--text-muted)">
+                Red gigante, pocos bloques.
+              </p>
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-light-blue)">/ 16</strong>
+              <p style="font-size: 0.85rem; margin-top: 0.3rem">
+                NETWORK: 192.168<br />HOST: .1.10
+              </p>
+              <p style="font-size: 0.75rem; color: var(--text-muted)">
+                Red mediana equilibrada.
+              </p>
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-light-blue)">/ 24</strong>
+              <p style="font-size: 0.85rem; margin-top: 0.3rem">
+                NETWORK: 192.168.1<br />HOST: .10
+              </p>
+              <p style="font-size: 0.75rem; color: var(--text-muted)">
+                Red pequeña (256 direcciones).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5: SECCIÓN 3 - CLASES HISTÓRICAS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 03</span>
+            <h2 class="slide-title">Clases Históricas de IPv4 (Classful)</h2>
+            <p class="slide-subtitle">
+              El modelo rígido tradicional de direccionamiento antes de CIDR
+            </p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Clase</th>
+                <th>Primer Octeto</th>
+                <th>Prefijo Histórico</th>
+                <th>Bits Iniciales</th>
+                <th>Propósito Histórico</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Clase A</strong></td>
+                <td>1 – 126</td>
+                <td>/8</td>
+                <td><code>0xxxxxxx</code></td>
+                <td>Redes muy grandes (16M hosts)</td>
+              </tr>
+              <tr>
+                <td><strong>Clase B</strong></td>
+                <td>128 – 191</td>
+                <td>/16</td>
+                <td><code>10xxxxxx</code></td>
+                <td>Redes medianas (65k hosts)</td>
+              </tr>
+              <tr>
+                <td><strong>Clase C</strong></td>
+                <td>192 – 223</td>
+                <td>/24</td>
+                <td><code>110xxxxx</code></td>
+                <td>Redes pequeñas (254 hosts)</td>
+              </tr>
+              <tr>
+                <td><strong>Clase D</strong></td>
+                <td>224 – 239</td>
+                <td>—</td>
+                <td><code>1110xxxx</code></td>
+                <td>Tráfico Multicast</td>
+              </tr>
+              <tr>
+                <td><strong>Clase E</strong></td>
+                <td>240 – 255</td>
+                <td>—</td>
+                <td><code>1111xxxx</code></td>
+                <td>Experimental / Reservado</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="teacher-controls" style="margin-top: 1rem">
+            <strong>💡 Contexto de Transición:</strong> El modelo Classful
+            provocó un desperdicio masivo de direcciones IP (Ejemplo: si
+            necesitabas 300 IPs, debías usar Clase B /16 con 65,536 IPs,
+            desperdiciando >64,000).
+          </div>
+        </div>
+
+        <!-- SLIDE 6: CLASSFUL VS CIDR -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 03 — Evolución</span>
+            <h2 class="slide-title">Evolución: Classful → CIDR</h2>
+            <p class="slide-subtitle">
+              Classless Inter-Domain Routing (Prefijos de Longitud Variable)
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="border-top: 4px solid var(--aws-red)">
+              <div class="card-title">🏛️ CLASSFUL (Histórico)</div>
+              <p>Tamaños fijos e inflexibles:</p>
+              <p><strong>Clase A:</strong> Solo /8</p>
+              <p><strong>Clase B:</strong> Solo /16</p>
+              <p><strong>Clase C:</strong> Solo /24</p>
+              <p
+                style="
+                  margin-top: 0.5rem;
+                  font-size: 0.85rem;
+                  color: var(--aws-red);
+                "
+              >
+                Resultado: Ineficiencia y agotamiento prematuro de direcciones
+                IPv4.
+              </p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--aws-green)">
+              <div class="card-title">⚡ CIDR (Modelo Moderno)</div>
+              <p>Cualquier prefijo dinámico entre /8 y /32:</p>
+              <p>
+                <strong>Flexibilidad:</strong> /17, /22, /25, /26, /27, /28...
+              </p>
+              <p
+                style="
+                  margin-top: 0.5rem;
+                  font-size: 0.85rem;
+                  color: var(--aws-green);
+                "
+              >
+                Resultado: Asignación exacta del tamaño necesario según la
+                demanda real.
+              </p>
+            </div>
+          </div>
+          <div class="exam-tip">
+            <div class="exam-tip-title">⚠️ Regla Importante de Examen</div>
+            <p>
+              Las clases A/B/C son un <strong>histórico</strong>. AWS VPC utiliza
+              <strong>exclusivamente CIDR (Classless)</strong> para definir el
+              direccionamiento de redes y subredes.
+            </p>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: EXPLORADOR CIDR INTERACTIVO (ANIMACIÓN CENTRAL) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 04 — Explorador Central</span>
+            <h2 class="slide-title">Explorador Interactivo de Bits CIDR</h2>
+            <p class="slide-subtitle">
+              Mueve el slider para observar cómo se toman prestados los bits de
+              host
+            </p>
+          </div>
+          <div class="card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
+              <label
+                ><strong>Prefijo CIDR:</strong>
+                <span
+                  id="cidrSliderVal"
+                  style="
+                    font-size: 1.5rem;
+                    color: var(--aws-orange);
+                    font-weight: bold;
+                  "
+                  >/24</span
+                ></label
+              >
+              <span
+                id="subnetMaskDisplay"
+                style="
+                  font-family: monospace;
+                  background: #0b1120;
+                  padding: 0.4rem 0.8rem;
+                  border-radius: 4px;
+                "
+                >Máscara: 255.255.255.0</span
+              >
+            </div>
+            <input
+              type="range"
+              min="8"
+              max="32"
+              value="24"
+              id="cidrRangeInput"
+              oninput="runCidrVisualizer(this.value)"
+            />
+
+            <div class="bit-bar">
+              <div class="bit-net" id="barNetBits" style="width: 75%">
+                NETWORK: 24 Bits
+              </div>
+              <div class="bit-host" id="barHostBits" style="width: 25%">
+                HOST: 8 Bits
+              </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 1rem; text-align: center">
+              <div
+                style="
+                  background: #0b1120;
+                  padding: 0.75rem;
+                  border-radius: 6px;
+                "
+              >
+                <div style="font-size: 0.8rem; color: var(--text-muted)">
+                  Total de Direcciones
+                </div>
+                <div
+                  style="
+                    font-size: 1.3rem;
+                    font-weight: bold;
+                    color: var(--aws-light-blue);
+                  "
+                  id="totalAddrsVal"
+                >
+                  256
+                </div>
+              </div>
+              <div
+                style="
+                  background: #0b1120;
+                  padding: 0.75rem;
+                  border-radius: 6px;
+                "
+              >
+                <div style="font-size: 0.8rem; color: var(--text-muted)">
+                  Hosts Tradicionales (2^n - 2)
+                </div>
+                <div
+                  style="
+                    font-size: 1.3rem;
+                    font-weight: bold;
+                    color: var(--aws-green);
+                  "
+                  id="usableTradVal"
+                >
+                  254
+                </div>
+              </div>
+              <div
+                style="
+                  background: #0b1120;
+                  padding: 0.75rem;
+                  border-radius: 6px;
+                "
+              >
+                <div style="font-size: 0.8rem; color: var(--text-muted)">
+                  IPs Utilizables en AWS Subnet
+                </div>
+                <div
+                  style="
+                    font-size: 1.3rem;
+                    font-weight: bold;
+                    color: var(--aws-orange);
+                  "
+                  id="usableAwsVal"
+                >
+                  251
+                </div>
+              </div>
+            </div>
+          </div>
+          <p
+            style="
+              font-size: 0.8rem;
+              color: var(--text-muted);
+              margin-top: 0.5rem;
+              text-align: center;
+            "
+          >
+            Mientras mayor es el prefijo CIDR (ej. /28), más bits pertenecen a
+            la Red y MENOS direcciones de Host quedan disponibles.
+          </p>
+        </div>
+
+        <!-- SLIDE 8: LA MATEMÁTICA VISUAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 04 — Matemática Intuitiva</span>
+            <h2 class="slide-title">¿Cómo se calcula el tamaño de red?</h2>
+            <p class="slide-subtitle">
+              Construyendo la intuición de la potencia de 2 antes de la fórmula
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🔢 Exponentes de Bits de Host</div>
+              <ul>
+                <li>
+                  <strong>8 bits de host:</strong> 2^8 = 256 combinaciones
+                  totales
+                </li>
+                <li>
+                  <strong>7 bits de host:</strong> 2^7 = 128 combinaciones
+                  totales
+                </li>
+                <li>
+                  <strong>6 bits de host:</strong> 2^6 = 64 combinaciones
+                  totales
+                </li>
+                <li>
+                  <strong>5 bits de host:</strong> 2^5 = 32 combinaciones
+                  totales
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">
+                ⚠️ Diferencia Crítica: Tradicional vs AWS
+              </div>
+              <p>
+                <strong>IPv4 Tradicional:</strong> Se restan 2 IPs (Network
+                Address y Broadcast Address).
+              </p>
+              <p style="margin-top: 0.5rem; color: var(--aws-orange)">
+                <strong>AWS VPC Subnet:</strong> AWS reserva
+                <strong>5 direcciones IP</strong> en cada subred (Red, Router
+                VPC, DNS, Uso futuro de AWS, y Broadcast).
+              </p>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.5rem;
+                  color: var(--text-muted);
+                "
+              >
+                ¡Nunca uses la fórmula 2^n - 2 directamente para calcular
+                disponibilidad en subnets AWS!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 9: SUBNETTING VISUAL /24 EN CUATRO /26 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 06 — Subnetting</span>
+            <h2 class="slide-title">
+              Ejemplo Principal: Dividir un /24 en cuatro /26
+            </h2>
+            <p class="slide-subtitle">
+              Tomando prestados 2 bits adicionales de Host (26 - 24 = 2 bits →
+              2^2 = 4 subredes)
+            </p>
+          </div>
+          <div class="card">
+            <div style="font-weight: bold; margin-bottom: 0.5rem">
+              Bloque Base: 192.168.1.0/24 (0 a 255)
+            </div>
+            <div
+              style="
+                height: 20px;
+                background: var(--aws-blue);
+                border-radius: 4px;
+                margin-bottom: 1rem;
+                text-align: center;
+                font-size: 0.8rem;
+              "
+            >
+              1 Bloque Grande de 256 IPs
+            </div>
+
+            <div style="font-weight: bold; margin-bottom: 0.5rem">
+              Resultado: 4 Subredes /26 (64 IPs por bloque)
+            </div>
+            <div class="grid-2" style="gap: 0.5rem">
+              <div
+                style="
+                  background: #0b1120;
+                  border: 1px solid var(--aws-orange);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  text-align: center;
+                  font-size: 0.85rem;
+                "
+              >
+                <strong>Subred 1:</strong> 192.168.1.0/26<br /><span
+                  style="color: var(--text-muted)"
+                  >(Rango: 0 – 63)</span
+                >
+              </div>
+              <div
+                style="
+                  background: #0b1120;
+                  border: 1px solid var(--aws-orange);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  text-align: center;
+                  font-size: 0.85rem;
+                "
+              >
+                <strong>Subred 2:</strong> 192.168.1.64/26<br /><span
+                  style="color: var(--text-muted)"
+                  >(Rango: 64 – 127)</span
+                >
+              </div>
+              <div
+                style="
+                  background: #0b1120;
+                  border: 1px solid var(--aws-orange);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  text-align: center;
+                  font-size: 0.85rem;
+                "
+              >
+                <strong>Subred 3:</strong> 192.168.1.128/26<br /><span
+                  style="color: var(--text-muted)"
+                  >(Rango: 128 – 191)</span
+                >
+              </div>
+              <div
+                style="
+                  background: #0b1120;
+                  border: 1px solid var(--aws-orange);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  text-align: center;
+                  font-size: 0.85rem;
+                "
+              >
+                <strong>Subred 4:</strong> 192.168.1.192/26<br /><span
+                  style="color: var(--text-muted)"
+                  >(Rango: 192 – 255)</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 10: CALCULADORA DE SUBNETTING INTERACTIVA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 06 — Herramienta</span>
+            <h2 class="slide-title">Calculadora Interactiva de Subnetting</h2>
+            <p class="slide-subtitle">
+              Ingresa cualquier IP y CIDR para obtener la anatomía completa del
+              bloque
+            </p>
+          </div>
+          <div class="card">
+            <div
+              style="
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 1rem;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <label
+                >IP Base:
+                <input type="text" id="calcIpInput" value="192.168.1.0"
+              /></label>
+              <label
+                >CIDR:
+                <select id="calcCidrSelect">
+                  <option value="16">/16</option>
+                  <option value="20">/20</option>
+                  <option value="24" selected>/24</option>
+                  <option value="26">/26</option>
+                  <option value="27">/27</option>
+                </select>
+              </label>
+              <button class="btn btn-orange" onclick="runSubnetCalculator()">
+                Calcular
+              </button>
+              <span style="font-size: 0.8rem; color: var(--text-muted)"
+                >Ejemplos: 10.0.0.0/16 | 172.16.0.0/20</span
+              >
+            </div>
+            <table>
+              <tr>
+                <th>Network Address</th>
+                <td id="resNetAddr">192.168.1.0</td>
+                <th>Broadcast Address</th>
+                <td id="resBroadAddr">192.168.1.255</td>
+              </tr>
+              <tr>
+                <th>First Host (Trad)</th>
+                <td id="resFirstHost">192.168.1.1</td>
+                <th>Last Host (Trad)</th>
+                <td id="resLastHost">192.168.1.254</td>
+              </tr>
+              <tr>
+                <th>Subnet Mask</th>
+                <td id="resMask">255.255.255.0</td>
+                <th>Bits de Host</th>
+                <td id="resHostBits">8 bits</td>
+              </tr>
+              <tr>
+                <th>Total Direcciones</th>
+                <td id="resTotalAddrs">256</td>
+                <th>IPs Usables AWS</th>
+                <td
+                  id="resAwsUsable"
+                  style="color: var(--aws-orange); font-weight: bold"
+                >
+                  251
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- SLIDE 11: RANGOS PRIVADOS Y APLICACIÓN AWS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 07 & 08</span>
+            <h2 class="slide-title">
+              Rangos Privados IPv4 (RFC 1918) y AWS VPC
+            </h2>
+            <p class="slide-subtitle">
+              Las direcciones no enrutables en Internet utilizadas para
+              construir nubes privadas
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🔒 Rangos Privados Estándar</div>
+              <ul>
+                <li><code>10.0.0.0 / 8</code> (10.0.0.0 – 10.255.255.255)</li>
+                <li>
+                  <code>172.16.0.0 / 12</code> (172.16.0.0 – 172.31.255.255)
+                </li>
+                <li>
+                  <code>192.168.0.0 / 16</code> (192.168.0.0 – 192.168.255.255)
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">☁️ Conexión con Amazon VPC</div>
+              <p>
+                Al crear una VPC en AWS, le asignas un bloque CIDR privado
+                (Ejemplo: <code>10.0.0.0/16</code>).
+              </p>
+              <p style="margin-top: 0.5rem; font-size: 0.85rem">
+                Posteriormente, creas **Subnets** dentro de la VPC dividiendo
+                ese bloque principal en rangos más pequeños (Ejemplo:
+                <code>10.0.1.0/24</code>).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 12: ANIMACIÓN VPC Y SUBNETS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 08 — Arquitectura AWS</span>
+            <h2 class="slide-title">Estructura Jerárquica: VPC → Subnets</h2>
+            <p class="slide-subtitle">
+              Las subredes deben estar completamente contenidas dentro del
+              bloque CIDR de la VPC
+            </p>
+          </div>
+          <div
+            style="
+              border: 2px dashed var(--aws-orange);
+              padding: 1.5rem;
+              border-radius: 12px;
+              background: rgba(255, 153, 0, 0.05);
+            "
+          >
+            <div
+              style="
+                font-size: 1.1rem;
+                font-weight: bold;
+                color: var(--aws-orange);
+                margin-bottom: 1rem;
+              "
+            >
+              Amazon VPC: 10.0.0.0/16 (65,536 IPs Totales)
+            </div>
+            <div class="grid-2" style="gap: 1rem">
+              <div
+                style="
+                  background: var(--card-bg);
+                  border: 1px solid var(--aws-green);
+                  padding: 1rem;
+                  border-radius: 8px;
+                "
+              >
+                <strong style="color: var(--aws-green)">Public Subnet A</strong
+                ><br />
+                <code>10.0.1.0 / 24</code> (251 IPs AWS usables)<br />
+                <span style="font-size: 0.75rem; color: var(--text-muted)"
+                  >Contiene Web Servers / Load Balancers</span
+                >
+              </div>
+              <div
+                style="
+                  background: var(--card-bg);
+                  border: 1px solid var(--aws-green);
+                  padding: 1rem;
+                  border-radius: 8px;
+                "
+              >
+                <strong style="color: var(--aws-green)">Public Subnet B</strong
+                ><br />
+                <code>10.0.2.0 / 24</code> (251 IPs AWS usables)<br />
+                <span style="font-size: 0.75rem; color: var(--text-muted)"
+                  >Alta Disponibilidad en AZ 2</span
+                >
+              </div>
+              <div
+                style="
+                  background: var(--card-bg);
+                  border: 1px solid var(--aws-light-blue);
+                  padding: 1rem;
+                  border-radius: 8px;
+                "
+              >
+                <strong style="color: var(--aws-light-blue)"
+                  >Private Subnet A</strong
+                ><br />
+                <code>10.0.10.0 / 24</code> (251 IPs AWS usables)<br />
+                <span style="font-size: 0.75rem; color: var(--text-muted)"
+                  >Servidores de Aplicación Backend</span
+                >
+              </div>
+              <div
+                style="
+                  background: var(--card-bg);
+                  border: 1px solid var(--aws-light-blue);
+                  padding: 1rem;
+                  border-radius: 8px;
+                "
+              >
+                <strong style="color: var(--aws-light-blue)"
+                  >Private Subnet B</strong
+                ><br />
+                <code>10.0.11.0 / 24</code> (251 IPs AWS usables)<br />
+                <span style="font-size: 0.75rem; color: var(--text-muted)"
+                  >Base de Datos RDS Aislada</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 13: CASO PRÁCTICO Y CRECTIMIENTO FUTURO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 09</span>
+            <h2 class="slide-title">
+              Pensar en Crecimiento y Evitar Solapamientos
+            </h2>
+            <p class="slide-subtitle">
+              Principios clave de diseño de redes híbridas y en la nube
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="border-top: 4px solid var(--aws-red)">
+              <div class="card-title">
+                ⚠️ Error Común: Solapamiento (Overlap)
+              </div>
+              <p>
+                Si la VPC de AWS usa <code>192.168.1.0/24</code> y la red local
+                (On-Premises) de la empresa usa <code>192.168.1.0/24</code>,
+                <strong
+                  >NO se podrán conectar mediante VPN o Direct Connect</strong
+                >
+                debido al conflicto de rutas.
+              </p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--aws-green)">
+              <div class="card-title">🌱 Planificación para Crecimiento</div>
+              <p>
+                Asegúrate de reservar bloques libres en la VPC (Ej. usar /16 en
+                la VPC y asignar subnets /24 dejando espacio libre entre ellas).
+                Rediseñar una VPC activa sin espacio es un proceso altamente
+                complejo.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 14: TRAMPAS FRECUENTES DE EXAMEN -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 10</span>
+            <h2 class="slide-title">"Trampas Frecuentes" en el Examen</h2>
+            <p class="slide-subtitle">
+              Aclarando malentendidos conceptuales para asegurar tu
+              certificación
+            </p>
+          </div>
+          <div class="grid-2" style="font-size: 0.85rem">
+            <div class="card">
+              <strong style="color: var(--aws-red)">❌ Error 1:</strong> Pensar
+              que /24 significa "24 direcciones IP".<br />
+              <strong style="color: var(--aws-green)">✓ Corrección:</strong> /24
+              significa que 24 bits pertenecen a la Red (quedan 256 direcciones
+              IP).
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-red)">❌ Error 2:</strong> Usar la
+              fórmula 2^n - 2 para calcular disponibles en AWS.<br />
+              <strong style="color: var(--aws-green)">✓ Corrección:</strong> AWS
+              siempre reserva 5 direcciones por subnet (2^n - 5).
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-red)">❌ Error 3:</strong> Pensar
+              que las Clases A/B/C rigen AWS VPC.<br />
+              <strong style="color: var(--aws-green)">✓ Corrección:</strong> AWS
+              utiliza estrictamente notación CIDR sin clases.
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-red)">❌ Error 4:</strong> Crear
+              subnets con bloques fuera del CIDR de la VPC.<br />
+              <strong style="color: var(--aws-green)">✓ Corrección:</strong>
+              Todas las subredes deben ser sub-bloques estrictos del CIDR base.
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 15: PREGUNTAS TIPO AWS CLOUD PRACTITIONER -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 11 — Evaluación</span>
+            <h2 class="slide-title">Pregunta Tipo Examen AWS</h2>
+            <p class="slide-subtitle">
+              Pon a prueba tu aprendizaje con este escenario de certificación
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <p style="font-size: 1.1rem; margin-bottom: 1rem">
+              Una empresa está configurando una nueva VPC con el bloque CIDR
+              <code>10.0.0.0/16</code> y crea una subred con el bloque
+              <code>10.0.1.0/24</code>. ¿Cuántas direcciones IP estarán
+              verdaderamente **disponibles para asignar a instancias EC2**
+              dentro de esta subred?
+            </p>
+            <div id="quiz-opts">
+              <div class="quiz-option" onclick="evalQuiz(this, false)">
+                A) 256 IPs
+              </div>
+              <div class="quiz-option" onclick="evalQuiz(this, false)">
+                B) 254 IPs
+              </div>
+              <div class="quiz-option" onclick="evalQuiz(this, true)">
+                C) 251 IPs
+              </div>
+              <div class="quiz-option" onclick="evalQuiz(this, false)">
+                D) 250 IPs
+              </div>
+            </div>
+            <div
+              id="quizExp"
+              style="
+                display: none;
+                margin-top: 1rem;
+                padding: 1rem;
+                background: #0b1120;
+                border-radius: 6px;
+              "
+            >
+              <strong style="color: var(--aws-green)"
+                >¡Correcto! (Opción C)</strong
+              ><br />
+              Un bloque /24 contiene 2^8 = 256 direcciones en total. Sin
+              embargo, AWS reserva automáticamente
+              <strong>5 direcciones IP</strong> en cada subred para fines de
+              gestión interna de red, dejando 251 IPs disponibles para recursos
+              del usuario.
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 16: MINI DESAFÍO FINAL - DISEÑA TU RED -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 12 — Desafío Final</span>
+            <h2 class="slide-title">
+              Mini Desafío Final: Validador de Red VPC
+            </h2>
+            <p class="slide-subtitle">
+              Diseña la arquitectura de red y verifica su validez técnica
+            </p>
+          </div>
+          <div class="card">
+            <div class="grid-2" style="gap: 1rem">
+              <div>
+                <label
+                  >CIDR de la VPC:
+                  <input
+                    type="text"
+                    id="v_vpc"
+                    value="10.0.0.0/16"
+                    style="width: 100%" /></label
+                ><br /><br />
+                <label
+                  >Subnet Pública A:
+                  <input
+                    type="text"
+                    id="v_sub1"
+                    value="10.0.1.0/24"
+                    style="width: 100%" /></label
+                ><br /><br />
+                <label
+                  >Subnet Privada A:
+                  <input
+                    type="text"
+                    id="v_sub2"
+                    value="10.0.2.0/24"
+                    style="width: 100%"
+                /></label>
+              </div>
+              <div>
+                <label
+                  >Subnet Privada B:
+                  <input
+                    type="text"
+                    id="v_sub3"
+                    value="10.0.3.0/24"
+                    style="width: 100%" /></label
+                ><br /><br />
+                <button
+                  class="btn btn-orange"
+                  style="width: 100%; margin-top: 1.5rem; padding: 0.8rem"
+                  onclick="validateVpcDesign()"
+                >
+                  Validar Arquitectura
+                </button>
+              </div>
+            </div>
+            <div
+              id="valResultBox"
+              style="
+                margin-top: 1rem;
+                padding: 0.8rem;
+                border-radius: 6px;
+                display: none;
+                font-weight: bold;
+              "
+            ></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- SIDEBAR MENU -->
+    <div class="sidebar" id="sidebar">
+      <h3 style="color: var(--aws-orange); margin-bottom: 1rem">
+        Índice de la Clase
+      </h3>
+      <div id="sidebarList"></div>
+    </div>
+
+    <footer>
+      <button class="btn" onclick="prevSlide()">← Anterior</button>
+      <div style="font-size: 0.85rem; color: var(--text-muted)">
+        Navega con flechas ◄ ► o Espacio
+      </div>
+      <button class="btn btn-orange" onclick="nextSlide()">Siguiente →</button>
+    </footer>
+
+    <script>
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const slideCounter = document.getElementById("slideCounter");
+      const sidebarList = document.getElementById("sidebarList");
+
+      // Inicializar Menú Lateral
+      slides.forEach((slide, idx) => {
+        const title =
+          slide.querySelector(".slide-title")?.innerText || `Slide ${idx + 1}`;
+        const item = document.createElement("div");
+        item.className = `sidebar-item ${idx === 0 ? "active" : ""}`;
+        item.innerText = `${idx + 1}. ${title}`;
+        item.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+        sidebarList.appendChild(item);
+      });
+
+      function updateView() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+
+        const items = sidebarList.querySelectorAll(".sidebar-item");
+        items.forEach((item, idx) => {
+          item.classList.toggle("active", idx === currentSlide);
+        });
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateView();
+        }
+      }
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateView();
+        }
+      }
+      function goToSlide(index) {
+        currentSlide = index;
+        updateView();
+      }
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+      function toggleFullScreen() {
+        if (!document.fullscreenElement)
+          document.documentElement.requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+      }
+
+      // Teclado
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      });
+
+      // --- INTERACTIVIDAD SECCIÓN 1: OCTETOS ---
+      function updateIpVisualizer() {
+        for (let i = 1; i <= 4; i++) {
+          let val = parseInt(document.getElementById(`in-oct${i}`).value) || 0;
+          val = Math.max(0, Math.min(255, val));
+          document.getElementById(`oct${i}-dec`).innerText = val;
+          document.getElementById(`oct${i}-bin`).innerText = val
+            .toString(2)
+            .padStart(8, "0");
+        }
+      }
+
+      // --- INTERACTIVIDAD SECCIÓN 4: EXPLORADOR CIDR ---
+      function runCidrVisualizer(val) {
+        const prefix = parseInt(val);
+        document.getElementById("cidrSliderVal").innerText = `/${prefix}`;
+
+        const hostBits = 32 - prefix;
+        const totalAddrs = Math.pow(2, hostBits);
+        const usableTrad = hostBits >= 2 ? totalAddrs - 2 : 0;
+        const usableAws = hostBits >= 3 ? totalAddrs - 5 : 0;
+
+        document.getElementById("barNetBits").style.width =
+          `${(prefix / 32) * 100}%`;
+        document.getElementById("barNetBits").innerText = `NET: ${prefix} Bits`;
+        document.getElementById("barHostBits").style.width =
+          `${(hostBits / 32) * 100}%`;
+        document.getElementById("barHostBits").innerText =
+          `HOST: ${hostBits} Bits`;
+
+        document.getElementById("totalAddrsVal").innerText =
+          totalAddrs.toLocaleString();
+        document.getElementById("usableTradVal").innerText =
+          usableTrad.toLocaleString();
+        document.getElementById("usableAwsVal").innerText =
+          usableAws.toLocaleString();
+
+        // Máscara
+        let maskBin = "1".repeat(prefix) + "0".repeat(hostBits);
+        let octs = [];
+        for (let i = 0; i < 32; i += 8)
+          octs.push(parseInt(maskBin.substr(i, 8), 2));
+        document.getElementById("subnetMaskDisplay").innerText =
+          `Máscara: ${octs.join(".")}`;
+      }
+
+      // --- INTERACTIVIDAD SECCIÓN 6: CALCULADORA DE SUBNETTING ---
+      function runSubnetCalculator() {
+        const ip = document.getElementById("calcIpInput").value.trim();
+        const cidr = parseInt(document.getElementById("calcCidrSelect").value);
+
+        const hostBits = 32 - cidr;
+        const totalAddrs = Math.pow(2, hostBits);
+
+        let maskBin = "1".repeat(cidr) + "0".repeat(hostBits);
+        let maskOcts = [];
+        for (let i = 0; i < 32; i += 8)
+          maskOcts.push(parseInt(maskBin.substr(i, 8), 2));
+
+        document.getElementById("resNetAddr").innerText = `${ip}`;
+        document.getElementById("resBroadAddr").innerText =
+          `${ip.replace(/\.\d+$/, "")}.${totalAddrs - 1}`;
+        document.getElementById("resFirstHost").innerText =
+          `${ip.replace(/\.\d+$/, "")}.1`;
+        document.getElementById("resLastHost").innerText =
+          `${ip.replace(/\.\d+$/, "")}.${totalAddrs - 2}`;
+        document.getElementById("resMask").innerText = maskOcts.join(".");
+        document.getElementById("resHostBits").innerText = `${hostBits} bits`;
+        document.getElementById("resTotalAddrs").innerText = totalAddrs;
+        document.getElementById("resAwsUsable").innerText = Math.max(
+          0,
+          totalAddrs - 5,
+        );
+      }
+
+      // --- QUIZ EVALUATOR ---
+      function evalQuiz(el, isCorrect) {
+        const opts = document.querySelectorAll("#quiz-opts .quiz-option");
+        opts.forEach((o) => o.classList.remove("correct", "incorrect"));
+        el.classList.add(isCorrect ? "correct" : "incorrect");
+        document.getElementById("quizExp").style.display = "block";
+      }
+
+      // --- VALIDATION MINI DESAFÍO ---
+      function validateVpcDesign() {
+        const vpc = document.getElementById("v_vpc").value.trim();
+        const s1 = document.getElementById("v_sub1").value.trim();
+        const s2 = document.getElementById("v_sub2").value.trim();
+        const s3 = document.getElementById("v_sub3").value.trim();
+        const box = document.getElementById("valResultBox");
+
+        box.style.display = "block";
+
+        if (s1 === s2 || s2 === s3 || s1 === s3) {
+          box.style.background = "rgba(239, 68, 68, 0.2)";
+          box.style.color = "var(--aws-red)";
+          box.innerText =
+            "❌ ERROR: Existen bloques CIDR duplicados o solapados entre subredes.";
+          return;
+        }
+
+        if (
+          !s1.startsWith("10.0.") ||
+          !s2.startsWith("10.0.") ||
+          !s3.startsWith("10.0.")
+        ) {
+          box.style.background = "rgba(239, 68, 68, 0.2)";
+          box.style.color = "var(--aws-red)";
+          box.innerText =
+            "❌ ERROR: Una o más subredes se encuentran fuera del rango CIDR de la VPC (10.0.0.0/16).";
+          return;
+        }
+
+        box.style.background = "rgba(16, 185, 129, 0.2)";
+        box.style.color = "var(--aws-green)";
+        box.innerText =
+          "✓ ¡DISEÑO VÁLIDO! VPC correctamente segmentada sin solapamientos y con margen para crecimiento futuro.";
+      }
+
+      updateView();
+    </script>
+  </body>
+</html>
