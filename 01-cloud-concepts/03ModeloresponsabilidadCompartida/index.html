@@ -1,0 +1,2143 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Modelo de Responsabilidad Compartida de AWS — Clase Interactiva
+    </title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #0073bb;
+        --aws-light-blue: #38bdf8;
+        --aws-green: #10b981;
+        --aws-purple: #a855f7;
+        --aws-red: #ef4444;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HEADER & PROGRESS */
+      header {
+        height: 60px;
+        background: #090d16;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        z-index: 10;
+      }
+      .brand {
+        font-weight: bold;
+        color: var(--aws-orange);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .progress-bar-container {
+        flex-grow: 1;
+        max-width: 400px;
+        height: 8px;
+        background: var(--card-border);
+        border-radius: 4px;
+        margin: 0 1.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--aws-orange),
+          var(--aws-light-blue)
+        );
+        transition: width 0.3s ease;
+      }
+      .header-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .btn:hover {
+        background: #334155;
+        border-color: var(--aws-light-blue);
+      }
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-orange:hover {
+        background: #e68a00;
+        color: #000;
+      }
+      .btn-purple {
+        background: var(--aws-purple);
+        color: #fff;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-purple:hover {
+        background: #9333ea;
+      }
+
+      /* LAYOUT SLIDES */
+      main {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .slide-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+        transform: scale(0.98);
+        padding: 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow-y: auto;
+      }
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      .slide-header {
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+      }
+      .slide-num {
+        font-size: 0.85rem;
+        color: var(--aws-orange);
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .slide-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-top: 0.2rem;
+      }
+      .slide-subtitle {
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+      }
+
+      /* CARDS & GRIDS */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.2rem;
+      }
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 10px;
+        padding: 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      }
+      .card-title {
+        color: var(--aws-light-blue);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* INTERACTIVE STACK & BOUNDARY */
+      .boundary-box {
+        border: 2px dashed var(--aws-light-blue);
+        border-radius: 10px;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.6);
+        margin-top: 1rem;
+      }
+      .stack-layer {
+        padding: 0.8rem 1rem;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0.4rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        font-size: 0.9rem;
+      }
+      .stack-layer:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+      }
+      .layer-aws {
+        background: rgba(0, 115, 187, 0.2);
+        color: var(--aws-light-blue);
+        border-color: var(--aws-blue);
+      }
+      .layer-customer {
+        background: rgba(168, 85, 247, 0.2);
+        color: #e9d5ff;
+        border-color: var(--aws-purple);
+      }
+      .layer-shared {
+        background: rgba(255, 153, 0, 0.2);
+        color: var(--aws-orange);
+        border-color: var(--aws-orange);
+      }
+
+      /* DRAG AND DROP / CLASSIFICATION GAME */
+      .drop-zone {
+        min-height: 180px;
+        border: 2px dashed var(--card-border);
+        border-radius: 8px;
+        padding: 1rem;
+        background: rgba(11, 17, 32, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .drop-zone.active-aws {
+        border-color: var(--aws-blue);
+        background: rgba(0, 115, 187, 0.1);
+      }
+      .drop-zone.active-cust {
+        border-color: var(--aws-purple);
+        background: rgba(168, 85, 247, 0.1);
+      }
+      .draggable-item {
+        padding: 0.6rem 0.8rem;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: grab;
+        user-select: none;
+      }
+      .draggable-item:active {
+        cursor: grabbing;
+      }
+
+      /* QUIZ & EXPLANATION PANELS */
+      .quiz-option {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+      }
+      .quiz-option:hover {
+        border-color: var(--aws-light-blue);
+        background: #26334d;
+      }
+      .quiz-option.correct {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--aws-green);
+      }
+      .quiz-option.incorrect {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--aws-red);
+      }
+
+      .explain-panel {
+        background: #0b1120;
+        border: 1px solid var(--aws-light-blue);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: none;
+      }
+      .explain-panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* SIDEBAR & MODAL */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -340px;
+        width: 340px;
+        height: 100%;
+        background: #0d1322;
+        border-left: 1px solid var(--card-border);
+        z-index: 100;
+        transition: right 0.3s ease;
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .sidebar.open {
+        right: 0;
+      }
+      .sidebar-item {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+      .sidebar-item:hover,
+      .sidebar-item.active {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 200;
+      }
+      .modal-content {
+        background: var(--card-bg);
+        border: 1px solid var(--aws-light-blue);
+        border-radius: 12px;
+        max-width: 650px;
+        width: 90%;
+        padding: 1.5rem;
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+
+      footer {
+        height: 60px;
+        background: #090d16;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+        z-index: 10;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      ul {
+        padding-left: 1.2rem;
+      }
+      li {
+        margin-bottom: 0.4rem;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+      }
+      code {
+        background: #0b1120;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        color: var(--aws-light-blue);
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header>
+      <div class="brand">
+        🛡️ AWS Cloud Practitioner: Responsabilidad Compartida
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="header-controls">
+        <button class="btn btn-purple" onclick="openExplainModal()">
+          💡 ¿Qué está pasando?
+        </button>
+        <button class="btn" onclick="toggleSidebar()">☰ Menú</button>
+        <button class="btn" onclick="goToSlide(0)">🏠 Inicio</button>
+      </div>
+    </header>
+
+    <!-- MAIN SLIDES CONTAINER -->
+    <main>
+      <div class="slide-container" id="slideContainer">
+        <!-- SLIDE 1: INTRODUCCIÓN -->
+        <div class="slide active">
+          <div style="text-align: center; max-width: 800px; margin: auto">
+            <span class="slide-num">Sección 01 — Introducción</span>
+            <h1
+              class="slide-title"
+              style="font-size: 2.5rem; margin-top: 0.5rem"
+            >
+              Modelo de Responsabilidad Compartida de AWS
+            </h1>
+            <p
+              class="slide-subtitle"
+              style="font-size: 1.1rem; margin-top: 0.8rem"
+            >
+              En AWS, la seguridad y el cumplimiento normativo son una
+              responsabilidad compartida entre AWS y el cliente.
+            </p>
+            <div class="grid-2" style="margin-top: 2rem; text-align: left">
+              <div class="card" style="border-top: 4px solid var(--aws-blue)">
+                <div class="card-title" style="color: var(--aws-blue)">
+                  ☁️ AWS: Security OF the Cloud
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted)">
+                  AWS es responsable de proteger la infraestructura física,
+                  hardware, centros de datos y software base que ejecuta los
+                  servicios en la nube.
+                </p>
+              </div>
+              <div class="card" style="border-top: 4px solid var(--aws-purple)">
+                <div class="card-title" style="color: var(--aws-purple)">
+                  👤 Cliente: Security IN the Cloud
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted)">
+                  El cliente es responsable de la configuración, datos, gestión
+                  de acceso (IAM), parches del SO (según servicio) y seguridad
+                  de sus aplicaciones.
+                </p>
+              </div>
+            </div>
+            <div style="margin-top: 2rem">
+              <button
+                class="btn btn-orange"
+                style="padding: 0.8rem 2.5rem; font-size: 1.1rem"
+                onclick="nextSlide()"
+              >
+                Comenzar Clase Interactiva →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 2: EL PROBLEMA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 02 — El Dilema de la Nube</span>
+            <h2 class="slide-title">
+              ¿Quién protege la aplicación en la nube?
+            </h2>
+            <p class="slide-subtitle">
+              Responde a este caso práctico inicial para explorar la línea
+              divisoria
+            </p>
+          </div>
+          <div class="card" style="max-width: 800px; margin: 0 auto">
+            <p style="font-size: 1rem; margin-bottom: 1rem">
+              Una empresa despliega una base de datos con información bancaria
+              de sus usuarios en AWS. Ocurre una filtración porque la cuenta no
+              tenía contraseña ni restricciones de red. ¿Quién es el responsable
+              de esta vulnerabilidad?
+            </p>
+            <div class="grid-3">
+              <button
+                class="btn"
+                style="padding: 1rem; justify-content: center"
+                onclick="checkProblemChoice('aws')"
+              >
+                🏛️ AWS únicamente
+              </button>
+              <button
+                class="btn btn-orange"
+                style="padding: 1rem; justify-content: center"
+                onclick="checkProblemChoice('customer')"
+              >
+                👤 El Cliente únicamente
+              </button>
+              <button
+                class="btn"
+                style="padding: 1rem; justify-content: center"
+                onclick="checkProblemChoice('both')"
+              >
+                🤝 Ambas partes por igual
+              </button>
+            </div>
+            <div class="explain-panel" id="problemExplainPanel">
+              <strong
+                id="problemExplainTitle"
+                style="color: var(--aws-orange)"
+              ></strong>
+              <p
+                id="problemExplainText"
+                style="font-size: 0.85rem; margin-top: 0.4rem"
+              ></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3: SECURITY OF THE CLOUD (AWS) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 03 — Responsabilidad de AWS</span>
+            <h2 class="slide-title">
+              Security OF the Cloud (Seguridad DE la Nube)
+            </h2>
+            <p class="slide-subtitle">
+              AWS gestiona la infraestructura global y los componentes de
+              hardware/software base
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-blue)">
+                🏢 Componentes gestionados por AWS
+              </div>
+              <ul>
+                <li>
+                  <strong>Centros de datos físicos:</strong> Edificios,
+                  controles biométricos, guardias de seguridad y generadores de
+                  energía.
+                </li>
+                <li>
+                  <strong>Hardware de cómputo y almacenamiento:</strong>
+                  Servidores físicos, discos duros, switches y cables de fibra.
+                </li>
+                <li>
+                  <strong>Infraestructura de red subyacente:</strong>
+                  Enrutamiento global y atenuación de ataques volumétricos.
+                </li>
+                <li>
+                  <strong>Hypervisor de virtualización:</strong> Capa de
+                  aislamiento (ej. AWS Nitro) que separa las máquinas virtuales.
+                </li>
+              </ul>
+            </div>
+            <div class="card" style="text-align: center; background: #0b1120">
+              <div
+                class="card-title"
+                style="justify-content: center; color: var(--aws-blue)"
+              >
+                🛡️ AWS Infrastructure Shield
+              </div>
+              <div
+                style="
+                  margin-top: 1rem;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.5rem;
+                "
+              >
+                <div class="stack-layer layer-aws">
+                  Regiones & Availability Zones
+                </div>
+                <div class="stack-layer layer-aws">
+                  Data Centers & Seguridad Física
+                </div>
+                <div class="stack-layer layer-aws">
+                  Servidores Físicos & Discos
+                </div>
+                <div class="stack-layer layer-aws">
+                  Nitro Hypervisor / Virtualización Base
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4: SECURITY IN THE CLOUD (CLIENTE) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num"
+              >Sección 04 — Responsabilidad del Cliente</span
+            >
+            <h2 class="slide-title">
+              Security IN the Cloud (Seguridad EN la Nube)
+            </h2>
+            <p class="slide-subtitle">
+              El cliente controla lo que almacena, quién accede y cómo configura
+              sus servicios
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-purple)">
+                👤 Control y Configuración del Cliente
+              </div>
+              <ul>
+                <li>
+                  <strong>Datos del cliente:</strong> Cifrado de datos en reposo
+                  y en tránsito.
+                </li>
+                <li>
+                  <strong>Gestión de Identidad (IAM):</strong> Creación de
+                  usuarios, contraseñas, MFA y permisos (Principio de Menor
+                  Privilegio).
+                </li>
+                <li>
+                  <strong>Configuración de red (VPC):</strong> Tablas de
+                  enrutamiento, Security Groups y Network ACLs.
+                </li>
+                <li>
+                  <strong>Sistema Operativo Invitado:</strong> Parches de
+                  seguridad e instalación de software en instancias EC2.
+                </li>
+              </ul>
+            </div>
+            <div class="card" style="text-align: center; background: #0b1120">
+              <div
+                class="card-title"
+                style="justify-content: center; color: var(--aws-purple)"
+              >
+                ⚙️ Capa de Configuración del Cliente
+              </div>
+              <div
+                style="
+                  margin-top: 1rem;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.5rem;
+                "
+              >
+                <div class="stack-layer layer-customer">
+                  Datos del Cliente & Cifrado
+                </div>
+                <div class="stack-layer layer-customer">
+                  IAM (Usuarios, Roles, MFA)
+                </div>
+                <div class="stack-layer layer-customer">
+                  Firewall Virtual (Security Groups)
+                </div>
+                <div class="stack-layer layer-customer">
+                  SO Invitado & Aplicación (ej. EC2)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5: ANIMACIÓN DE LA FRONTERA VARIABLES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 05 — Frontera Dinámica</span>
+            <h2 class="slide-title">
+              La Frontera de Responsabilidad Cambia por Servicio
+            </h2>
+            <p class="slide-subtitle">
+              A mayor nivel de abstracción del servicio, AWS asume más
+              componentes subyacentes
+            </p>
+          </div>
+          <div class="card">
+            <label style="font-weight: bold; color: var(--aws-orange)"
+              >Mueve el selector para observar cómo cambia la frontera:</label
+            >
+            <input
+              type="range"
+              min="1"
+              max="3"
+              value="1"
+              id="serviceBoundarySlider"
+              style="width: 100%; margin: 1rem 0"
+              oninput="updateBoundaryView(this.value)"
+            />
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.85rem;
+                font-weight: bold;
+              "
+            >
+              <span>1. IaaS (Amazon EC2)</span>
+              <span>2. PaaS / Managed (Amazon RDS)</span>
+              <span>3. Serverless (AWS Lambda)</span>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top: 1rem">
+            <div class="card" id="boundaryCustomerCard">
+              <div class="card-title" style="color: var(--aws-purple)">
+                👤 Responsabilidades del Cliente
+              </div>
+              <ul id="boundaryCustomerList"></ul>
+            </div>
+            <div class="card" id="boundaryAwsCard">
+              <div class="card-title" style="color: var(--aws-blue)">
+                ☁️ Responsabilidades de AWS
+              </div>
+              <ul id="boundaryAwsList"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 6: SIMULADOR AMAZON EC2 (IAAS) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 06 — Caso IaaS</span>
+            <h2 class="slide-title">Simulador de Inspección: Amazon EC2</h2>
+            <p class="slide-subtitle">
+              Haz clic en cada componente de una instancia EC2 para inspeccionar
+              de quién es la responsabilidad
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                🖥️ Pila de Infraestructura EC2
+              </div>
+              <div
+                style="
+                  margin-top: 1rem;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.4rem;
+                "
+              >
+                <div
+                  class="stack-layer layer-customer"
+                  onclick="inspectEc2Layer('data')"
+                >
+                  Datos de la Aplicación
+                </div>
+                <div
+                  class="stack-layer layer-customer"
+                  onclick="inspectEc2Layer('app')"
+                >
+                  Código de la Aplicación
+                </div>
+                <div
+                  class="stack-layer layer-customer"
+                  onclick="inspectEc2Layer('os')"
+                >
+                  Sistema Operativo Invitado (ej. Ubuntu/Windows)
+                </div>
+                <div
+                  class="stack-layer layer-customer"
+                  onclick="inspectEc2Layer('sg')"
+                >
+                  Security Group (Firewall Virtual)
+                </div>
+                <div
+                  class="stack-layer layer-aws"
+                  onclick="inspectEc2Layer('hyp')"
+                >
+                  Hypervisor (Nitro) & Virtualización
+                </div>
+                <div
+                  class="stack-layer layer-aws"
+                  onclick="inspectEc2Layer('hw')"
+                >
+                  Servidor Físico & Disco Racks
+                </div>
+              </div>
+            </div>
+            <div class="card" id="ec2InspectCard">
+              <div class="card-title">👈 Haz clic en cualquier capa</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                En EC2 (IaaS), el cliente tiene el control casi total del
+                entorno virtual, por lo que asume la responsabilidad de
+                actualizar y parchear el Sistema Operativo.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: SIMULADOR AMAZON S3 (OBJECT STORAGE) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num"
+              >Sección 07 — Caso Storage Servicio Administrado</span
+            >
+            <h2 class="slide-title">Simulador de Configuración: Amazon S3</h2>
+            <p class="slide-subtitle">
+              AWS gestiona los discos y la durabilidad; el cliente gestiona los
+              permisos y el acceso
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">📦 Configuración del Bucket S3</div>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.8rem;
+                  margin-top: 1rem;
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 0.85rem;
+                  "
+                >
+                  <span>Bloquear Acceso Público:</span>
+                  <input
+                    type="checkbox"
+                    id="s3BlockPublic"
+                    checked
+                    onchange="updateS3Sim()"
+                  />
+                </label>
+                <label
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 0.85rem;
+                  "
+                >
+                  <span>Cifrado por Defecto (SSE-S3):</span>
+                  <input
+                    type="checkbox"
+                    id="s3Encrypt"
+                    checked
+                    onchange="updateS3Sim()"
+                  />
+                </label>
+                <label
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 0.85rem;
+                  "
+                >
+                  <span>Política de Acceso IAM:</span>
+                  <select id="s3IamPolicy" class="btn" onchange="updateS3Sim()">
+                    <option value="strict">
+                      Restringida (Principio Menor Privilegio)
+                    </option>
+                    <option value="open">Permisiva (* / Wildcard)</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div class="card" id="s3FeedbackCard">
+              <!-- JS Injects -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 8: SIMULADOR AMAZON RDS (PAAS) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 08 — Caso PaaS</span>
+            <h2 class="slide-title">
+              Amazon RDS: Base de Datos Relacional Administrada
+            </h2>
+            <p class="slide-subtitle">
+              AWS parchea el motor y el SO; el cliente gestiona los datos,
+              usuarios y esquemas
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-blue)">
+                ☁️ Lo que AWS Administra en RDS
+              </div>
+              <ul>
+                <li>Instalación y mantenimiento del hardware de BD.</li>
+                <li>Parches del Sistema Operativo base.</li>
+                <li>Parches del motor de base de datos (MySQL/PostgreSQL).</li>
+                <li>Copias de seguridad automáticas (Backups) y Multi-AZ.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-purple)">
+                👤 Lo que el Cliente Administra en RDS
+              </div>
+              <ul>
+                <li>
+                  Diseño de tablas, esquemas y optimización de consultas SQL.
+                </li>
+                <li>Creación y permisos de usuarios de la base de datos.</li>
+                <li>Cifrado de datos y credenciales de conexión.</li>
+                <li>Reglas de tráfico de red (Security Groups asociados).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 9: SIMULADOR AWS LAMBDA (SERVERLESS) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 09 — Caso Serverless</span>
+            <h2 class="slide-title">AWS Lambda: Cómputo sin Servidores</h2>
+            <p class="slide-subtitle">
+              Serverless NO significa sin servidores; significa que AWS los
+              administra por ti
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                ⚡ Abstracción Total de Infraestructura
+              </div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  margin-bottom: 0.8rem;
+                "
+              >
+                En AWS Lambda, no hay instancias EC2 ni sistemas operativos que
+                configurar o parchear.
+              </p>
+              <ul>
+                <li>
+                  <strong>AWS administra:</strong> Servidores, SO, runtime
+                  (NodeJS/Python), escalado y capacidad.
+                </li>
+                <li>
+                  <strong>El cliente administra:</strong> El código de la
+                  función, las dependencias, la configuración de memoria y los
+                  permisos de ejecución IAM.
+                </li>
+              </ul>
+            </div>
+            <div class="card" style="text-align: center; background: #0b1120">
+              <div class="card-title" style="justify-content: center">
+                📦 Distribución en AWS Lambda
+              </div>
+              <div class="stack-layer layer-customer" style="margin-top: 1rem">
+                Código de la Función & Roles IAM (Cliente)
+              </div>
+              <div class="stack-layer layer-aws">
+                Entorno de Ejecución & Runtime (AWS)
+              </div>
+              <div class="stack-layer layer-aws">
+                Sistema Operativo & Servidores (AWS)
+              </div>
+              <div class="stack-layer layer-aws">
+                Infraestructura Física AWS (AWS)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 10: MATRIZ COMPARATIVA DE SERVICIOS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 10 — Matriz General</span>
+            <h2 class="slide-title">Tabla Comparativa por Servicio</h2>
+            <p class="slide-subtitle">
+              Resumen visual de responsabilidades según la categoría del
+              servicio
+            </p>
+          </div>
+          <table
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.85rem;
+              border: 1px solid var(--card-border);
+            "
+          >
+            <thead>
+              <tr style="background: #0b1120; color: var(--aws-orange)">
+                <th
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  Componente / Tarea
+                </th>
+                <th
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  EC2 (IaaS)
+                </th>
+                <th
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  RDS (PaaS)
+                </th>
+                <th
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  S3 (Storage)
+                </th>
+                <th
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  Lambda (Serverless)
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  Seguridad Física Data Center
+                </td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+              </tr>
+              <tr>
+                <td
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  Parches del Sistema Operativo
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+              </tr>
+              <tr>
+                <td
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  Parches de Motor / Runtime
+                </td>
+                <td style="color: var(--aws-purple); text-align: center">
+                  CLIENTE
+                </td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+                <td style="color: var(--aws-blue); text-align: center">AWS</td>
+              </tr>
+              <tr>
+                <td
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  Configuración de Permisos / IAM
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style="padding: 0.6rem; border: 1px solid var(--card-border)"
+                >
+                  Protección de Datos & Cifrado
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+                <td
+                  style="
+                    color: var(--aws-purple);
+                    text-align: center;
+                    font-weight: bold;
+                  "
+                >
+                  CLIENTE
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SLIDE 11: IAM Y PRINCIPIO DE MENOR PRIVILEGIO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 11 — Identidad y Accesos</span>
+            <h2 class="slide-title">
+              IAM: Responsabilidad Absoluta del Cliente
+            </h2>
+            <p class="slide-subtitle">
+              AWS provee la herramienta IAM; el cliente es responsable de
+              configurarla correctamente
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-purple)">
+                🔐 Prácticas Recomendadas del Cliente
+              </div>
+              <ul>
+                <li>
+                  <strong>Autenticación Multi-Factor (MFA):</strong> Obligatoria
+                  en la cuenta Root y usuarios IAM.
+                </li>
+                <li>
+                  <strong>Principio de Menor Privilegio:</strong> Otorgar
+                  únicamente los permisos necesarios para realizar una tarea.
+                </li>
+                <li>
+                  <strong>Uso de Roles de IAM:</strong> Asignar roles a
+                  instancias EC2 en lugar de guardar claves hardcodeadas en el
+                  código.
+                </li>
+                <li>
+                  <strong>Rotación de credenciales:</strong> Cambiar
+                  periódicamente claves de acceso y contraseñas.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-red)">
+                ⚠️ Protección de la Cuenta Root
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                La cuenta Root tiene acceso sin restricciones a todos los
+                recursos y facturación.
+              </p>
+              <div
+                style="
+                  background: rgba(239, 68, 68, 0.1);
+                  border: 1px solid var(--aws-red);
+                  padding: 0.8rem;
+                  border-radius: 6px;
+                  margin-top: 0.8rem;
+                  font-size: 0.85rem;
+                "
+              >
+                📌 <strong>Regla de Examen:</strong> Bloquea la cuenta Root con
+                MFA, no crees claves de acceso para Root y utiliza
+                usuarios/roles de IAM para tareas cotidianas.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 12: CIFRADO DE DATOS (AT REST & IN TRANSIT) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 12 — Protección de Datos</span>
+            <h2 class="slide-title">Cifrado de Datos y AWS KMS</h2>
+            <p class="slide-subtitle">
+              AWS proporciona el servicio de claves (KMS); el cliente decide qué
+              y cómo cifrar
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🔒 Cifrado en Reposo (At Rest)</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Proteger los datos guardados en discos EBS, buckets S3 o bases
+                de datos RDS.
+              </p>
+              <p style="font-size: 0.85rem; margin-top: 0.5rem">
+                El cliente debe habilitar la casilla de cifrado e integrar
+                llaves de <strong>AWS KMS (Key Management Service)</strong>.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">🌐 Cifrado en Tránsito (In Transit)</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Proteger los datos mientras viajan por la red entre clientes y
+                servidores.
+              </p>
+              <p style="font-size: 0.85rem; margin-top: 0.5rem">
+                El cliente debe configurar protocolos seguros como
+                <strong>TLS/HTTPS</strong> y gestionar certificados mediante AWS
+                Certificate Manager (ACM).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 13: JUEGO DE CLASIFICACIÓN "ARRASTRA O SELECCIONA" -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 13 — Evaluación Interactiva</span>
+            <h2 class="slide-title">Actividad: Clasifica la Responsabilidad</h2>
+            <p class="slide-subtitle">
+              Selecciona cada elemento para asignarlo a AWS o al Cliente
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card-title">📦 Elementos Pendientes</div>
+              <div
+                id="gamePendingList"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.4rem;
+                  margin-top: 0.5rem;
+                "
+              >
+                <!-- JS Injects -->
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem">
+              <div>
+                <div class="card-title" style="color: var(--aws-blue)">
+                  ☁️ Responsabilidad DE AWS
+                </div>
+                <div class="drop-zone" id="awsDropZone"></div>
+              </div>
+              <div>
+                <div class="card-title" style="color: var(--aws-purple)">
+                  👤 Responsabilidad DEL CLIENTE
+                </div>
+                <div class="drop-zone" id="custDropZone"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 14: SECCIÓN DE MITOS Y CONFUSIONES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 14 — Mitos Frecuentes</span>
+            <h2 class="slide-title">Desmontando Mitos de la Nube</h2>
+            <p class="slide-subtitle">
+              Aclarando malentendidos habituales en las preguntas de
+              certificación
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ MITO 1: "AWS se encarga de toda la seguridad porque está en
+                la nube."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> AWS solo protege la infraestructura
+                base. Si dejas un bucket S3 público o contraseñas débiles, la
+                falla es 100% responsabilidad del cliente.
+              </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ MITO 2: "Usar un servicio administrado (ej. RDS) elimina mis
+                tareas de seguridad."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> AWS elimina la gestión de parches del
+                SO, pero tú sigues siendo responsable de los usuarios,
+                contraseñas, permisos y datos de la base de datos.
+              </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ MITO 3: "Serverless significa que no hay responsabilidad de
+                infraestructura."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> Los servidores existen y los
+                administra AWS, pero el cliente sigue siendo responsable de la
+                seguridad del código y las dependencias de la función.
+              </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ MITO 4: "AWS decide quién tiene acceso a mis archivos
+                guardados en S3."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> El cliente mantiene la soberanía
+                absoluta de sus datos y configura explícitamente las políticas
+                de acceso IAM y de bucket.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 15: DESAFÍO FINAL "AUDITA ESTA ARQUITECTURA" -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 15 — Desafío de Integración</span>
+            <h2 class="slide-title">Desafío: Audita esta Arquitectura AWS</h2>
+            <p class="slide-subtitle">
+              Identifica los fallos de configuración de seguridad cometidos por
+              el cliente
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🔍 Hallazgos de la Auditoría</div>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.5rem;
+                  margin-top: 0.5rem;
+                "
+              >
+                <button class="btn" onclick="auditItem('root')">
+                  ⚠️ Cuenta Root utilizada para tareas de desarrollo diarias
+                </button>
+                <button class="btn" onclick="auditItem('ec2_os')">
+                  ⚠️ Servidor EC2 con parches de SO desactualizados desde hace 2
+                  años
+                </button>
+                <button class="btn" onclick="auditItem('s3_pub')">
+                  ⚠️ Bucket S3 con datos confidenciales configurado con acceso
+                  público
+                </button>
+                <button class="btn" onclick="auditItem('mfa')">
+                  ⚠️ Usuarios administradores sin autenticación MFA activada
+                </button>
+              </div>
+            </div>
+            <div class="card" id="auditFeedbackPanel">
+              <div class="card-title">
+                👈 Selecciona un hallazgo para analizarlo
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Determina a quién corresponde corregir cada vulnerabilidad
+                detectada en la auditoría.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 16: QUIZ CLOUD PRACTITIONER -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 16 — Evaluativa</span>
+            <h2 class="slide-title">
+              Cuestionario Final del Modelo Compartido
+            </h2>
+            <p class="slide-subtitle">
+              Preguntas preparatorias para el examen AWS Certified Cloud
+              Practitioner
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <div
+              style="
+                font-size: 0.85rem;
+                color: var(--aws-orange);
+                font-weight: bold;
+              "
+              id="quizCounter"
+            >
+              Pregunta 1 de 3
+            </div>
+            <p
+              style="font-size: 1.1rem; font-weight: 600; margin: 0.8rem 0"
+              id="quizQuestionText"
+            >
+              ¿Cuál de las siguientes tareas es una responsabilidad exclusiva de
+              AWS según el Modelo de Responsabilidad Compartida?
+            </p>
+            <div id="quizOptionsBox">
+              <!-- JS Injects -->
+            </div>
+            <div class="explain-panel" id="quizExplainBox">
+              <strong id="quizExplainTitle" style="color: var(--aws-green)"
+                >Explicación:</strong
+              >
+              <p
+                id="quizExplainText"
+                style="font-size: 0.85rem; margin-top: 0.3rem"
+              ></p>
+              <button
+                class="btn btn-orange"
+                style="margin-top: 0.8rem"
+                onclick="nextQuizQuestion()"
+              >
+                Continuar →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 17: GLOSARIO INTERACTIVO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 17 — Referencia</span>
+            <h2 class="slide-title">Glosario de Seguridad y Cumplimiento</h2>
+            <p class="slide-subtitle">
+              Términos clave exigidos en la certificación AWS Cloud Practitioner
+            </p>
+          </div>
+          <div class="grid-3" style="max-height: 400px; overflow-y: auto">
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Shared Responsibility Model: Marco de seguridad de AWS que divide las tareas de protección entre AWS (Infraestructura base) y el Cliente (Datos y Configuración).',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)"
+                >Shared Responsibility</strong
+              >
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Marco divisorio de seguridad entre AWS y Cliente.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Security OF the Cloud: Responsabilidad de AWS de proteger data centers, hardware, software base e infraestructura de red.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)"
+                >Security OF the Cloud</strong
+              >
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Responsabilidad de AWS sobre la infraestructura.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Security IN the Cloud: Responsabilidad del cliente sobre la configuración de datos, acceso IAM, parches de SO e instancias.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)"
+                >Security IN the Cloud</strong
+              >
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Responsabilidad del cliente sobre su entorno.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Principio de Menor Privilegio: Práctica de seguridad de otorgar a un usuario o rol únicamente los permisos estrictamente necesarios para su trabajo.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">Least Privilege</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Conceder solo los permisos mínimos necesarios.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'AWS KMS: Servicio administrado para crear y controlar las claves de cifrado utilizadas para proteger los datos.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">AWS KMS</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Gestión de claves de cifrado de datos.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Nitro System: Colección de bloques de construcción de hardware y hypervisor ligero que impulsa las instancias EC2 modernas.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">AWS Nitro System</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Hypervisor y aislamiento de hardware de AWS.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 18: RESUMEN Y REGLA FINAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 18 — Síntesis Final</span>
+            <h2 class="slide-title">
+              Resumen para el Examen Cloud Practitioner
+            </h2>
+            <p class="slide-subtitle">
+              Si solo recuerdas 5 cosas antes de rendir el examen, que sean
+              estas:
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <ul
+              style="
+                font-size: 0.95rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+              "
+            >
+              <li>
+                🛡️ <strong>AWS</strong> es responsable de la seguridad
+                <strong>DE</strong> la nube (Data Centers, Hardware físico,
+                Hypervisor, Red base).
+              </li>
+              <li>
+                👤 El <strong>CLIENTE</strong> es responsable de la seguridad
+                <strong>EN</strong> la nube (Datos, Gestión de Identidades IAM,
+                Cifrado, Configuración de Firewalls).
+              </li>
+              <li>
+                ⚙️ En <strong>EC2 (IaaS)</strong>, el cliente DEBE actualizar y
+                parchear el Sistema Operativo Invitado.
+              </li>
+              <li>
+                📦 En <strong>RDS / Lambda / S3</strong>, AWS asume los parches
+                del SO/Runtime, pero el cliente MANTIENE la responsabilidad de
+                datos y accesos.
+              </li>
+              <li>
+                🔑 La protección de la <strong>Cuenta Root</strong> con MFA y el
+                principio de menor privilegio en IAM son responsabilidad 100%
+                del cliente.
+              </li>
+            </ul>
+            <div style="margin-top: 1.5rem; text-align: center">
+              <button
+                class="btn btn-orange"
+                style="padding: 0.8rem 2rem; font-size: 1rem"
+                onclick="goToSlide(0)"
+              >
+                🔄 Reiniciar Clase Interactiva
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- SIDEBAR MENU -->
+    <div class="sidebar" id="sidebar">
+      <h3 style="color: var(--aws-orange); margin-bottom: 1rem">
+        Navegación de Secciones
+      </h3>
+      <div id="sidebarList"></div>
+    </div>
+
+    <!-- EXPLAIN MODAL -->
+    <div class="modal-overlay" id="explainModal">
+      <div class="modal-content">
+        <h3 style="color: var(--aws-orange)" id="explainModalTitle">
+          💡 Modo "¿Qué está pasando?"
+        </h3>
+        <div style="margin-top: 1rem; font-size: 0.9rem" id="explainModalBody">
+          <p>
+            En esta sección estás visualizando cómo se distribuye la
+            responsabilidad de seguridad entre AWS y el Cliente.
+          </p>
+          <ol style="margin-top: 0.8rem; padding-left: 1.2rem">
+            <li>
+              <strong>Paso 1:</strong> AWS asegura la infraestructura física
+              subyacente.
+            </li>
+            <li>
+              <strong>Paso 2:</strong> El servicio abstrae determinados
+              componentes según su categoría (IaaS, PaaS, Serverless).
+            </li>
+            <li>
+              <strong>Paso 3:</strong> El cliente configura identidades,
+              permisos de red y protección de datos.
+            </li>
+          </ol>
+        </div>
+        <button
+          class="btn btn-orange"
+          style="margin-top: 1.5rem"
+          onclick="closeExplainModal()"
+        >
+          Entendido
+        </button>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <button class="btn" onclick="prevSlide()">← Anterior</button>
+      <span
+        style="font-size: 0.85rem; color: var(--text-muted)"
+        id="slideCounter"
+        >1 / 18</span
+      >
+      <button class="btn btn-orange" onclick="nextSlide()">Siguiente →</button>
+    </footer>
+
+    <script>
+      /* ==========================================
+       ESTADO Y NAVEGACIÓN PRINCIPAL
+    ========================================== */
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const slideCounter = document.getElementById("slideCounter");
+      const sidebarList = document.getElementById("sidebarList");
+
+      slides.forEach((slide, idx) => {
+        const title =
+          slide.querySelector(".slide-title")?.innerText || `Slide ${idx + 1}`;
+        const item = document.createElement("div");
+        item.className = `sidebar-item ${idx === 0 ? "active" : ""}`;
+        item.innerText = `${idx + 1}. ${title}`;
+        item.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+        sidebarList.appendChild(item);
+      });
+
+      function updateView() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+
+        const items = sidebarList.querySelectorAll(".sidebar-item");
+        items.forEach((item, idx) => {
+          item.classList.toggle("active", idx === currentSlide);
+        });
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateView();
+        }
+      }
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateView();
+        }
+      }
+      function goToSlide(idx) {
+        currentSlide = idx;
+        updateView();
+      }
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      });
+
+      /* ==========================================
+       SLIDE 2: DILEMA DE LA NUBE
+    ========================================== */
+      function checkProblemChoice(choice) {
+        const panel = document.getElementById("problemExplainPanel");
+        panel.classList.add("active");
+
+        if (choice === "customer") {
+          document.getElementById("problemExplainTitle").innerText =
+            "✅ ¡Correcto! Responsabilidad del Cliente";
+          document.getElementById("problemExplainText").innerText =
+            "AWS provee la infraestructura segura para la base de datos, pero la configuración de contraseñas, usuarios e identidades es responsabilidad estricta del cliente.";
+        } else {
+          document.getElementById("problemExplainTitle").innerText =
+            "💡 Consideración Importante";
+          document.getElementById("problemExplainText").innerText =
+            "AWS asegura los servidores físicos y el motor de base de datos, pero el cliente debe configurar el acceso e identidades. La filtración por falta de contraseñas es responsabilidad del cliente.";
+        }
+      }
+
+      /* ==========================================
+       SLIDE 5: FRONTERA DINÁMICA DE RESPONSABILIDAD
+    ========================================== */
+      const boundaryData = {
+        1: {
+          cust: [
+            "Parches del Sistema Operativo Invitado",
+            "Instalación y parches de Aplicaciones",
+            "Reglas de Firewall Virtual (Security Groups)",
+            "Gestión de Claves y Datos",
+          ],
+          aws: [
+            "Seguridad Física de Data Centers",
+            "Servidores Físicos y Discos Racks",
+            "Hypervisor de Virtualización (Nitro)",
+            "Infraestructura de Red Subyacente",
+          ],
+        },
+        2: {
+          cust: [
+            "Esquemas de Base de Datos y Datos",
+            "Permisos de Usuarios e Identidades IAM",
+            "Cifrado de Datos y Reglas de Red",
+            "Optimización de Consultas SQL",
+          ],
+          aws: [
+            "Seguridad Física de Data Centers",
+            "Servidores Físicos y Discos Racks",
+            "Parches del Sistema Operativo Base",
+            "Parches del Motor de Base de Datos",
+          ],
+        },
+        3: {
+          cust: [
+            "Código de la Función y Dependencias",
+            "Configuración de Permisos de Ejecución IAM",
+            "Datos procesados por la Función",
+            "Variables de Entorno y Claves",
+          ],
+          aws: [
+            "Seguridad Física y Servidores Físicos",
+            "Sistema Operativo y Entorno de Ejecución",
+            "Gestión de Capacidad y Escalado Automático",
+            "Aislamiento de Contenedores de Ejecución",
+          ],
+        },
+      };
+
+      function updateBoundaryView(val) {
+        const data = boundaryData[val];
+        const custList = document.getElementById("boundaryCustomerList");
+        const awsList = document.getElementById("boundaryAwsList");
+
+        custList.innerHTML = data.cust
+          .map((item) => `<li>${item}</li>`)
+          .join("");
+        awsList.innerHTML = data.aws.map((item) => `<li>${item}</li>`).join("");
+      }
+      updateBoundaryView(1);
+
+      /* ==========================================
+       SLIDE 6: INSPECTOR EC2
+    ========================================== */
+      const ec2Layers = {
+        data: {
+          title: "Datos de la Aplicación",
+          resp: "CLIENTE",
+          desc: "El cliente debe cifrar los datos sensibles y gestionar copias de seguridad.",
+        },
+        app: {
+          title: "Código de la Aplicación",
+          resp: "CLIENTE",
+          desc: "El cliente debe corregir vulnerabilidades en el código y librerías de terceros.",
+        },
+        os: {
+          title: "Sistema Operativo Invitado",
+          resp: "CLIENTE",
+          desc: "¡Punto clave de examen! El cliente debe aplicar parches de seguridad al SO en instancias EC2.",
+        },
+        sg: {
+          title: "Security Group",
+          resp: "CLIENTE",
+          desc: "El cliente debe configurar las reglas de entrada/salida (Inbound/Outbound) del firewall virtual.",
+        },
+        hyp: {
+          title: "Hypervisor (AWS Nitro)",
+          resp: "AWS",
+          desc: "AWS gestiona la capa de virtualización que aísla las máquinas virtuales entre sí.",
+        },
+        hw: {
+          title: "Servidor Físico",
+          resp: "AWS",
+          desc: "AWS reemplaza procesadores, memoria RAM o discos averiados en el Data Center.",
+        },
+      };
+
+      function inspectEc2Layer(key) {
+        const info = ec2Layers[key];
+        const card = document.getElementById("ec2InspectCard");
+        const isCust = info.resp === "CLIENTE";
+
+        card.innerHTML = `
+        <div class="card-title" style="color: ${isCust ? "var(--aws-purple)" : "var(--aws-blue)"};">${info.title}</div>
+        <div style="font-size: 0.85rem; font-weight: bold; color: ${isCust ? "var(--aws-purple)" : "var(--aws-blue)"}; margin-bottom: 0.5rem;">Responsable: ${info.resp}</div>
+        <p style="font-size: 0.85rem; color: #cbd5e1;">${info.desc}</p>
+      `;
+      }
+
+      /* ==========================================
+       SLIDE 7: SIMULADOR S3
+    ========================================== */
+      function updateS3Sim() {
+        const blockPublic = document.getElementById("s3BlockPublic").checked;
+        const encrypt = document.getElementById("s3Encrypt").checked;
+        const policy = document.getElementById("s3IamPolicy").value;
+        const card = document.getElementById("s3FeedbackCard");
+
+        if (blockPublic && encrypt && policy === "strict") {
+          card.innerHTML = `
+          <div class="card-title" style="color: var(--aws-green);">✅ Configuración S3 Segura</div>
+          <p style="font-size: 0.85rem; margin-top: 0.4rem;">
+            Has aplicado el Principio de Menor Privilegio, activado el cifrado e impedido el acceso público no autorizado. Los datos están protegidos.
+          </p>
+        `;
+        } else {
+          card.innerHTML = `
+          <div class="card-title" style="color: var(--aws-red);">⚠️ Riesgo de Configuración Detectado</div>
+          <p style="font-size: 0.85rem; margin-top: 0.4rem;">
+            AWS mantiene la infraestructura física de S3 segura, pero tus opciones actuales de permisos o cifrado podrían exponer datos confidenciales a usuarios no autorizados.
+          </p>
+        `;
+        }
+      }
+      updateS3Sim();
+
+      /* ==========================================
+       SLIDE 13: JUEGO DE CLASIFICACIÓN
+    ========================================== */
+      const gameItems = [
+        { id: "item1", text: "Seguridad Física de Data Centers", resp: "aws" },
+        { id: "item2", text: "Parches de SO en instancias EC2", resp: "cust" },
+        { id: "item3", text: "Configuración de usuarios e IAM", resp: "cust" },
+        { id: "item4", text: "Reemplazo de discos físicos rotos", resp: "aws" },
+        { id: "item5", text: "Cifrado de datos en reposo", resp: "cust" },
+        { id: "item6", text: "Mantenimiento de Hypervisor Nitro", resp: "aws" },
+      ];
+
+      function renderGame() {
+        const pendingList = document.getElementById("gamePendingList");
+        pendingList.innerHTML = "";
+
+        gameItems.forEach((item) => {
+          pendingList.innerHTML += `
+          <div class="card" style="padding: 0.5rem 0.8rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+            <span>${item.text}</span>
+            <div style="display: flex; gap: 0.3rem;">
+              <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="assignGameItem('${item.id}', 'aws')">☁️ AWS</button>
+              <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="assignGameItem('${item.id}', 'cust')">👤 Cliente</button>
+            </div>
+          </div>
+        `;
+        });
+      }
+
+      function assignGameItem(id, target) {
+        const item = gameItems.find((i) => i.id === id);
+        const awsZone = document.getElementById("awsDropZone");
+        const custZone = document.getElementById("custDropZone");
+
+        const isCorrect = item.resp === target;
+        const color = isCorrect ? "var(--aws-green)" : "var(--aws-red)";
+        const el = `<div class="draggable-item" style="border-color: ${color}; font-size: 0.8rem;">${item.text} ${isCorrect ? "✅" : "❌"}</div>`;
+
+        if (target === "aws") awsZone.innerHTML += el;
+        else custZone.innerHTML += el;
+
+        const idx = gameItems.findIndex((i) => i.id === id);
+        if (idx > -1) gameItems.splice(idx, 1);
+        renderGame();
+      }
+      renderGame();
+
+      /* ==========================================
+       SLIDE 15: AUDITORÍA DE ARQUITECTURA
+    ========================================== */
+      const auditData = {
+        root: {
+          title: "Uso de la Cuenta Root",
+          resp: "Responsabilidad del CLIENTE",
+          desc: "El cliente debe crear usuarios e identidades IAM para las operaciones diarias y bloquear la cuenta Root con MFA.",
+        },
+        ec2_os: {
+          title: "Parches de SO en EC2",
+          resp: "Responsabilidad del CLIENTE",
+          desc: "En servicios IaaS como EC2, la gestión de parches de seguridad del Sistema Operativo es 100% responsabilidad del cliente.",
+        },
+        s3_pub: {
+          title: "Acceso Público en S3",
+          resp: "Responsabilidad del CLIENTE",
+          desc: 'AWS proporciona la función "Block Public Access", pero el cliente debe configurarla correctamente para proteger sus buckets.',
+        },
+        mfa: {
+          title: "Autenticación MFA Ausente",
+          resp: "Responsabilidad del CLIENTE",
+          desc: "La activación de MFA en las identidades y credenciales de acceso es una práctica de configuración que recae en el cliente.",
+        },
+      };
+
+      function auditItem(key) {
+        const info = auditData[key];
+        const panel = document.getElementById("auditFeedbackPanel");
+        panel.innerHTML = `
+        <div class="card-title" style="color: var(--aws-orange);">${info.title}</div>
+        <div style="font-size: 0.85rem; font-weight: bold; color: var(--aws-purple); margin: 0.4rem 0;">${info.resp}</div>
+        <p style="font-size: 0.85rem; color: #cbd5e1;">${info.desc}</p>
+      `;
+      }
+
+      /* ==========================================
+       SLIDE 16: QUIZ CLOUD PRACTITIONER
+    ========================================== */
+      const quizQuestions = [
+        {
+          q: "¿Cuál de las siguientes tareas es una responsabilidad exclusiva de AWS según el Modelo de Responsabilidad Compartida?",
+          options: [
+            "Configurar las reglas del Security Group en una instancia EC2",
+            "Gestión e instalación de parches del Sistema Operativo en EC2",
+            "Mantenimiento y seguridad física de los centros de datos",
+            "Cifrado de archivos cargados a un bucket de Amazon S3",
+          ],
+          correct: 2,
+          exp: 'AWS es responsable de la seguridad "DE" la nube, lo que incluye la seguridad física de las instalaciones y los centros de datos.',
+        },
+        {
+          q: "Al ejecutar una base de datos relacional en Amazon RDS, ¿de qué tarea continúa siendo responsable el CLIENTE?",
+          options: [
+            "Parchear el sistema operativo del servidor de base de datos",
+            "Gestionar los permisos de acceso y usuarios de la base de datos",
+            "Reemplazar discos duros averiados en el rack",
+            "Instalar actualizaciones de firmware en la infraestructura",
+          ],
+          correct: 1,
+          exp: "En Amazon RDS (PaaS), AWS parchea el SO y el motor, pero el cliente sigue siendo responsable de la gestión de usuarios, permisos y datos.",
+        },
+        {
+          q: '¿Qué componente de seguridad "EN" la nube debe configurar el cliente para limitar el tráfico de red de entrada a una instancia EC2?',
+          options: [
+            "AWS Nitro Hypervisor",
+            "Security Group",
+            "Mantenimiento de centro de datos",
+            "Generadores eléctricos de respaldo",
+          ],
+          correct: 1,
+          exp: "El Security Group actúa como un firewall virtual a nivel de instancia y es configurado por el cliente.",
+        },
+      ];
+      let currentQuizIdx = 0;
+
+      function renderQuiz() {
+        const q = quizQuestions[currentQuizIdx];
+        document.getElementById("quizCounter").innerText =
+          `Pregunta ${currentQuizIdx + 1} de ${quizQuestions.length}`;
+        document.getElementById("quizQuestionText").innerText = q.q;
+        document.getElementById("quizExplainBox").classList.remove("active");
+
+        const box = document.getElementById("quizOptionsBox");
+        box.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+          box.innerHTML += `<div class="quiz-option" onclick="selectQuizOption(${idx}, this)">${opt}</div>`;
+        });
+      }
+
+      function selectQuizOption(idx, el) {
+        const q = quizQuestions[currentQuizIdx];
+        const options = document.querySelectorAll(".quiz-option");
+        options.forEach((o) => o.classList.remove("correct", "incorrect"));
+
+        if (idx === q.correct) {
+          el.classList.add("correct");
+        } else {
+          el.classList.add("incorrect");
+          options[q.correct].classList.add("correct");
+        }
+
+        document.getElementById("quizExplainBox").classList.add("active");
+        document.getElementById("quizExplainText").innerText = q.exp;
+      }
+
+      function nextQuizQuestion() {
+        currentQuizIdx = (currentQuizIdx + 1) % quizQuestions.length;
+        renderQuiz();
+      }
+      renderQuiz();
+
+      /* ==========================================
+       MODALES Y EXPLAIN MODE
+    ========================================== */
+      function openExplainModal() {
+        document.getElementById("explainModal").style.display = "flex";
+      }
+
+      function closeExplainModal() {
+        document.getElementById("explainModal").style.display = "none";
+      }
+
+      // Inicialización
+      updateView();
+    </script>
+  </body>
+</html>

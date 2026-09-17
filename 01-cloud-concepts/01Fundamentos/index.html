@@ -1,0 +1,2310 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fundamentos de Cloud Computing y AWS Cloud Practitioner</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #0073bb;
+        --aws-light-blue: #38bdf8;
+        --aws-green: #10b981;
+        --aws-purple: #a855f7;
+        --aws-red: #ef4444;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HEADER & PROGRESS */
+      header {
+        height: 60px;
+        background: #090d16;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        z-index: 10;
+      }
+      .brand {
+        font-weight: bold;
+        color: var(--aws-orange);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .progress-bar-container {
+        flex-grow: 1;
+        max-width: 400px;
+        height: 8px;
+        background: var(--card-border);
+        border-radius: 4px;
+        margin: 0 1.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--aws-orange),
+          var(--aws-light-blue)
+        );
+        transition: width 0.3s ease;
+      }
+      .header-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .btn:hover {
+        background: #334155;
+        border-color: var(--aws-light-blue);
+      }
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-orange:hover {
+        background: #e68a00;
+        color: #000;
+      }
+      .btn-purple {
+        background: var(--aws-purple);
+        color: #fff;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-purple:hover {
+        background: #9333ea;
+      }
+
+      /* SLIDE LAYOUT */
+      main {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .slide-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+        transform: scale(0.98);
+        padding: 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow-y: auto;
+      }
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      .slide-header {
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+      }
+      .slide-num {
+        font-size: 0.85rem;
+        color: var(--aws-orange);
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .slide-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-top: 0.2rem;
+      }
+      .slide-subtitle {
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+      }
+
+      /* GRID & CARDS */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.2rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 10px;
+        padding: 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      }
+      .card-title {
+        color: var(--aws-light-blue);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* INTERACTIVE STACK & METER */
+      .stack-layer {
+        padding: 0.8rem 1rem;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0.4rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        font-size: 0.9rem;
+      }
+      .stack-layer:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+      }
+      .stack-layer.selected {
+        border-color: #fff;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+      }
+
+      .layer-client {
+        background: var(--aws-purple);
+        color: #fff;
+      }
+      .layer-shared {
+        background: var(--aws-orange);
+        color: #000;
+      }
+      .layer-aws {
+        background: var(--aws-blue);
+        color: #fff;
+      }
+
+      .resource-meter {
+        margin-top: 0.8rem;
+      }
+      .meter-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 0.3rem;
+      }
+      .meter-bg {
+        background: #0b1120;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid var(--card-border);
+      }
+      .meter-fill {
+        height: 100%;
+        background: var(--aws-light-blue);
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+
+      /* QUIZ & EXPLANATION PANELS */
+      .quiz-option {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+      }
+      .quiz-option:hover {
+        border-color: var(--aws-light-blue);
+        background: #26334d;
+      }
+      .quiz-option.correct {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--aws-green);
+      }
+      .quiz-option.incorrect {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--aws-red);
+      }
+
+      .explain-panel {
+        background: #0b1120;
+        border: 1px solid var(--aws-light-blue);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: none;
+      }
+      .explain-panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* SIDEBAR & MODAL */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -340px;
+        width: 340px;
+        height: 100%;
+        background: #0d1322;
+        border-left: 1px solid var(--card-border);
+        z-index: 100;
+        transition: right 0.3s ease;
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .sidebar.open {
+        right: 0;
+      }
+      .sidebar-item {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+      .sidebar-item:hover,
+      .sidebar-item.active {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 200;
+      }
+      .modal-content {
+        background: var(--card-bg);
+        border: 1px solid var(--aws-light-blue);
+        border-radius: 12px;
+        max-width: 600px;
+        width: 90%;
+        padding: 1.5rem;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      footer {
+        height: 60px;
+        background: #090d16;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+        z-index: 10;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      ul {
+        padding-left: 1.2rem;
+      }
+      li {
+        margin-bottom: 0.4rem;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+      }
+      code {
+        background: #0b1120;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        color: var(--aws-light-blue);
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header>
+      <div class="brand">☁️ AWS Cloud Practitioner: Fundamentos de Cloud</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="header-controls">
+        <button class="btn btn-purple" onclick="openExplainModal()">
+          💡 ¿Qué está pasando?
+        </button>
+        <button class="btn" id="examModeBtn" onclick="toggleExamMode()">
+          🎯 Modo Examen AWS
+        </button>
+        <button class="btn" onclick="toggleSidebar()">☰ Menú</button>
+        <button class="btn" onclick="goToSlide(0)">🏠 Inicio</button>
+      </div>
+    </header>
+
+    <!-- MAIN SLIDE CONTAINER -->
+    <main>
+      <div class="slide-container" id="slideContainer">
+        <!-- SLIDE 1: INTRODUCCIÓN -->
+        <div class="slide active">
+          <div style="text-align: center; max-width: 800px; margin: auto">
+            <span class="slide-num">Sección 01 — Introducción</span>
+            <h1
+              class="slide-title"
+              style="font-size: 2.8rem; margin-top: 0.5rem"
+            >
+              Fundamentos de Cloud Computing
+            </h1>
+            <p
+              class="slide-subtitle"
+              style="font-size: 1.2rem; margin-top: 0.8rem"
+            >
+              ¿Qué pasaría si pudieras utilizar servidores, almacenamiento y
+              bases de datos sin tener que comprar y mantener físicamente toda
+              esa infraestructura?
+            </p>
+            <div class="grid-2" style="margin-top: 2.5rem; text-align: left">
+              <div class="card" style="border-top: 4px solid var(--aws-red)">
+                <div class="card-title">🏢 Antes (Tradicional On-Premises)</div>
+                <p style="font-size: 0.85rem; color: var(--text-muted)">
+                  Comprar hardware → Esperar semanas → Instalar en rack →
+                  Configurar red → Mantener energía y refrigeración → Ejecutar
+                  aplicación.
+                </p>
+              </div>
+              <div class="card" style="border-top: 4px solid var(--aws-green)">
+                <div class="card-title">☁️ Ahora (Cloud Computing)</div>
+                <p style="font-size: 0.85rem; color: var(--text-muted)">
+                  Solicitar recurso mediante API/Consola → Aprovisionamiento
+                  instantáneo → Recursos disponibles en minutos → Pagar solo por
+                  uso.
+                </p>
+              </div>
+            </div>
+            <div style="margin-top: 2.5rem">
+              <button
+                class="btn btn-orange"
+                style="padding: 0.8rem 2.5rem; font-size: 1.1rem"
+                onclick="nextSlide()"
+              >
+                Comenzar Clase Interactiva →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 2: ¿QUÉ SIGNIFICA "LA NUBE"? -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 02 — Concepto Base</span>
+            <h2 class="slide-title">¿Qué significa realmente "La Nube"?</h2>
+            <p class="slide-subtitle">
+              "La nube" no es algo etéreo; son Data Centers reales
+              interconectados en todo el mundo
+            </p>
+          </div>
+          <div class="grid-2" style="align-items: center">
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                🔍 Jerarquía Física de AWS
+              </div>
+              <div
+                style="
+                  margin-top: 1rem;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.5rem;
+                "
+              >
+                <div
+                  class="stack-layer layer-aws"
+                  onclick="showCloudZoom('reg')"
+                >
+                  🌍 Región de AWS (Ej. us-east-1)
+                </div>
+                <div
+                  class="stack-layer layer-aws"
+                  onclick="showCloudZoom('az')"
+                >
+                  🏢 Availability Zone (AZ)
+                </div>
+                <div
+                  class="stack-layer layer-aws"
+                  onclick="showCloudZoom('dc')"
+                >
+                  📦 Data Center Físico
+                </div>
+                <div
+                  class="stack-layer layer-shared"
+                  onclick="showCloudZoom('hw')"
+                >
+                  🖥️ Servidores, Discos y Redes Físicas
+                </div>
+              </div>
+            </div>
+            <div class="card" id="cloudZoomInfoCard">
+              <div class="card-title">👈 Haz clic en una capa física</div>
+              <p style="font-size: 0.9rem; color: var(--text-muted)">
+                Cloud Computing es la entrega bajo demanda de recursos de TI a
+                través de Internet con un modelo de pago por uso.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3: EL PROBLEMA DE LA CAPACIDAD Y DEMANDA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num"
+              >Sección 03 — Infraestructura Tradicional</span
+            >
+            <h2 class="slide-title">El Problema de la Capacidad Tradicional</h2>
+            <p class="slide-subtitle">
+              Simula cambios en el tráfico de usuarios y observa las
+              limitaciones de una infraestructura fija
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">👥 Control de Demanda de Usuarios</div>
+                <div style="display: flex; gap: 0.5rem; margin: 1rem 0">
+                  <button class="btn" onclick="setCapTraffic(100)">
+                    100 Usuarios
+                  </button>
+                  <button class="btn btn-orange" onclick="setCapTraffic(2000)">
+                    2,000 Usuarios
+                  </button>
+                  <button class="btn btn-purple" onclick="setCapTraffic(10000)">
+                    10,000 Usuarios
+                  </button>
+                </div>
+                <p style="font-size: 0.9rem">
+                  Capacidad Instalada Fija: <strong>2,500 Usuarios</strong>
+                </p>
+              </div>
+              <div
+                class="card"
+                style="margin-top: 1rem"
+                id="capProblemFeedback"
+              >
+                <!-- JS Injects -->
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📊 Comparativa: Capacidad vs Demanda</div>
+              <div class="resource-meter">
+                <div class="meter-label">
+                  <span>Capacidad Fija del Servidor</span><span>2,500</span>
+                </div>
+                <div class="meter-bg">
+                  <div
+                    class="meter-fill"
+                    style="width: 50%; background: var(--aws-blue)"
+                  ></div>
+                </div>
+              </div>
+              <div class="resource-meter" style="margin-top: 1.5rem">
+                <div class="meter-label">
+                  <span>Demanda Real Actual</span
+                  ><span id="capTrafficText">100</span>
+                </div>
+                <div class="meter-bg">
+                  <div class="meter-fill" id="capTrafficFill"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4: RECURSOS BAJO DEMANDA Y PAGO POR USO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num"
+              >Sección 04 — On-Demand & Pay-as-you-go</span
+            >
+            <h2 class="slide-title">
+              Aprovisionamiento Bajo Demanda y Pago por Uso
+            </h2>
+            <p class="slide-subtitle">
+              Enciende y apaga servidores virtuales en segundos y observa la
+              simulación de cobro
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                🖥️ Servidor Virtual (Ej. Instancia EC2)
+              </div>
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem">
+                <button
+                  class="btn btn-orange"
+                  id="serverStateBtn"
+                  onclick="toggleOnDemandServer()"
+                >
+                  ▶️ Iniciar Servidor
+                </button>
+                <button class="btn" onclick="resetOnDemandMeter()">
+                  🔄 Reiniciar Contador
+                </button>
+              </div>
+              <div style="margin-top: 1.5rem; font-size: 1.1rem">
+                Estado del Servidor:
+                <strong id="serverStatusText" style="color: var(--aws-red)"
+                  >APAGADO</strong
+                >
+              </div>
+              <div style="margin-top: 0.8rem; font-size: 1rem">
+                Tiempo Activo: <code id="serverTimerText">00:00 s</code>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">💰 Simulación de Costo Acumulado</div>
+              <div
+                style="
+                  font-size: 2.5rem;
+                  font-weight: bold;
+                  color: var(--aws-green);
+                  margin: 1rem 0;
+                "
+                id="serverCostText"
+              >
+                $0.00 USD
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                📌 <strong>Principio Clave:</strong> Pagas exactamente por los
+                segundos o minutos que utilizas el recurso. Si apagas o eliminas
+                el servidor, dejas de pagar inmediatamente.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5: CAPEX VS OPEX -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 05 — Modelo Financiero</span>
+            <h2 class="slide-title">
+              CapEx vs. OpEx: Cambio de Modelo Económico
+            </h2>
+            <p class="slide-subtitle">
+              Mueve el control para comparar la estructura de costos On-Premises
+              frente a Cloud
+            </p>
+          </div>
+          <div class="card" style="margin-bottom: 1.5rem">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.5rem;
+              "
+            >
+              <span>Modelo Tradicional (CapEx Dominante)</span>
+              <span>Modelo Cloud (OpEx Dominante)</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              id="capexSlider"
+              style="width: 100%"
+              oninput="updateCapexView(this.value)"
+            />
+          </div>
+          <div class="grid-2">
+            <div class="card" id="capexCard">
+              <div class="card-title">🏛️ CapEx (Capital Expenditure)</div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  margin-bottom: 0.8rem;
+                "
+              >
+                Inversión de capital inicial significativa en activos físicos.
+              </p>
+              <ul>
+                <li>Compra de servidores físicos y storage</li>
+                <li>Construcción/alquiler de data center</li>
+                <li>Contratos de energía y refrigeración a largo plazo</li>
+                <li>Inversión fija de alto riesgo previo a la demanda</li>
+              </ul>
+            </div>
+            <div class="card" id="opexCard">
+              <div class="card-title">⚡ OpEx (Operational Expenditure)</div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  margin-bottom: 0.8rem;
+                "
+              >
+                Gastos operativos variables según la actividad del negocio.
+              </p>
+              <ul>
+                <li>Sin costo inicial de infraestructura</li>
+                <li>Pago por uso variable según consumo real</li>
+                <li>
+                  Flexibilidad para cancelar recursos en cualquier momento
+                </li>
+                <li>Escalabilidad alineada directamente con los ingresos</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 6: ELASTICIDAD -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 06 — Elasticidad</span>
+            <h2 class="slide-title">
+              Elasticidad: Ajuste Automático a la Demanda
+            </h2>
+            <p class="slide-subtitle">
+              Capacidad de aumentar o REDUCIR recursos automáticamente para
+              acompañar la curva de tráfico
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">📉 Simular Curva de Demanda</div>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value="2"
+                  id="elasticitySlider"
+                  style="width: 100%; margin: 1rem 0"
+                  oninput="updateElasticity(this.value)"
+                />
+                <p style="font-size: 0.9rem">
+                  Demanda Actual:
+                  <strong
+                    id="elasticityValText"
+                    style="color: var(--aws-orange)"
+                    >2 Servidores requeridos</strong
+                  >
+                </p>
+              </div>
+              <div class="card" style="margin-top: 1rem">
+                <div class="card-title">🎯 Beneficio de la Elasticidad</div>
+                <p style="font-size: 0.85rem; color: var(--text-muted)">
+                  Evita el <strong>desperdicio de dinero</strong> en horas de
+                  bajo tráfico y previene la
+                  <strong>caída del servicio</strong> durante picos repentinos.
+                </p>
+              </div>
+            </div>
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                Servidores Activos en AWS (Auto Scaling)
+              </div>
+              <div
+                id="elasticityBoxes"
+                style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 0.5rem;
+                  justify-content: center;
+                  margin-top: 1rem;
+                  min-height: 120px;
+                  align-items: center;
+                "
+              >
+                <!-- JS Injects -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: ESCALABILIDAD VERTICAL VS HORIZONTAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 07 — Escalabilidad</span>
+            <h2 class="slide-title">Escalabilidad: Scale Up vs. Scale Out</h2>
+            <p class="slide-subtitle">
+              Explora los dos enfoques principales para incrementar la capacidad
+              de un sistema
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                ⬆️ Escalabilidad Vertical (Scale Up / Down)
+              </div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  margin-bottom: 1rem;
+                "
+              >
+                Aumentar la potencia (CPU, RAM) de la MISMA máquina.
+              </p>
+              <div
+                style="
+                  text-align: center;
+                  background: #0b1120;
+                  padding: 1rem;
+                  border-radius: 8px;
+                "
+              >
+                <div
+                  id="vertServerBox"
+                  style="
+                    padding: 1rem;
+                    background: var(--aws-blue);
+                    border-radius: 6px;
+                    font-weight: bold;
+                    width: 60%;
+                    margin: auto;
+                    transition: all 0.3s;
+                  "
+                >
+                  Servidor EC2<br /><small id="vertServerSpec"
+                    >2 vCPU / 4 GB RAM</small
+                  >
+                </div>
+                <div
+                  style="
+                    margin-top: 1rem;
+                    display: flex;
+                    gap: 0.5rem;
+                    justify-content: center;
+                  "
+                >
+                  <button class="btn btn-orange" onclick="scaleVertical(true)">
+                    ➕ Scale Up (Más Potencia)
+                  </button>
+                  <button class="btn" onclick="scaleVertical(false)">
+                    ➖ Scale Down
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">
+                ➡️ Escalabilidad Horizontal (Scale Out / In)
+              </div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  margin-bottom: 1rem;
+                "
+              >
+                Agregar MÁS INSTANCIAS en paralelo para repartir la carga.
+              </p>
+              <div
+                style="
+                  text-align: center;
+                  background: #0b1120;
+                  padding: 1rem;
+                  border-radius: 8px;
+                  min-height: 150px;
+                "
+              >
+                <div
+                  id="horizServerGrid"
+                  style="
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.4rem;
+                    justify-content: center;
+                  "
+                >
+                  <div
+                    class="card"
+                    style="
+                      padding: 0.5rem;
+                      background: var(--aws-green);
+                      font-size: 0.75rem;
+                    "
+                  >
+                    Servidor 1
+                  </div>
+                </div>
+                <div
+                  style="
+                    margin-top: 1rem;
+                    display: flex;
+                    gap: 0.5rem;
+                    justify-content: center;
+                  "
+                >
+                  <button
+                    class="btn btn-orange"
+                    onclick="scaleHorizontal(true)"
+                  >
+                    ➕ Scale Out (Más Servidores)
+                  </button>
+                  <button class="btn" onclick="scaleHorizontal(false)">
+                    ➖ Scale In
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 8: ALTA DISPONIBILIDAD VS TOLERANCIA A FALLOS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 08 — Resiliencia</span>
+            <h2 class="slide-title">
+              Alta Disponibilidad vs. Tolerancia a Fallos
+            </h2>
+            <p class="slide-subtitle">
+              Simula la caída de un servidor y compara el diseño de arquitectura
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">⚠️ Servidor Único (Sin Redundancia)</div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 1rem;
+                  background: #0b1120;
+                  border-radius: 8px;
+                "
+              >
+                <div
+                  id="singleServerBox"
+                  style="
+                    padding: 1rem;
+                    background: var(--aws-green);
+                    border-radius: 6px;
+                    font-weight: bold;
+                  "
+                >
+                  Servidor Web Principal (AZ 1)
+                </div>
+                <button
+                  class="btn btn-purple"
+                  style="margin-top: 1rem"
+                  onclick="failSingleServer()"
+                >
+                  💥 Simular Fallo del Servidor
+                </button>
+                <div
+                  id="singleServerStatus"
+                  style="
+                    margin-top: 0.8rem;
+                    font-size: 0.85rem;
+                    color: var(--aws-green);
+                  "
+                >
+                  Estado: Servicio Operativo (100%)
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">
+                🛡️ Alta Disponibilidad (Load Balancer + Multi-AZ)
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 1rem;
+                  background: #0b1120;
+                  border-radius: 8px;
+                "
+              >
+                <div
+                  style="
+                    font-size: 0.8rem;
+                    color: var(--aws-light-blue);
+                    margin-bottom: 0.5rem;
+                  "
+                >
+                  ⚖️ Elastic Load Balancer (ELB)
+                </div>
+                <div
+                  style="display: flex; gap: 0.5rem; justify-content: center"
+                >
+                  <div
+                    id="haServer1"
+                    style="
+                      flex: 1;
+                      padding: 0.5rem;
+                      background: var(--aws-green);
+                      border-radius: 6px;
+                      font-size: 0.75rem;
+                    "
+                  >
+                    Servidor 1 (AZ 1)
+                  </div>
+                  <div
+                    id="haServer2"
+                    style="
+                      flex: 1;
+                      padding: 0.5rem;
+                      background: var(--aws-green);
+                      border-radius: 6px;
+                      font-size: 0.75rem;
+                    "
+                  >
+                    Servidor 2 (AZ 2)
+                  </div>
+                </div>
+                <button
+                  class="btn btn-purple"
+                  style="margin-top: 1rem"
+                  onclick="failHAServer()"
+                >
+                  💥 Simular Fallo en AZ 1
+                </button>
+                <div
+                  id="haServerStatus"
+                  style="
+                    margin-top: 0.8rem;
+                    font-size: 0.85rem;
+                    color: var(--aws-green);
+                  "
+                >
+                  Estado: Aplicación Disponible (Tráfico reenviado a AZ 2)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 9: AUTOMATIZACIÓN E INFRASTRUCTURE AS CODE -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 09 — Automatización</span>
+            <h2 class="slide-title">
+              Automatización e Infraestructura como Código (IaC)
+            </h2>
+            <p class="slide-subtitle">
+              Sustituye la configuración manual por scripts declarativos
+              repetibles y sin errores humanos
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                📝 Proceso Manual (Lento y propenso a errores)
+              </div>
+              <ol style="margin-top: 0.5rem">
+                <li>Iniciar sesión en la consola web</li>
+                <li>Hacer clic en múltiples menús</li>
+                <li>Configurar manualmente la red y puertos</li>
+                <li>Instalar dependencias una por una</li>
+              </ol>
+            </div>
+            <div class="card">
+              <div class="card-title">
+                ⚡ Automatizado / IaC (Rápido y consistente)
+              </div>
+              <pre
+                style="
+                  background: #0b1120;
+                  padding: 0.8rem;
+                  border-radius: 6px;
+                  color: var(--aws-light-blue);
+                  font-size: 0.75rem;
+                  margin-top: 0.5rem;
+                "
+              >
+Resources:
+  MyWebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: ami-0c55b159cbfafe1f0</pre
+              >
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.5rem;
+                "
+              >
+                Permite crear 1 o 100 entornos idénticos en minutos ejecutando
+                un script (Ej. AWS CloudFormation).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 10: MODELOS DE SERVICIO: IAAS, PAAS, SAAS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 10 — Modelos de Servicio</span>
+            <h2 class="slide-title">IaaS, PaaS y SaaS: Niveles de Control</h2>
+            <p class="slide-subtitle">
+              Selecciona un modelo para ver la distribución de responsabilidades
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem">
+            <button class="btn btn-orange" onclick="showServiceModel('iaas')">
+              🖥️ IaaS (Infrastructure)
+            </button>
+            <button class="btn" id="paasBtn" onclick="showServiceModel('paas')">
+              ⚙️ PaaS (Platform)
+            </button>
+            <button class="btn" id="saasBtn" onclick="showServiceModel('saas')">
+              📱 SaaS (Software)
+            </button>
+          </div>
+          <div class="grid-2">
+            <div class="card" id="serviceModelStackCard">
+              <!-- Inyectado por JS -->
+            </div>
+            <div class="card" id="serviceModelInfoCard">
+              <!-- Inyectado por JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 11: NUBE PÚBLICA, PRIVADA E HÍBRIDA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 11 — Modelos de Despliegue</span>
+            <h2 class="slide-title">Nube Pública, Privada e Híbrida</h2>
+            <p class="slide-subtitle">
+              Tres formas de desplegar y operar la infraestructura
+            </p>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title">🌐 Nube Pública</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Propiedad de un proveedor cloud (AWS) que ofrece recursos a
+                múltiples clientes a través de Internet.
+              </p>
+              <div
+                style="
+                  margin-top: 0.8rem;
+                  font-size: 0.8rem;
+                  color: var(--aws-light-blue);
+                "
+              >
+                Ej. Amazon EC2, S3
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🔒 Nube Privada</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Infraestructura utilizada exclusivamente por una sola
+                organización (On-Premises o Data Center dedicado).
+              </p>
+              <div
+                style="
+                  margin-top: 0.8rem;
+                  font-size: 0.8rem;
+                  color: var(--aws-orange);
+                "
+              >
+                Control absoluto / Mayor costo
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🔀 Nube Híbrida</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Conecta infraestructura On-Premises local con recursos de la
+                Nube Pública de forma integrada.
+              </p>
+              <div
+                style="
+                  margin-top: 0.8rem;
+                  font-size: 0.8rem;
+                  color: var(--aws-green);
+                "
+              >
+                Ej. AWS Direct Connect / VPN
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 12: INFRAESTRUCTURA GLOBAL DE AWS (REGIONES Y AZs) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num"
+              >Sección 12 — AWS Global Infrastructure</span
+            >
+            <h2 class="slide-title">Regiones y Availability Zones (AZs)</h2>
+            <p class="slide-subtitle">
+              La base física global sobre la que se construyen los servicios de
+              AWS
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🌍 Región de AWS</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Ubicación geográfica física en el mundo que agrupa múltiples
+                Zonas de Disponibilidad aisladas (Ej. us-east-1 N. Virginia).
+              </p>
+              <h4
+                style="
+                  margin-top: 1rem;
+                  color: var(--aws-orange);
+                  font-size: 0.9rem;
+                "
+              >
+                Factores para elegir una Región:
+              </h4>
+              <ul style="font-size: 0.8rem; margin-top: 0.3rem">
+                <li>
+                  <strong>Cumplimiento y Residencia de Datos:</strong> Leyes
+                  locales.
+                </li>
+                <li>
+                  <strong>Latencia:</strong> Cercanía física a los usuarios
+                  finales.
+                </li>
+                <li>
+                  <strong>Disponibilidad de Servicios:</strong> Servicios
+                  habilitados.
+                </li>
+                <li>
+                  <strong>Costo:</strong> Precios variados según el país/región.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">🏢 Availability Zone (AZ)</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Uno o más centros de datos físicos discretos con energía, red y
+                refrigeración redundantes dentro de una Región.
+              </p>
+              <div
+                style="
+                  background: #0b1120;
+                  padding: 1rem;
+                  border-radius: 8px;
+                  margin-top: 1rem;
+                  text-align: center;
+                "
+              >
+                <strong>Región (Ej. us-east-1)</strong>
+                <div style="display: flex; gap: 0.4rem; margin-top: 0.5rem">
+                  <div
+                    style="
+                      flex: 1;
+                      background: var(--aws-blue);
+                      padding: 0.4rem;
+                      border-radius: 4px;
+                      font-size: 0.75rem;
+                    "
+                  >
+                    AZ us-east-1a
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      background: var(--aws-blue);
+                      padding: 0.4rem;
+                      border-radius: 4px;
+                      font-size: 0.75rem;
+                    "
+                  >
+                    AZ us-east-1b
+                  </div>
+                  <div
+                    style="
+                      flex: 1;
+                      background: var(--aws-blue);
+                      padding: 0.4rem;
+                      border-radius: 4px;
+                      font-size: 0.75rem;
+                    "
+                  >
+                    AZ us-east-1c
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 13: MODELO DE RESPONSABILIDAD COMPARTIDA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 13 — Seguridad en AWS</span>
+            <h2 class="slide-title">Modelo de Responsabilidad Compartida</h2>
+            <p class="slide-subtitle">
+              Selecciona un servicio para explorar la línea divisoria de
+              responsabilidades
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem">
+            <button class="btn btn-orange" onclick="showSharedResp('ec2')">
+              🖥️ Amazon EC2 (IaaS)
+            </button>
+            <button class="btn" id="s3RespBtn" onclick="showSharedResp('s3')">
+              📦 Amazon S3 (Almacenamiento)
+            </button>
+            <button class="btn" id="rdsRespBtn" onclick="showSharedResp('rds')">
+              🗄️ Amazon RDS (PaaS)
+            </button>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-purple)">
+                👤 Responsabilidad DEL CLIENTE (Seguridad EN la Nube)
+              </div>
+              <div
+                id="clientRespList"
+                style="margin-top: 0.5rem; font-size: 0.85rem"
+              >
+                <!-- JS Injects -->
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title" style="color: var(--aws-blue)">
+                ☁️ Responsabilidad DE AWS (Seguridad DE la Nube)
+              </div>
+              <div
+                id="awsRespList"
+                style="margin-top: 0.5rem; font-size: 0.85rem"
+              >
+                <!-- JS Injects -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 14: SECCIÓN "MITOS Y ERRORES CONCEPTUALES" -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 14 — Mitos Frecuentes</span>
+            <h2 class="slide-title">Mitos vs. Realidades de Cloud Computing</h2>
+            <p class="slide-subtitle">
+              Desmontando confusiones comunes para la certificación AWS
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ Mito: "La nube no utiliza servidores físicos."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> La nube se apoya completamente en
+                servidores físicos, discos y data centers reales administrados
+                por el proveedor.
+              </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ Mito: "Migrar a la nube siempre es más barato
+                automáticamente."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> Cloud cambia el modelo de cobro. Si
+                no se optimizan los recursos, puede resultar costoso. El ahorro
+                proviene de la elasticidad y el correcto dimensionamiento.
+              </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ Mito: "Todo escala automáticamente en la nube sin configurar
+                nada."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> Debes diseñar y configurar servicios
+                como AWS Auto Scaling y Load Balancers para lograr elasticidad.
+              </p>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--aws-red)">
+              <strong style="color: var(--aws-red)"
+                >❌ Mito: "AWS se encarga de la seguridad de mis datos y
+                contraseñas."</strong
+              >
+              <p
+                style="
+                  font-size: 0.85rem;
+                  margin-top: 0.4rem;
+                  color: var(--text-muted);
+                "
+              >
+                <strong>Realidad:</strong> Bajo el modelo de responsabilidad
+                compartida, el cliente es responsable del cifrado, los datos y
+                los permisos de acceso de usuarios.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 15: SIMULADOR CONSTRUYE TU NUBE -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 15 — Taller Interactivo</span>
+            <h2 class="slide-title">Constructor de Arquitectura Cloud</h2>
+            <p class="slide-subtitle">
+              Selecciona los bloques necesarios para estructurar una aplicación
+              segura y escalable
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">🧩 Bloques Disponibles</div>
+                <div
+                  style="
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    margin-top: 0.8rem;
+                  "
+                >
+                  <button class="btn" onclick="addArchComponent('compute')">
+                    🖥️ Compute (EC2)
+                  </button>
+                  <button class="btn" onclick="addArchComponent('db')">
+                    🗄️ Database (RDS)
+                  </button>
+                  <button class="btn" onclick="addArchComponent('storage')">
+                    📦 Storage (S3)
+                  </button>
+                  <button class="btn" onclick="addArchComponent('net')">
+                    ⚖️ Network (ELB)
+                  </button>
+                  <button class="btn" onclick="resetArchComponents()">
+                    🔄 Reiniciar
+                  </button>
+                </div>
+              </div>
+              <div
+                class="card"
+                style="margin-top: 1rem"
+                id="archPedagogicFeedback"
+              >
+                <div class="card-title">💡 Diagnóstico de Arquitectura</div>
+                <p style="font-size: 0.85rem; color: var(--text-muted)">
+                  Agrega componentes para ver las recomendaciones conceptuales.
+                </p>
+              </div>
+            </div>
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                📐 Diagrama Conectado
+              </div>
+              <div
+                id="archCanvasBox"
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.5rem;
+                  justify-content: center;
+                  margin-top: 1rem;
+                  min-height: 180px;
+                "
+              >
+                <span style="font-size: 0.85rem; color: var(--text-muted)"
+                  >Diagrama vacío.</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 16: QUIZ FINAL INTERACTIVO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 16 — Evaluativa</span>
+            <h2 class="slide-title">Cuestionario Final de Fundamentos Cloud</h2>
+            <p class="slide-subtitle">
+              Demuestra tu aprendizaje con preguntas orientadas a AWS Cloud
+              Practitioner
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <div
+              style="
+                font-size: 0.85rem;
+                color: var(--aws-orange);
+                font-weight: bold;
+              "
+              id="quizCounter"
+            >
+              Pregunta 1 de 3
+            </div>
+            <p
+              style="font-size: 1.1rem; font-weight: 600; margin: 0.8rem 0"
+              id="quizQuestionText"
+            >
+              ¿Qué beneficio de la nube permite adaptar los recursos de
+              infraestructura automáticamente ante aumentos y reducciones de
+              tráfico?
+            </p>
+            <div id="quizOptionsBox">
+              <!-- Inyectado por JS -->
+            </div>
+            <div class="explain-panel" id="quizExplainBox">
+              <strong id="quizExplainTitle" style="color: var(--aws-green)"
+                >Explicación:</strong
+              >
+              <p
+                id="quizExplainText"
+                style="font-size: 0.85rem; margin-top: 0.3rem"
+              ></p>
+              <button
+                class="btn btn-orange"
+                style="margin-top: 0.8rem"
+                onclick="nextQuizQuestion()"
+              >
+                Continuar →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 17: DESAFÍO FINAL "MIGRACIÓN A LA NUBE" -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 17 — Desafío de Integración</span>
+            <h2 class="slide-title">
+              Desafío: Modernizar una Infraestructura Legacy
+            </h2>
+            <p class="slide-subtitle">
+              Una empresa tradicional quiere migrar su centro de datos local a
+              AWS
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                🏢 Infraestructura On-Premises Actual
+              </div>
+              <ul style="font-size: 0.85rem">
+                <li>2 Servidores físicos comprados (Sobredimensionados)</li>
+                <li>
+                  1 Servidor de base de datos local sin copia de seguridad en
+                  otra ubicación
+                </li>
+                <li>Gastos fijos de mantenimiento y energía (CapEx alto)</li>
+                <li>Caídas del sistema cuando hay ofertas especiales</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">☁️ Estrategia de Modernización Cloud</div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.8rem">
+                Selecciona los principios para transformar la solución:
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 0.4rem">
+                <button
+                  class="btn"
+                  onclick="applyMigrationPrinciple('elastic')"
+                >
+                  ➕ Implementar Auto Scaling (Elasticidad)
+                </button>
+                <button class="btn" onclick="applyMigrationPrinciple('ha')">
+                  ➕ Desplegar en Múltiples AZs (Alta Disponibilidad)
+                </button>
+                <button class="btn" onclick="applyMigrationPrinciple('opex')">
+                  ➕ Pasar de CapEx a OpEx (Pago por Uso)
+                </button>
+              </div>
+              <div
+                class="explain-panel"
+                id="migrationFeedbackPanel"
+                style="margin-top: 0.8rem"
+              >
+                <strong style="color: var(--aws-green)"
+                  >Resultado de la Modernización:</strong
+                >
+                <p
+                  id="migrationFeedbackText"
+                  style="font-size: 0.8rem; margin-top: 0.3rem"
+                ></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 18: GLOSARIO INTERACTIVO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 18 — Referencia</span>
+            <h2 class="slide-title">Glosario Interactivo de Términos</h2>
+            <p class="slide-subtitle">
+              Consulta rápidamente las definiciones clave para la certificación
+            </p>
+          </div>
+          <div class="grid-3" style="max-height: 400px; overflow-y: auto">
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Cloud Computing: Entrega bajo demanda de potencia de cómputo, almacenamiento, bases de datos y aplicaciones a través de Internet con pago por uso.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">Cloud Computing</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Entrega bajo demanda de TI vía Internet.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Elasticidad: Capacidad de aprovisionar y liberar recursos automáticamente según la demanda variable.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">Elasticidad</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Escalado automático según tráfico.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'Alta Disponibilidad (HA): Sistema diseñado para operar continuamente sin interrupciones mediante redundancia.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)"
+                >Alta Disponibilidad</strong
+              >
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Tolerancia a fallos mediante redundancia.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert(
+                  'CapEx: Gastos de capital iniciales en infraestructura física.',
+                )
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">CapEx</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Inversión inicial física.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert('OpEx: Gastos operativos pagados periódicamente por uso.')
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">OpEx</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Gasto operativo continuo.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="
+                alert('IaaS: Infraestructura como Servicio (Ej. Amazon EC2).')
+              "
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">IaaS</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Infraestructura base configurable.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar" id="sidebar">
+      <h3 style="color: var(--aws-orange); margin-bottom: 1rem">
+        Navegación de la Clase
+      </h3>
+      <div id="sidebarList"></div>
+    </div>
+
+    <!-- EXPLAIN MODAL -->
+    <div class="modal-overlay" id="explainModal">
+      <div class="modal-content">
+        <h3 style="color: var(--aws-orange)" id="explainModalTitle">
+          💡 Modo "Explicación Paso a Paso"
+        </h3>
+        <div style="margin-top: 1rem; font-size: 0.9rem" id="explainModalBody">
+          <p>
+            En esta sección estás explorando cómo la nube resuelve las
+            limitaciones físicas y económicas de los centros de datos
+            tradicionales.
+          </p>
+        </div>
+        <button
+          class="btn btn-orange"
+          style="margin-top: 1.5rem"
+          onclick="closeExplainModal()"
+        >
+          Entendido
+        </button>
+      </div>
+    </div>
+
+    <!-- FOOTER CONTROLS -->
+    <footer>
+      <button class="btn" onclick="prevSlide()">← Anterior</button>
+      <span
+        style="font-size: 0.85rem; color: var(--text-muted)"
+        id="slideCounter"
+        >1 / 18</span
+      >
+      <button class="btn btn-orange" onclick="nextSlide()">Siguiente →</button>
+    </footer>
+
+    <script>
+      /* ==========================================
+       ESTADO Y NAVEGACIÓN PRINCIPAL
+    ========================================== */
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const slideCounter = document.getElementById("slideCounter");
+      const sidebarList = document.getElementById("sidebarList");
+
+      slides.forEach((slide, idx) => {
+        const title =
+          slide.querySelector(".slide-title")?.innerText || `Slide ${idx + 1}`;
+        const item = document.createElement("div");
+        item.className = `sidebar-item ${idx === 0 ? "active" : ""}`;
+        item.innerText = `${idx + 1}. ${title}`;
+        item.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+        sidebarList.appendChild(item);
+      });
+
+      function updateView() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+
+        const items = sidebarList.querySelectorAll(".sidebar-item");
+        items.forEach((item, idx) => {
+          item.classList.toggle("active", idx === currentSlide);
+        });
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateView();
+        }
+      }
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateView();
+        }
+      }
+      function goToSlide(idx) {
+        currentSlide = idx;
+        updateView();
+      }
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      });
+
+      /* ==========================================
+       SLIDE 2: ZOOM A LA NUBE
+    ========================================== */
+      const cloudZoomData = {
+        reg: {
+          title: "🌍 Región de AWS",
+          text: "Una ubicación geográfica mundial que agrupa múltiples Zonas de Disponibilidad (AZs). Ejemplo: us-east-1 (N. Virginia).",
+        },
+        az: {
+          title: "🏢 Availability Zone (AZ)",
+          text: "Uno o más data centers aislados físicamente dentro de una Región, con redundancia de energía, red y refrigeración.",
+        },
+        dc: {
+          title: "📦 Data Center Físico",
+          text: "Edificio físico de alta seguridad equipado con miles de servidores montados en racks.",
+        },
+        hw: {
+          title: "🖥️ Infraestructura Física",
+          text: "Procesadores, memoria RAM, discos de almacenamiento SSD y switches de red de alta velocidad administrados por AWS.",
+        },
+      };
+
+      function showCloudZoom(key) {
+        const info = cloudZoomData[key];
+        const card = document.getElementById("cloudZoomInfoCard");
+        card.innerHTML = `
+        <div class="card-title" style="color:var(--aws-orange);">${info.title}</div>
+        <p style="font-size:0.9rem; margin-top:0.5rem;">${info.text}</p>
+      `;
+      }
+
+      /* ==========================================
+       SLIDE 3: PROBLEMA DE CAPACIDAD
+    ========================================== */
+      function setCapTraffic(num) {
+        document.getElementById("capTrafficText").innerText = num;
+        const fill = document.getElementById("capTrafficFill");
+        const feedback = document.getElementById("capProblemFeedback");
+
+        let pct = Math.min(100, (num / 10000) * 100);
+        fill.style.width = `${pct}%`;
+
+        if (num > 2500) {
+          fill.style.background = "var(--aws-red)";
+          feedback.innerHTML = `
+          <strong style="color:var(--aws-red);">❌ Colapso del Servidor Tradicional</strong>
+          <p style="font-size:0.85rem; margin-top:0.3rem;">La demanda (${num} usuarios) supera la capacidad fija (2,500). El servidor no responde y los clientes experimentan caídas.</p>
+        `;
+        } else if (num < 1000) {
+          fill.style.background = "var(--aws-orange)";
+          feedback.innerHTML = `
+          <strong style="color:var(--aws-orange);">⚠️ Infraestructura Sobredimensionada y Desperdicio</strong>
+          <p style="font-size:0.85rem; margin-top:0.3rem;">Solo estás usando ${num} de 2,500 de capacidad. Estás pagando por hardware ocioso que no genera valor.</p>
+        `;
+        } else {
+          fill.style.background = "var(--aws-green)";
+          feedback.innerHTML = `
+          <strong style="color:var(--aws-green);">✅ Operación Estable</strong>
+          <p style="font-size:0.85rem; margin-top:0.3rem;">El tráfico está equilibrado con la capacidad del servidor.</p>
+        `;
+        }
+      }
+      setCapTraffic(100);
+
+      /* ==========================================
+       SLIDE 4: ON-DEMAND & PAY-AS-YOU-GO
+    ========================================== */
+      let serverActive = false;
+      let serverTimer = null;
+      let secondsActive = 0;
+
+      function toggleOnDemandServer() {
+        serverActive = !serverActive;
+        const btn = document.getElementById("serverStateBtn");
+        const status = document.getElementById("serverStatusText");
+
+        if (serverActive) {
+          btn.innerText = "⏹️ Apagar Servidor";
+          btn.className = "btn btn-purple";
+          status.innerText = "ENCENDIDO / OPERATIVO";
+          status.style.color = "var(--aws-green)";
+
+          serverTimer = setInterval(() => {
+            secondsActive++;
+            document.getElementById("serverTimerText").innerText =
+              `${secondsActive} s`;
+            let cost = (secondsActive * 0.05).toFixed(2);
+            document.getElementById("serverCostText").innerText =
+              `$${cost} USD`;
+          }, 1000);
+        } else {
+          btn.innerText = "▶️ Iniciar Servidor";
+          btn.className = "btn btn-orange";
+          status.innerText = "APAGADO";
+          status.style.color = "var(--aws-red)";
+          clearInterval(serverTimer);
+        }
+      }
+
+      function resetOnDemandMeter() {
+        if (serverActive) toggleOnDemandServer();
+        secondsActive = 0;
+        document.getElementById("serverTimerText").innerText = `00:00 s`;
+        document.getElementById("serverCostText").innerText = `$0.00 USD`;
+      }
+
+      /* ==========================================
+       SLIDE 5: CAPEX VS OPEX
+    ========================================== */
+      function updateCapexView(val) {
+        const capexCard = document.getElementById("capexCard");
+        const opexCard = document.getElementById("opexCard");
+
+        let opacCapex = 1 - val / 100;
+        let opacOpex = val / 100;
+
+        capexCard.style.opacity = Math.max(0.3, opacCapex);
+        opexCard.style.opacity = Math.max(0.3, opacOpex);
+      }
+
+      /* ==========================================
+       SLIDE 6: ELASTICIDAD
+    ========================================== */
+      function updateElasticity(val) {
+        document.getElementById("elasticityValText").innerText =
+          `${val} Servidor(es) activo(s)`;
+        const box = document.getElementById("elasticityBoxes");
+        box.innerHTML = "";
+
+        for (let i = 0; i < val; i++) {
+          box.innerHTML += `<div class="card" style="padding:0.6rem; background:#064e3b; border:1px solid var(--aws-green); font-size:0.8rem;">🖥️ EC2 Auto-Scaled #${i + 1}</div>`;
+        }
+      }
+      updateElasticity(2);
+
+      /* ==========================================
+       SLIDE 7: ESCALABILIDAD VERTICAL Y HORIZONTAL
+    ========================================== */
+      let vertLevel = 1;
+      function scaleVertical(up) {
+        if (up && vertLevel < 4) vertLevel++;
+        if (!up && vertLevel > 1) vertLevel--;
+
+        const box = document.getElementById("vertServerBox");
+        const spec = document.getElementById("vertServerSpec");
+
+        if (vertLevel === 1) {
+          box.style.width = "50%";
+          spec.innerText = "2 vCPU / 4 GB RAM";
+        }
+        if (vertLevel === 2) {
+          box.style.width = "70%";
+          spec.innerText = "4 vCPU / 16 GB RAM";
+        }
+        if (vertLevel === 3) {
+          box.style.width = "85%";
+          spec.innerText = "8 vCPU / 32 GB RAM";
+        }
+        if (vertLevel === 4) {
+          box.style.width = "100%";
+          spec.innerText = "16 vCPU / 64 GB RAM";
+        }
+      }
+
+      let horizCount = 1;
+      function scaleHorizontal(out) {
+        if (out && horizCount < 6) horizCount++;
+        if (!out && horizCount > 1) horizCount--;
+
+        const grid = document.getElementById("horizServerGrid");
+        grid.innerHTML = "";
+        for (let i = 0; i < horizCount; i++) {
+          grid.innerHTML += `<div class="card" style="padding:0.5rem; background:var(--aws-green); font-size:0.75rem;">Servidor #${i + 1}</div>`;
+        }
+      }
+
+      /* ==========================================
+       SLIDE 8: ALTA DISPONIBILIDAD
+    ========================================== */
+      function failSingleServer() {
+        const box = document.getElementById("singleServerBox");
+        const status = document.getElementById("singleServerStatus");
+        box.style.background = "var(--aws-red)";
+        box.innerText = "Servidor Caído (Sin respuesta)";
+        status.style.color = "var(--aws-red)";
+        status.innerText = "Estado: Caída Total del Servicio (Outage)";
+      }
+
+      function failHAServer() {
+        const s1 = document.getElementById("haServer1");
+        const status = document.getElementById("haServerStatus");
+        s1.style.background = "var(--aws-red)";
+        s1.innerText = "AZ 1 Falló ❌";
+        status.innerText =
+          "Estado: Operativo (ELB redirigió 100% del tráfico a Servidor 2 en AZ 2)";
+      }
+
+      /* ==========================================
+       SLIDE 10: MODELOS DE SERVICIO (IAAS, PAAS, SAAS)
+    ========================================== */
+      function showServiceModel(model) {
+        const stack = document.getElementById("serviceModelStackCard");
+        const info = document.getElementById("serviceModelInfoCard");
+
+        document.getElementById("paasBtn").className =
+          model === "paas" ? "btn btn-orange" : "btn";
+        document.getElementById("saasBtn").className =
+          model === "saas" ? "btn btn-orange" : "btn";
+
+        if (model === "iaas") {
+          stack.innerHTML = `
+          <div class="card-title">🖥️ IaaS (Infrastructure as a Service)</div>
+          <div class="stack-layer layer-client">Aplicaciones & Datos (Tú)</div>
+          <div class="stack-layer layer-client">Sistema Operativo (Tú)</div>
+          <div class="stack-layer layer-aws">Virtualización & Hardware (AWS)</div>
+          <div class="stack-layer layer-aws">Redes & Data Centers (AWS)</div>
+        `;
+          info.innerHTML = `
+          <div class="card-title">Ejemplo AWS: Amazon EC2</div>
+          <p style="font-size:0.85rem; color:var(--text-muted);">
+            Provee bloques fundamentales de TI (cómputo, almacenamiento y redes). Máximo control sobre el sistema operativo y la configuración.
+          </p>
+        `;
+        } else if (model === "paas") {
+          stack.innerHTML = `
+          <div class="card-title">⚙️ PaaS (Platform as a Service)</div>
+          <div class="stack-layer layer-client">Código de Aplicación & Datos (Tú)</div>
+          <div class="stack-layer layer-aws">Sistema Operativo & Runtime (AWS)</div>
+          <div class="stack-layer layer-aws">Virtualización & Hardware (AWS)</div>
+          <div class="stack-layer layer-aws">Redes & Data Centers (AWS)</div>
+        `;
+          info.innerHTML = `
+          <div class="card-title">Ejemplo AWS: Elastic Beanstalk / RDS</div>
+          <p style="font-size:0.85rem; color:var(--text-muted);">
+            Elimina la necesidad de gestionar la infraestructura subyacente (Sistemas Operativos y parches), permitiéndote concentrarte únicamente en desplegar tu código.
+          </p>
+        `;
+        } else {
+          stack.innerHTML = `
+          <div class="card-title">📱 SaaS (Software as a Service)</div>
+          <div class="stack-layer layer-aws">Aplicaciones & Datos (Proveedor)</div>
+          <div class="stack-layer layer-aws">Plataforma & Runtime (Proveedor)</div>
+          <div class="stack-layer layer-aws">Infraestructura Base (Proveedor)</div>
+        `;
+          info.innerHTML = `
+          <div class="card-title">Ejemplo: M365, Salesforce, Dropbox</div>
+          <p style="font-size:0.85rem; color:var(--text-muted);">
+            Producto completo gestionado y operado en su totalidad por el proveedor del servicio. Solo te preocupas por consumir la aplicación.
+          </p>
+        `;
+        }
+      }
+      showServiceModel("iaas");
+
+      /* ==========================================
+       SLIDE 13: RESPONSABILIDAD COMPARTIDA
+    ========================================== */
+      function showSharedResp(service) {
+        const client = document.getElementById("clientRespList");
+        const aws = document.getElementById("awsRespList");
+
+        document.getElementById("s3RespBtn").className =
+          service === "s3" ? "btn btn-orange" : "btn";
+        document.getElementById("rdsRespBtn").className =
+          service === "rds" ? "btn btn-orange" : "btn";
+
+        if (service === "ec2") {
+          client.innerHTML =
+            "<ul><li>Parches del Sistema Operativo Invitado</li><li>Configuración de Firewall (Security Groups)</li><li>Cifrado de datos y gestión de usuarios IAM</li></ul>";
+          aws.innerHTML =
+            "<ul><li>Hardware físico y servidores</li><li>Nitro Hypervisor</li><li>Seguridad física de los Data Centers</li></ul>";
+        } else if (service === "s3") {
+          client.innerHTML =
+            "<ul><li>Permisos de acceso al Bucket (Políticas)</li><li>Cifrado de objetos (Lado cliente o servidor)</li><li>Clasificación de datos cargados</li></ul>";
+          aws.innerHTML =
+            "<ul><li>Infraestructura de almacenamiento masivo</li><li>Durabilidad de objetos (99.999999999%)</li><li>Gestión de discos duros físicos</li></ul>";
+        } else {
+          client.innerHTML =
+            "<ul><li>Optimización de consultas SQL y esquemas</li><li>Configuración de usuarios de base de datos</li><li>Parámetros de conexión de red</li></ul>";
+          aws.innerHTML =
+            "<ul><li>Instalación y parches automáticos del motor de BD</li><li>Copias de seguridad automáticas (Backups)</li><li>Mantenimiento del hardware de BD</li></ul>";
+        }
+      }
+      showSharedResp("ec2");
+
+      /* ==========================================
+       SLIDE 15: CONSTRUCTOR DE ARQUITECTURA
+    ========================================== */
+      let archComponents = [];
+      function addArchComponent(type) {
+        if (archComponents.length < 4) {
+          archComponents.push(type);
+          renderArch();
+        }
+      }
+
+      function resetArchComponents() {
+        archComponents = [];
+        renderArch();
+      }
+
+      function renderArch() {
+        const canvas = document.getElementById("archCanvasBox");
+        const feedback = document.getElementById("archPedagogicFeedback");
+        canvas.innerHTML = "";
+
+        if (archComponents.length === 0) {
+          canvas.innerHTML =
+            '<span style="font-size: 0.85rem; color: var(--text-muted);">Diagrama vacío. Haz clic en los botones superiores para agregar capas.</span>';
+          feedback.innerHTML =
+            '<p style="font-size:0.85rem; color:var(--text-muted);">Agrega componentes para ver las recomendaciones conceptuales.</p>';
+          return;
+        }
+
+        archComponents.forEach((c) => {
+          if (c === "compute")
+            canvas.innerHTML += `<div class="card" style="padding:0.5rem; background:#312e81;">🖥️ Compute: Amazon EC2</div>`;
+          if (c === "db")
+            canvas.innerHTML += `<div class="card" style="padding:0.5rem; background:#065f46;">🗄️ Database: Amazon RDS</div>`;
+          if (c === "storage")
+            canvas.innerHTML += `<div class="card" style="padding:0.5rem; background:#581c87;">📦 Storage: Amazon S3</div>`;
+          if (c === "net")
+            canvas.innerHTML += `<div class="card" style="padding:0.5rem; background:#1e3a8a;">⚖️ Network: Elastic Load Balancer</div>`;
+        });
+
+        if (
+          archComponents.includes("compute") &&
+          archComponents.includes("db")
+        ) {
+          feedback.innerHTML =
+            '<strong style="color:var(--aws-green);">✅ Buenas Prácticas AWS:</strong><p style="font-size:0.85rem; margin-top:0.3rem;">Has separado la capa de cómputo (EC2) de la capa persistente de base de datos (RDS).</p>';
+        } else {
+          feedback.innerHTML =
+            '<strong style="color:var(--aws-orange);">💡 Sugerencia Arquitectónica:</strong><p style="font-size:0.85rem; margin-top:0.3rem;">Asegúrate de combinar cómputo con un almacenamiento o base de datos persistente.</p>';
+        }
+      }
+
+      /* ==========================================
+       SLIDE 16: QUIZ FINAL
+    ========================================== */
+      const quizQuestions = [
+        {
+          q: "¿Qué beneficio de la nube permite adaptar los recursos de infraestructura automáticamente ante aumentos y reducciones de tráfico?",
+          options: [
+            "Tolerancia a fallos",
+            "Elasticidad",
+            "CapEx",
+            "Economías de escala",
+          ],
+          correct: 1,
+          exp: "La elasticidad es la capacidad de aumentar o reducir recursos informáticos de forma automática según la demanda cambiante.",
+        },
+        {
+          q: "Bajo el Modelo de Responsabilidad Compartida de AWS, ¿cuál es una responsabilidad exclusiva del CLIENTE en una instancia EC2?",
+          options: [
+            "Mantenimiento del Hypervisor",
+            "Seguridad física del Data Center",
+            "Instalación de parches en el Sistema Operativo Invitado",
+            "Reemplazo de discos duros averiados",
+          ],
+          correct: 2,
+          exp: "En instancias EC2 (IaaS), el cliente es responsable de gestionar y parchear el Sistema Operativo instalado en la máquina virtual.",
+        },
+        {
+          q: "¿Qué término describe el cambio del modelo financiero de inversión fija inicial a gastos operativos variables en la nube?",
+          options: [
+            "Transición de OpEx a CapEx",
+            "Transición de CapEx a OpEx",
+            "Alta Disponibilidad Estática",
+            "Aprovisionamiento Rígido",
+          ],
+          correct: 1,
+          exp: "Cloud Computing permite sustituir los costos de capital de infraestructura física (CapEx) por costos operativos variables pagados por consumo (OpEx).",
+        },
+      ];
+      let currentQuizIdx = 0;
+
+      function renderQuiz() {
+        const q = quizQuestions[currentQuizIdx];
+        document.getElementById("quizCounter").innerText =
+          `Pregunta ${currentQuizIdx + 1} de ${quizQuestions.length}`;
+        document.getElementById("quizQuestionText").innerText = q.q;
+        document.getElementById("quizExplainBox").classList.remove("active");
+
+        const box = document.getElementById("quizOptionsBox");
+        box.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+          box.innerHTML += `<div class="quiz-option" onclick="selectQuizOption(${idx}, this)">${opt}</div>`;
+        });
+      }
+
+      function selectQuizOption(idx, el) {
+        const q = quizQuestions[currentQuizIdx];
+        const options = document.querySelectorAll(".quiz-option");
+        options.forEach((o) => o.classList.remove("correct", "incorrect"));
+
+        if (idx === q.correct) {
+          el.classList.add("correct");
+        } else {
+          el.classList.add("incorrect");
+          options[q.correct].classList.add("correct");
+        }
+
+        document.getElementById("quizExplainBox").classList.add("active");
+        document.getElementById("quizExplainText").innerText = q.exp;
+      }
+
+      function nextQuizQuestion() {
+        currentQuizIdx = (currentQuizIdx + 1) % quizQuestions.length;
+        renderQuiz();
+      }
+      renderQuiz();
+
+      /* ==========================================
+       SLIDE 17: DESAFÍO DE MIGRACIÓN
+    ========================================== */
+      function applyMigrationPrinciple(type) {
+        const panel = document.getElementById("migrationFeedbackPanel");
+        const text = document.getElementById("migrationFeedbackText");
+        panel.classList.add("active");
+
+        if (type === "elastic") {
+          text.innerText =
+            "✅ Implementar Auto Scaling permite apagar servidores por la noche y encender instancias adicionales automáticamente en eventos de alta demanda.";
+        } else if (type === "ha") {
+          text.innerText =
+            "✅ Distribuir la aplicación entre múltiples Zonas de Disponibilidad (Multi-AZ) garantiza continuidad del negocio si un Data Center completo sufre un fallo.";
+        } else {
+          text.innerText =
+            "✅ Eliminar la compra de servidores físicos elimina el riesgo de activos obsoletos y alinea los costos directamente con el uso del negocio.";
+        }
+      }
+
+      /* ==========================================
+       MODALES Y EXAM MODE
+    ========================================== */
+      function openExplainModal() {
+        document.getElementById("explainModal").style.display = "flex";
+      }
+
+      function closeExplainModal() {
+        document.getElementById("explainModal").style.display = "none";
+      }
+
+      function toggleExamMode() {
+        const btn = document.getElementById("examModeBtn");
+        btn.classList.toggle("btn-orange");
+        alert(
+          "🎯 Modo Examen AWS Activado: Se enfocarán los conceptos clave evaluados en la certificación Cloud Practitioner (Elasticidad, OpEx, Modelo Compartido).",
+        );
+      }
+
+      // Inicialización
+      updateView();
+    </script>
+  </body>
+</html>

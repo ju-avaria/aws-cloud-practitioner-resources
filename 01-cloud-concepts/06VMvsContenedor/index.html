@@ -1,0 +1,2234 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Máquinas Virtuales vs. Contenedores en AWS - Clase Interactiva
+    </title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #0073bb;
+        --aws-light-blue: #38bdf8;
+        --aws-green: #10b981;
+        --aws-purple: #a855f7;
+        --aws-red: #ef4444;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HEADER & NAVIGATION */
+      header {
+        height: 60px;
+        background: #090d16;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        z-index: 10;
+      }
+      .brand {
+        font-weight: bold;
+        color: var(--aws-orange);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .progress-bar-container {
+        flex-grow: 1;
+        max-width: 400px;
+        height: 8px;
+        background: var(--card-border);
+        border-radius: 4px;
+        margin: 0 1.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--aws-orange),
+          var(--aws-light-blue)
+        );
+        transition: width 0.3s ease;
+      }
+      .header-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .btn:hover {
+        background: #334155;
+        border-color: var(--aws-light-blue);
+      }
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-orange:hover {
+        background: #e68a00;
+        color: #000;
+      }
+      .btn-purple {
+        background: var(--aws-purple);
+        color: #fff;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-purple:hover {
+        background: #9333ea;
+      }
+      .btn-active {
+        border-color: var(--aws-orange);
+        background: rgba(255, 153, 0, 0.15);
+      }
+
+      /* MAIN CONTAINER & SLIDES */
+      main {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .slide-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+        transform: scale(0.98);
+        padding: 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow-y: auto;
+      }
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      .slide-header {
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+      }
+      .slide-num {
+        font-size: 0.85rem;
+        color: var(--aws-orange);
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .slide-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-top: 0.2rem;
+      }
+      .slide-subtitle {
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+      }
+
+      /* LAYOUT UTILITIES */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.2rem;
+      }
+      .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 10px;
+        padding: 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      }
+      .card-title {
+        color: var(--aws-light-blue);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* INTERACTIVE STACKS & ANIMATIONS */
+      .stack-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        max-width: 450px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .stack-layer {
+        padding: 0.8rem 1rem;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        font-size: 0.9rem;
+        user-select: none;
+      }
+      .stack-layer:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+      }
+      .stack-layer.selected {
+        border-color: #fff;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+        transform: scale(1.02);
+      }
+
+      .layer-hardware {
+        background: #334155;
+        color: #f8fafc;
+      }
+      .layer-host-os {
+        background: #1e3a8a;
+        color: #93c5fd;
+      }
+      .layer-hypervisor {
+        background: #581c87;
+        color: #e9d5ff;
+      }
+      .layer-runtime {
+        background: #065f46;
+        color: #a7f3d0;
+      }
+      .layer-vm {
+        background: #312e81;
+        color: #c7d2fe;
+        border: 1px dashed var(--aws-light-blue);
+      }
+      .layer-container {
+        background: #064e3b;
+        color: #a7f3d0;
+        border: 1px dashed var(--aws-green);
+      }
+      .layer-app {
+        background: var(--aws-orange);
+        color: #000;
+      }
+
+      /* RESOURCE BARS */
+      .resource-meter {
+        margin-top: 0.5rem;
+      }
+      .meter-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 0.2rem;
+      }
+      .meter-bg {
+        background: #0b1120;
+        height: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+        border: 1px solid var(--card-border);
+      }
+      .meter-fill {
+        height: 100%;
+        background: var(--aws-light-blue);
+        width: 0%;
+        transition: width 0.5s ease;
+      }
+      .meter-fill.warn {
+        background: var(--aws-orange);
+      }
+      .meter-fill.danger {
+        background: var(--aws-red);
+      }
+
+      /* TABLES & QUIZ */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--card-border);
+        padding: 0.6rem 0.8rem;
+        text-align: left;
+      }
+      th {
+        background: #0b1120;
+        color: var(--aws-orange);
+      }
+      tr.selectable {
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      tr.selectable:hover {
+        background: rgba(56, 189, 248, 0.1);
+      }
+      tr.selected-row {
+        background: rgba(255, 153, 0, 0.15);
+        border-left: 4px solid var(--aws-orange);
+      }
+
+      .quiz-option {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+      }
+      .quiz-option:hover {
+        border-color: var(--aws-light-blue);
+        background: #26334d;
+      }
+      .quiz-option.correct {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--aws-green);
+      }
+      .quiz-option.incorrect {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--aws-red);
+      }
+
+      /* TOOLTIP & EXPLANATION PANELS */
+      .explain-panel {
+        background: #0b1120;
+        border: 1px solid var(--aws-light-blue);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: none;
+      }
+      .explain-panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .tooltip-term {
+        border-bottom: 1px dashed var(--aws-orange);
+        color: var(--aws-orange);
+        cursor: help;
+        position: relative;
+        display: inline-block;
+      }
+
+      /* SIDEBAR & FOOTER */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -340px;
+        width: 340px;
+        height: 100%;
+        background: #0d1322;
+        border-left: 1px solid var(--card-border);
+        z-index: 100;
+        transition: right 0.3s ease;
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .sidebar.open {
+        right: 0;
+      }
+      .sidebar-item {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+      .sidebar-item:hover,
+      .sidebar-item.active {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      footer {
+        height: 60px;
+        background: #090d16;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+        z-index: 10;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* MODAL EXPLAIN */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 200;
+      }
+      .modal-content {
+        background: var(--card-bg);
+        border: 1px solid var(--aws-light-blue);
+        border-radius: 12px;
+        max-width: 600px;
+        width: 90%;
+        padding: 1.5rem;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      ul {
+        padding-left: 1.2rem;
+      }
+      li {
+        margin-bottom: 0.4rem;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+      }
+      code {
+        background: #0b1120;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        color: var(--aws-light-blue);
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header>
+      <div class="brand">☁️ AWS Cloud Practitioner: VMs vs. Contenedores</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="header-controls">
+        <button class="btn btn-purple" onclick="openExplainModal()">
+          💡 ¿Qué está pasando?
+        </button>
+        <button class="btn" id="examModeBtn" onclick="toggleExamMode()">
+          🎯 Modo Examen AWS
+        </button>
+        <button class="btn" onclick="toggleSidebar()">☰ Menú</button>
+        <button class="btn" onclick="goToSlide(0)">🏠 Inicio</button>
+      </div>
+    </header>
+
+    <!-- MAIN SLIDES CONTAINER -->
+    <main>
+      <div class="slide-container" id="slideContainer">
+        <!-- SLIDE 1: INTRODUCCIÓN -->
+        <div class="slide active">
+          <div style="text-align: center; max-width: 800px; margin: auto">
+            <span class="slide-num">Sección 01 — Introducción</span>
+            <h1
+              class="slide-title"
+              style="font-size: 2.8rem; margin-top: 0.5rem"
+            >
+              Máquinas Virtuales vs. Contenedores
+            </h1>
+            <p
+              class="slide-subtitle"
+              style="font-size: 1.2rem; margin-top: 0.8rem"
+            >
+              ¿Cómo podemos ejecutar varias aplicaciones aisladas sobre el mismo
+              servidor físico?
+            </p>
+            <div class="grid-2" style="margin-top: 2.5rem; text-align: left">
+              <div class="card" style="border-top: 4px solid var(--aws-blue)">
+                <div class="card-title">🖥️ Máquina Virtual (VM)</div>
+                <p style="font-size: 0.9rem; color: var(--text-muted)">
+                  Virtualización a nivel de hardware. Cada aplicación corre
+                  sobre su propio Sistema Operativo Invitado completo.
+                </p>
+              </div>
+              <div class="card" style="border-top: 4px solid var(--aws-green)">
+                <div class="card-title">📦 Contenedor</div>
+                <p style="font-size: 0.9rem; color: var(--text-muted)">
+                  Virtualización a nivel de Sistema Operativo. Las aplicaciones
+                  comparten el mismo Kernel del Host de forma aislada.
+                </p>
+              </div>
+            </div>
+            <div style="margin-top: 2.5rem">
+              <button
+                class="btn btn-orange"
+                style="padding: 0.8rem 2.5rem; font-size: 1.1rem"
+                onclick="nextSlide()"
+              >
+                Iniciar Clase Interactiva →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 2: ¿QUÉ ES UNA MÁQUINA VIRTUAL? -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 02 — Arquitectura VM</span>
+            <h2 class="slide-title">¿Qué es una Máquina Virtual?</h2>
+            <p class="slide-subtitle">
+              Haz clic en cada capa de la pila para inspeccionar su función y
+              consumo
+            </p>
+          </div>
+          <div class="grid-2" style="align-items: center">
+            <div class="stack-container">
+              <div
+                class="stack-layer layer-app"
+                onclick="inspectLayer('vm-app', this)"
+              >
+                Application (App A)
+              </div>
+              <div
+                class="stack-layer layer-vm"
+                onclick="inspectLayer('vm-os', this)"
+              >
+                Guest Operating System (Linux / Windows)
+              </div>
+              <div
+                class="stack-layer layer-hypervisor"
+                onclick="inspectLayer('vm-hyp', this)"
+              >
+                Hypervisor (Type 1 / Type 2)
+              </div>
+              <div
+                class="stack-layer layer-host-os"
+                onclick="inspectLayer('vm-host', this)"
+              >
+                Host Operating System (Opcional)
+              </div>
+              <div
+                class="stack-layer layer-hardware"
+                onclick="inspectLayer('vm-hw', this)"
+              >
+                Physical Hardware (CPU, RAM, Disks)
+              </div>
+            </div>
+            <div>
+              <div class="card" id="vmLayerInfoCard">
+                <div class="card-title">
+                  👈 Haz clic en una capa para explorarla
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted)">
+                  Selecciona cualquier capa del diagrama para ver qué ocurre a
+                  nivel de CPU, memoria y aislamiento de infraestructura.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3: ANIMACIÓN HYPERVISOR -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 03 — Simulación Hypervisor</span>
+            <h2 class="slide-title">¿Qué hace el Hypervisor?</h2>
+            <p class="slide-subtitle">
+              Enciende o apaga VMs virtuales y observa la asignación estática de
+              recursos en tiempo real
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                🖥️ Servidor Físico (64 GB RAM / 16 vCPUs)
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 0.5rem;
+                  justify-content: center;
+                  margin: 1.5rem 0;
+                "
+              >
+                <div
+                  id="vmBox1"
+                  class="card"
+                  style="
+                    flex: 1;
+                    border: 2px solid var(--aws-blue);
+                    background: #1a233a;
+                  "
+                >
+                  <strong>VM 1 (Linux)</strong><br /><small>App A (Web)</small
+                  ><br />
+                  <button
+                    class="btn btn-orange"
+                    style="margin-top: 0.5rem; font-size: 0.75rem"
+                    onclick="toggleVM(1)"
+                  >
+                    On / Off
+                  </button>
+                </div>
+                <div
+                  id="vmBox2"
+                  class="card"
+                  style="
+                    flex: 1;
+                    border: 2px solid var(--aws-blue);
+                    background: #1a233a;
+                  "
+                >
+                  <strong>VM 2 (Win)</strong><br /><small>App B (DB)</small
+                  ><br />
+                  <button
+                    class="btn btn-orange"
+                    style="margin-top: 0.5rem; font-size: 0.75rem"
+                    onclick="toggleVM(2)"
+                  >
+                    On / Off
+                  </button>
+                </div>
+                <div
+                  id="vmBox3"
+                  class="card"
+                  style="
+                    flex: 1;
+                    border: 2px solid var(--aws-blue);
+                    background: #1a233a;
+                  "
+                >
+                  <strong>VM 3 (Linux)</strong><br /><small>App C (API)</small
+                  ><br />
+                  <button
+                    class="btn btn-orange"
+                    style="margin-top: 0.5rem; font-size: 0.75rem"
+                    onclick="toggleVM(3)"
+                  >
+                    On / Off
+                  </button>
+                </div>
+              </div>
+              <div class="stack-layer layer-hypervisor">
+                HYPERVISOR (Gestor de Hardware Virtual)
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">
+                📊 Consumo de Recursos del Servidor Físico
+              </div>
+              <div class="resource-meter">
+                <div class="meter-label">
+                  <span>Uso de CPU</span
+                  ><span id="vmCpuText">0 / 16 vCPUs</span>
+                </div>
+                <div class="meter-bg">
+                  <div class="meter-fill" id="vmCpuFill"></div>
+                </div>
+              </div>
+              <div class="resource-meter" style="margin-top: 1rem">
+                <div class="meter-label">
+                  <span>Uso de RAM</span><span id="vmRamText">0 / 64 GB</span>
+                </div>
+                <div class="meter-bg">
+                  <div class="meter-fill" id="vmRamFill"></div>
+                </div>
+              </div>
+              <div
+                style="
+                  margin-top: 1.5rem;
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                "
+              >
+                📌 <strong>Observación Clave:</strong> Cada VM reserva recursos
+                de forma completa para alojar su propio
+                <span
+                  class="tooltip-term"
+                  title="Sistema operativo que corre dentro de una VM aislada"
+                  >Guest OS</span
+                >, incluso si la aplicación interna está inactiva.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4: ¿QUÉ ES UN CONTENEDOR? -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num"
+              >Sección 04 — Arquitectura Contenedores</span
+            >
+            <h2 class="slide-title">¿Qué es un Contenedor?</h2>
+            <p class="slide-subtitle">
+              Los contenedores empaquetan la Aplicación + Dependencias
+              compartiendo el Kernel del Host
+            </p>
+          </div>
+          <div class="grid-2" style="align-items: center">
+            <div class="stack-container">
+              <div style="display: flex; gap: 0.4rem">
+                <div
+                  class="stack-layer layer-container"
+                  style="flex: 1"
+                  onclick="inspectLayer('cnt-a', this)"
+                >
+                  Container A<br /><small>App A + Dep</small>
+                </div>
+                <div
+                  class="stack-layer layer-container"
+                  style="flex: 1"
+                  onclick="inspectLayer('cnt-b', this)"
+                >
+                  Container B<br /><small>App B + Dep</small>
+                </div>
+                <div
+                  class="stack-layer layer-container"
+                  style="flex: 1"
+                  onclick="inspectLayer('cnt-c', this)"
+                >
+                  Container C<br /><small>App C + Dep</small>
+                </div>
+              </div>
+              <div
+                class="stack-layer layer-runtime"
+                onclick="inspectLayer('cnt-rt', this)"
+              >
+                Container Runtime (Docker / containerd)
+              </div>
+              <div
+                class="stack-layer layer-host-os"
+                onclick="inspectLayer('cnt-os', this)"
+              >
+                Host Operating System (Kernel Linux / Windows)
+              </div>
+              <div
+                class="stack-layer layer-hardware"
+                onclick="inspectLayer('cnt-hw', this)"
+              >
+                Physical Hardware
+              </div>
+            </div>
+            <div>
+              <div class="card" id="cntLayerInfoCard">
+                <div class="card-title">👈 Haz clic en los componentes</div>
+                <p style="font-size: 0.9rem; color: var(--text-muted)">
+                  A diferencia de las VMs, NO hay un Guest OS duplicado en cada
+                  contenedor. Todos se comunican directamente con el Kernel del
+                  Host.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5: ANIMACIÓN COMPARATIVA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 05 — Comparación Lado a Lado</span>
+            <h2 class="slide-title">VM vs. Contenedor: Comparativa Visual</h2>
+            <p class="slide-subtitle">
+              Compara la estructura de capas directamente
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="text-align: center">
+              <div
+                class="card-title"
+                style="justify-content: center; color: var(--aws-blue)"
+              >
+                🖥️ Máquina Virtual
+              </div>
+              <div class="stack-container" style="margin-top: 1rem">
+                <div class="stack-layer layer-app">Aplicación A</div>
+                <div class="stack-layer layer-vm">Guest OS (Gigabytes)</div>
+                <div class="stack-layer layer-hypervisor">Hypervisor</div>
+                <div class="stack-layer layer-hardware">Hardware Físico</div>
+              </div>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 1rem;
+                "
+              >
+                Aislamiento fuerte a nivel de Hardware Virtual.
+              </p>
+            </div>
+            <div class="card" style="text-align: center">
+              <div
+                class="card-title"
+                style="justify-content: center; color: var(--aws-green)"
+              >
+                📦 Contenedor
+              </div>
+              <div class="stack-container" style="margin-top: 1rem">
+                <div class="stack-layer layer-app">
+                  Aplicación A + Librerías
+                </div>
+                <div class="stack-layer layer-runtime">Container Runtime</div>
+                <div class="stack-layer layer-host-os">
+                  Host OS (Kernel Compartido)
+                </div>
+                <div class="stack-layer layer-hardware">Hardware Físico</div>
+              </div>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 1rem;
+                "
+              >
+                Ligero, inicio en segundos, comparte Kernel.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 6: SIMULADOR INTERACTIVO CONSTRUYE INFRAESTRUCTURA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 06 — Simulador</span>
+            <h2 class="slide-title">Construye tu Infraestructura</h2>
+            <p class="slide-subtitle">
+              Agrega elementos y observa la densidad de aplicaciones y el
+              consumo estimado de recursos
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">🛠️ Panel de Control</div>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem">
+                  <button class="btn btn-orange" onclick="addSimVM()">
+                    + Agregar VM (OS + App)
+                  </button>
+                  <button class="btn btn-purple" onclick="addSimContainer()">
+                    + Agregar Contenedor
+                  </button>
+                  <button class="btn" onclick="resetSimInfra()">
+                    🔄 Reiniciar
+                  </button>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    gap: 1rem;
+                    margin-top: 1rem;
+                    font-weight: bold;
+                    font-size: 0.9rem;
+                  "
+                >
+                  <div>
+                    VMs creadas:
+                    <span id="simVmCount" style="color: var(--aws-light-blue)"
+                      >0</span
+                    >
+                  </div>
+                  <div>
+                    Contenedores creados:
+                    <span id="simCntCount" style="color: var(--aws-green)"
+                      >0</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="margin-top: 1rem">
+                <div class="card-title">📊 Simulación de Consumo Estimado</div>
+                <div class="resource-meter">
+                  <div class="meter-label">
+                    <span>Carga de RAM Estimada</span
+                    ><span id="simRamText">0%</span>
+                  </div>
+                  <div class="meter-bg">
+                    <div class="meter-fill" id="simRamFill"></div>
+                  </div>
+                </div>
+                <div class="resource-meter" style="margin-top: 0.8rem">
+                  <div class="meter-label">
+                    <span>Almacenamiento Usado</span
+                    ><span id="simDiskText">0 GB</span>
+                  </div>
+                  <div class="meter-bg">
+                    <div class="meter-fill" id="simDiskFill"></div>
+                  </div>
+                </div>
+                <small
+                  style="
+                    color: var(--text-muted);
+                    display: block;
+                    margin-top: 0.5rem;
+                  "
+                  >* Simulación conceptual para ilustrar la alta densidad de los
+                  contenedores frente al peso de las VMs.</small
+                >
+              </div>
+            </div>
+            <div class="card" style="height: 320px; overflow-y: auto">
+              <div class="card-title">📦 Vista del Servidor Físico</div>
+              <div
+                id="infraDisplayGrid"
+                style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 0.5rem;
+                  margin-top: 0.5rem;
+                "
+              >
+                <span style="color: var(--text-muted); font-size: 0.85rem"
+                  >Servidor vacío. Haz clic en los botones para desplegar
+                  componentes.</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: TABLA COMPARATIVA INTERACTIVA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 07 — Comparación Técnica</span>
+            <h2 class="slide-title">Tabla Comparativa Dinámica</h2>
+            <p class="slide-subtitle">
+              Haz clic en cualquier fila para profundizar conceptualmente
+            </p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>Máquina Virtual</th>
+                <th>Contenedor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="selectable"
+                onclick="
+                  explainRow(
+                    'so',
+                    'Las VMs requieren un SO invitado completo con su propio Kernel. Los contenedores comparten el Kernel del SO Host.',
+                  )
+                "
+              >
+                <td><strong>Sistema Operativo propio</strong></td>
+                <td>Sí (Guest OS)</td>
+                <td>Generalmente No (Compartido)</td>
+              </tr>
+              <tr
+                class="selectable"
+                onclick="
+                  explainRow(
+                    'aisl',
+                    'Las VMs tienen aislamiento a nivel de hardware por hypervisor. Los contenedores usan Namespaces y cgroups del Kernel.',
+                  )
+                "
+              >
+                <td><strong>Aislamiento</strong></td>
+                <td>Alto (Hardware Virtual)</td>
+                <td>Alto (Mecanismos de SO)</td>
+              </tr>
+              <tr
+                class="selectable"
+                onclick="
+                  explainRow(
+                    'size',
+                    'Las VMs ocupan Gigabytes por incluir la imagen del SO. Los contenedores suelen ocupar Megabytes.',
+                  )
+                "
+              >
+                <td><strong>Tamaño de Imagen</strong></td>
+                <td>Mayor (GBs)</td>
+                <td>Menor (MBs)</td>
+              </tr>
+              <tr
+                class="selectable"
+                onclick="
+                  explainRow(
+                    'boot',
+                    'Una VM tarda minutos en arrancar el SO. Un contenedor inicia casi instantáneamente en milisegundos o segundos.',
+                  )
+                "
+              >
+                <td><strong>Tiempo de Inicio</strong></td>
+                <td>Generalmente minutos</td>
+                <td>Generalmente segundos</td>
+              </tr>
+              <tr
+                class="selectable"
+                onclick="
+                  explainRow(
+                    'dens',
+                    'Al no duplicar sistemas operativos, se pueden ejecutar muchos más contenedores que VMs en el mismo hardware.',
+                  )
+                "
+              >
+                <td><strong>Densidad de Apps</strong></td>
+                <td>Menor</td>
+                <td>Mayor</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="explain-panel" id="tableRowExplain">
+            <strong style="color: var(--aws-orange)" id="tableRowTitle"
+              >Selecciona una fila</strong
+            >
+            <p style="margin-top: 0.3rem; font-size: 0.9rem" id="tableRowText">
+              Haz clic en la tabla para ver el análisis detallado.
+            </p>
+          </div>
+        </div>
+
+        <!-- SLIDE 8: ANALOGÍA VISUAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 08 — Analogía Conceptual</span>
+            <h2 class="slide-title">
+              Analogía: Casa Unifamiliar vs. Edificio de Departamentos
+            </h2>
+            <p class="slide-subtitle">
+              Alterna entre la analogía y la arquitectura real para fijar los
+              conceptos
+            </p>
+          </div>
+          <div style="text-align: center; margin-bottom: 1rem">
+            <button class="btn btn-orange" onclick="setAnalogyMode('analogy')">
+              🏠 Ver Analogía
+            </button>
+            <button
+              class="btn"
+              id="realArchBtn"
+              onclick="setAnalogyMode('real')"
+            >
+              💻 Ver Arquitectura Real
+            </button>
+          </div>
+          <div class="grid-2" id="analogyCardContainer">
+            <!-- Dinámico JS -->
+          </div>
+        </div>
+
+        <!-- SLIDE 9: CASOS DE USO Y DECISIONES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 09 — Casos de Uso</span>
+            <h2 class="slide-title">¿Cuándo usar cuál? Escenarios Prácticos</h2>
+            <p class="slide-subtitle">
+              Selecciona una tecnología para evaluar sus escenarios idóneos
+            </p>
+          </div>
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem">
+            <button class="btn btn-orange" onclick="showUseCases('vm')">
+              🖥️ Casos de Uso VM
+            </button>
+            <button
+              class="btn"
+              id="cntUseCaseBtn"
+              onclick="showUseCases('cnt')"
+            >
+              📦 Casos de Uso Contenedores
+            </button>
+          </div>
+          <div class="grid-3" id="useCaseCardsGrid">
+            <!-- Cargado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- SLIDE 10: MÁQUINAS VIRTUALES EN AWS (AMAZON EC2) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 10 — AWS Cloud Practitioner</span>
+            <h2 class="slide-title">Máquinas Virtuales en AWS: Amazon EC2</h2>
+            <p class="slide-subtitle">
+              Amazon Elastic Compute Cloud es el servicio fundamental de IaaS en
+              AWS
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">
+                  ☁️ Amazon EC2 (Elastic Compute Cloud)
+                </div>
+                <p style="font-size: 0.9rem">
+                  Instancias de cómputo virtualizadas bajo demanda en la nube de
+                  AWS. Equivalente directo a una Máquina Virtual en tu centro de
+                  datos.
+                </p>
+              </div>
+              <div class="card" style="margin-top: 1rem">
+                <div class="card-title">🧩 Componentes Clave de EC2</div>
+                <ul>
+                  <li>
+                    <code>AMI</code>: Plantilla con el Sistema Operativo e
+                    imagen base.
+                  </li>
+                  <li><code>Instance Type</code>: Tamaño de CPU, RAM y Red.</li>
+                  <li>
+                    <code>EBS</code>: Disco duro virtual persistentemente
+                    adjunto.
+                  </li>
+                  <li>
+                    <code>Security Group</code>: Firewall virtual a nivel de
+                    instancia.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                Jerarquía de Despliegue AWS
+              </div>
+              <div class="stack-container" style="margin-top: 1rem">
+                <div class="stack-layer layer-hardware">
+                  Región AWS (Ej. us-east-1)
+                </div>
+                <div class="stack-layer layer-host-os">
+                  Availability Zone (AZ)
+                </div>
+                <div class="stack-layer layer-hypervisor">
+                  AWS Nitro Hypervisor
+                </div>
+                <div class="stack-layer layer-vm">EC2 Instance (VM)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 11: CONTENEDORES EN AWS (ECS, ECR, FARGATE) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 11 — AWS Cloud Practitioner</span>
+            <h2 class="slide-title">Ecosistema de Contenedores en AWS</h2>
+            <p class="slide-subtitle">
+              Servicios clave para gestionar, almacenar y ejecutar contenedores
+            </p>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title">📦 Amazon ECS</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Elastic Container Service: Orquestador altamente escalable para
+                ejecutar contenedores Docker en AWS.
+              </p>
+              <div style="margin-top: 0.8rem; font-size: 0.8rem">
+                <code>Task</code>: Definición del contenedor.<br />
+                <code>Service</code>: Mantiene réplicas activas.<br />
+                <code>Cluster</code>: Grupo de cómputo.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🗄️ Amazon ECR</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Elastic Container Registry: Registro gestionado para almacenar y
+                recuperar imágenes Docker de forma segura.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">⚡ AWS Fargate</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted)">
+                Motor de cómputo Serverless para contenedores. Ejecuta
+                contenedores sin gestionar ni aprovisionar servidores EC2.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 12: ECS + EC2 VS. ECS + FARGATE -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 12 — Modelos de Cómputo AWS</span>
+            <h2 class="slide-title">ECS sobre EC2 vs. ECS sobre Fargate</h2>
+            <p class="slide-subtitle">
+              Dos formas distintas de ejecutar contenedores en AWS
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🖥️ ECS sobre EC2 (Gestionado por ti)</div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.8rem">
+                Tú administras las instancias EC2 que componen el Cluster.
+                Tienes control del SO y parches.
+              </p>
+              <div class="stack-container">
+                <div class="stack-layer layer-container">Contenedores</div>
+                <div class="stack-layer layer-runtime">Container Runtime</div>
+                <div class="stack-layer layer-vm">
+                  Instancia EC2 (Tú la administras)
+                </div>
+                <div class="stack-layer layer-hardware">AWS Infrastructure</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🚀 ECS sobre Fargate (Serverless)</div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.8rem">
+                AWS gestiona los servidores subyacentes. Tú solo pagas por la
+                CPU y RAM que consume tu contenedor.
+              </p>
+              <div class="stack-container">
+                <div class="stack-layer layer-container">Contenedores</div>
+                <div class="stack-layer layer-hypervisor">
+                  AWS Fargate (Serverless Managed)
+                </div>
+                <div class="stack-layer layer-hardware">AWS Infrastructure</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 13: RELACIÓN ENTRE VMS Y CONTENEDORES (NO EXCLUYENTES) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 13 — Relación Tecnológica</span>
+            <h2 class="slide-title">¿VMs o Contenedores? ¡Ambos Juntos!</h2>
+            <p class="slide-subtitle">
+              Evita el error común: "Es una u otra, nunca ambas"
+            </p>
+          </div>
+          <div class="grid-2" style="align-items: center">
+            <div class="card">
+              <div class="card-title">🤝 Arquitectura Híbrida Real</div>
+              <p style="font-size: 0.9rem; margin-bottom: 0.8rem">
+                En la gran mayoría de despliegues en la nube (como ECS sobre EC2
+                o Kubernetes en EC2), los contenedores se ejecutan
+                <strong>DENTRO</strong> de Máquinas Virtuales.
+              </p>
+              <ul>
+                <li>
+                  La VM provee aislamiento fuerte de infraestructura y límites
+                  de red.
+                </li>
+                <li>
+                  Los contenedores proveen velocidad de despliegue y empaquetado
+                  de aplicaciones.
+                </li>
+              </ul>
+            </div>
+            <div class="stack-container">
+              <div class="stack-layer layer-app">
+                Aplicación A (Docker Container)
+              </div>
+              <div class="stack-layer layer-runtime">Docker Runtime</div>
+              <div class="stack-layer layer-vm">
+                Guest OS (Linux EC2 Instance)
+              </div>
+              <div class="stack-layer layer-hypervisor">
+                AWS Nitro Hypervisor
+              </div>
+              <div class="stack-layer layer-hardware">Servidor Físico AWS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 14: SIMULACIÓN DE ESCALABILIDAD -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 14 — Escalabilidad Horizontal</span>
+            <h2 class="slide-title">
+              Simulador de Escalabilidad ante picos de Tráfico
+            </h2>
+            <p class="slide-subtitle">
+              Aumenta los usuarios y compara el comportamiento de escalado entre
+              VMs y Contenedores
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">📈 Tráfico de Usuarios Entrante</div>
+                <div style="display: flex; gap: 0.5rem; margin: 1rem 0">
+                  <button class="btn" onclick="setTraffic(100)">
+                    100 usuarios
+                  </button>
+                  <button class="btn btn-orange" onclick="setTraffic(1000)">
+                    1,000 usuarios
+                  </button>
+                  <button class="btn btn-purple" onclick="setTraffic(10000)">
+                    10,000 usuarios
+                  </button>
+                </div>
+                <p style="font-size: 0.9rem">
+                  Usuarios simulados:
+                  <strong
+                    id="trafficNumDisplay"
+                    style="color: var(--aws-orange)"
+                    >100</strong
+                  >
+                </p>
+              </div>
+              <div class="card" style="margin-top: 1rem">
+                <div class="card-title">⚙️ Estrategia de Escalado</div>
+                <div style="display: flex; gap: 0.5rem">
+                  <button
+                    class="btn btn-orange"
+                    id="scaleVmBtn"
+                    onclick="setScaleStrategy('vm')"
+                  >
+                    Escalar con VMs (EC2 Auto Scaling)
+                  </button>
+                  <button
+                    class="btn"
+                    id="scaleCntBtn"
+                    onclick="setScaleStrategy('cnt')"
+                  >
+                    Escalar con Contenedores (ECS Tasks)
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                Visualización de Instancias / Réplicas
+              </div>
+              <div
+                id="scaleVisualBox"
+                style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 0.5rem;
+                  justify-content: center;
+                  margin-top: 1rem;
+                  min-height: 120px;
+                  align-items: center;
+                "
+              >
+                <!-- JS Injects -->
+              </div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--aws-light-blue);
+                  margin-top: 1rem;
+                "
+                id="scaleFeedbackText"
+              >
+                Selecciona un nivel de tráfico.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 15: DECISIONES ARQUITECTÓNICAS (ESCENARIOS) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 15 — Taller de Arquitectura</span>
+            <h2 class="slide-title">Desafíos Arquitectónicos</h2>
+            <p class="slide-subtitle">
+              Toma decisiones según los requisitos de negocio
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <div
+              style="font-weight: bold; color: var(--aws-orange)"
+              id="scenNumTitle"
+            >
+              Escenario 1 de 5
+            </div>
+            <h3 style="margin-top: 0.5rem" id="scenQuestionText">
+              Tengo una aplicación legacy monolítica que requiere parches
+              específicos de kernel en Windows Server 2016.
+            </h3>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem">
+              <button
+                class="btn btn-orange"
+                style="flex: 1; padding: 0.8rem"
+                onclick="evaluateScenarioChoice('vm')"
+              >
+                🖥️ Usar Máquina Virtual (EC2)
+              </button>
+              <button
+                class="btn btn-purple"
+                style="flex: 1; padding: 0.8rem"
+                onclick="evaluateScenarioChoice('cnt')"
+              >
+                📦 Usar Contenedor (ECS/Fargate)
+              </button>
+            </div>
+            <div class="explain-panel" id="scenResultPanel">
+              <strong id="scenResultTitle" style="color: var(--aws-green)"
+                >Análisis de la Elección:</strong
+              >
+              <p
+                id="scenResultDesc"
+                style="margin-top: 0.5rem; font-size: 0.9rem"
+              ></p>
+              <button
+                class="btn btn-orange"
+                style="margin-top: 1rem"
+                onclick="nextScenario()"
+              >
+                Siguiente Escenario →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 16: QUIZ FINAL INTERACTIVO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 16 — Evaluativa</span>
+            <h2 class="slide-title">Cuestionario Final de Conocimientos</h2>
+            <p class="slide-subtitle">
+              Demuestra lo aprendido con preguntas tipo AWS Cloud Practitioner
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <div
+              style="
+                font-size: 0.85rem;
+                color: var(--aws-orange);
+                font-weight: bold;
+              "
+              id="quizCounter"
+            >
+              Pregunta 1 de 5
+            </div>
+            <p
+              style="font-size: 1.1rem; font-weight: 600; margin: 0.8rem 0"
+              id="quizQuestionText"
+            >
+              ¿Qué componente software se encarga de virtualizar el hardware
+              físico para permitir múltiples VMs con diferentes Sistemas
+              Operativos Invitados?
+            </p>
+            <div id="quizOptionsBox">
+              <!-- Inyectado por JS -->
+            </div>
+            <div class="explain-panel" id="quizExplainBox">
+              <strong id="quizExplainTitle" style="color: var(--aws-green)"
+                >Explicación:</strong
+              >
+              <p
+                id="quizExplainText"
+                style="font-size: 0.85rem; margin-top: 0.3rem"
+              ></p>
+              <button
+                class="btn btn-orange"
+                style="margin-top: 0.8rem"
+                onclick="nextQuizQuestion()"
+              >
+                Continuar →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 17: MINI DESAFÍO FINAL "DISEÑA TU ARQUITECTURA" -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 17 — Mini Desafío Final</span>
+            <h2 class="slide-title">Diseña tu Arquitectura AWS</h2>
+            <p class="slide-subtitle">
+              Selecciona los parámetros de tu proyecto y genera el diagrama
+              recomendado
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">⚙️ Parámetros del Proyecto</div>
+              <label
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  display: block;
+                  margin-top: 0.5rem;
+                "
+                >Tipo de Aplicación:</label
+              >
+              <select
+                id="archAppType"
+                class="btn"
+                style="width: 100%; margin-top: 0.2rem"
+                onchange="generateArchDiagram()"
+              >
+                <option value="micro">Microservicios / APIs ligeras</option>
+                <option value="legacy">Monolito Legacy Windows</option>
+              </select>
+
+              <label
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  display: block;
+                  margin-top: 0.8rem;
+                "
+                >Modelo de Operación Preferido:</label
+              >
+              <select
+                id="archOpModel"
+                class="btn"
+                style="width: 100%; margin-top: 0.2rem"
+                onchange="generateArchDiagram()"
+              >
+                <option value="serverless">
+                  Serverless (Sin administrar servidores)
+                </option>
+                <option value="fullcontrol">
+                  Control total del SO subyacente
+                </option>
+              </select>
+            </div>
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                📐 Arquitectura AWS Generada
+              </div>
+              <div
+                class="stack-container"
+                id="archGeneratedStack"
+                style="margin-top: 1rem"
+              >
+                <!-- Generado dinámicamente -->
+              </div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--aws-light-blue);
+                  margin-top: 1rem;
+                "
+                id="archExplanationText"
+              ></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 18: GLOSARIO INTERACTIVO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Sección 18 — Referencia</span>
+            <h2 class="slide-title">Glosario Interactivo de Términos</h2>
+            <p class="slide-subtitle">
+              Haz clic en cualquier término para consultar su definición
+              orientada al examen
+            </p>
+          </div>
+          <div class="grid-3" style="max-height: 400px; overflow-y: auto">
+            <div
+              class="card"
+              onclick="openGlossaryTerm('Hypervisor')"
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">Hypervisor</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Software/Hardware que abstrae recursos físicos para crear VMs.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="openGlossaryTerm('EC2')"
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">Amazon EC2</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Servicio AWS que provee máquinas virtuales en la nube.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="openGlossaryTerm('ECS')"
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">Amazon ECS</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Orquestador de contenedores gestionado por AWS.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="openGlossaryTerm('Fargate')"
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">AWS Fargate</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Motor Serverless para ejecutar contenedores sin servidores.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="openGlossaryTerm('ECR')"
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)">Amazon ECR</strong>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Registro privado para almacenar imágenes de contenedor.
+              </p>
+            </div>
+            <div
+              class="card"
+              onclick="openGlossaryTerm('Runtime')"
+              style="cursor: pointer"
+            >
+              <strong style="color: var(--aws-orange)"
+                >Container Runtime</strong
+              >
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                Motor (ej. Docker) que ejecuta los contenedores sobre el SO.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- SIDEBAR INDEX -->
+    <div class="sidebar" id="sidebar">
+      <h3 style="color: var(--aws-orange); margin-bottom: 1rem">
+        Navegación de la Clase
+      </h3>
+      <div id="sidebarList"></div>
+    </div>
+
+    <!-- MODAL EXPLICATIVO "¿QUÉ ESTÁ PASANDO?" -->
+    <div class="modal-overlay" id="explainModal">
+      <div class="modal-content">
+        <h3 style="color: var(--aws-orange)" id="explainModalTitle">
+          💡 Modo "Explicación Paso a Paso"
+        </h3>
+        <div style="margin-top: 1rem; font-size: 0.9rem" id="explainModalBody">
+          <p>
+            En esta sección estás visualizando la interacción entre las
+            diferentes capas de cómputo.
+          </p>
+        </div>
+        <button
+          class="btn btn-orange"
+          style="margin-top: 1.5rem"
+          onclick="closeExplainModal()"
+        >
+          Entendido
+        </button>
+      </div>
+    </div>
+
+    <!-- FOOTER CONTROLS -->
+    <footer>
+      <button class="btn" onclick="prevSlide()">← Anterior</button>
+      <span
+        style="font-size: 0.85rem; color: var(--text-muted)"
+        id="slideCounter"
+        >1 / 18</span
+      >
+      <button class="btn btn-orange" onclick="nextSlide()">Siguiente →</button>
+    </footer>
+
+    <script>
+      /* ==========================================
+       ESTADO Y NAVEGACIÓN PRINCIPAL
+    ========================================== */
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const slideCounter = document.getElementById("slideCounter");
+      const sidebarList = document.getElementById("sidebarList");
+
+      // Generar menú lateral
+      slides.forEach((slide, idx) => {
+        const title =
+          slide.querySelector(".slide-title")?.innerText || `Slide ${idx + 1}`;
+        const item = document.createElement("div");
+        item.className = `sidebar-item ${idx === 0 ? "active" : ""}`;
+        item.innerText = `${idx + 1}. ${title}`;
+        item.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+        sidebarList.appendChild(item);
+      });
+
+      function updateView() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+
+        const items = sidebarList.querySelectorAll(".sidebar-item");
+        items.forEach((item, idx) => {
+          item.classList.toggle("active", idx === currentSlide);
+        });
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateView();
+        }
+      }
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateView();
+        }
+      }
+      function goToSlide(idx) {
+        currentSlide = idx;
+        updateView();
+      }
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      });
+
+      /* ==========================================
+       INSPECTOR DE CAPAS (SLIDES 2 Y 4)
+    ========================================== */
+      const layerData = {
+        "vm-app": {
+          title: "Application Layer",
+          text: "Código final ejecutado dentro de la VM. Consume CPU y RAM virtualizadas por el Guest OS.",
+        },
+        "vm-os": {
+          title: "Guest Operating System",
+          text: "Kernel e imagen completa de SO (Windows/Linux). Requiere parches propios y consume habitualmente entre 1 y 4 GB de RAM solo para iniciar.",
+        },
+        "vm-hyp": {
+          title: "Hypervisor",
+          text: "Software/Firmware (ej. AWS Nitro, KVM, VMware) que crea y administra máquinas virtuales asignando vCPUs y RAM virtual.",
+        },
+        "vm-host": {
+          title: "Host OS",
+          text: "Sistema operativo del servidor físico (opcional en hypervisores Type 1 Bare-Metal).",
+        },
+        "vm-hw": {
+          title: "Physical Hardware",
+          text: "Servidor físico con procesadores (CPUs), módulos de memoria RAM y almacenamiento en estado sólido.",
+        },
+        "cnt-a": {
+          title: "Contenedor A",
+          text: "Empaqueta únicamente la Aplicación y sus Librerías requeridas. Tamaño ligero (MBs).",
+        },
+        "cnt-b": {
+          title: "Contenedor B",
+          text: "Totalmente aislado del Contenedor A pero comparte el mismo Kernel del SO Host.",
+        },
+        "cnt-c": {
+          title: "Contenedor C",
+          text: "Inicia instantáneamente sin esperar el arranque de un Sistema Operativo.",
+        },
+        "cnt-rt": {
+          title: "Container Runtime",
+          text: "Motor (Docker, containerd) encargado de gestionar namespaces, aislar procesos y limitar recursos.",
+        },
+        "cnt-os": {
+          title: "Host OS Kernel",
+          text: "El único Kernel activo en el servidor. Todos los contenedores realizan llamadas del sistema (syscalls) directas a este Kernel.",
+        },
+        "cnt-hw": {
+          title: "Physical Hardware",
+          text: "Infraestructura física compartida eficientemente por todos los contenedores.",
+        },
+      };
+
+      function inspectLayer(key, el) {
+        const parent = el.parentElement;
+        parent
+          .querySelectorAll(".stack-layer")
+          .forEach((l) => l.classList.remove("selected"));
+        el.classList.add("selected");
+
+        const info = layerData[key];
+        const card = key.startsWith("vm")
+          ? document.getElementById("vmLayerInfoCard")
+          : document.getElementById("cntLayerInfoCard");
+        card.innerHTML = `
+        <div class="card-title" style="color:var(--aws-orange);">${info.title}</div>
+        <p style="font-size: 0.9rem; margin-top:0.5rem;">${info.text}</p>
+      `;
+      }
+
+      /* ==========================================
+       SIMULACIÓN HYPERVISOR (SLIDE 3)
+    ========================================== */
+      let vmState = { 1: false, 2: false, 3: false };
+      function toggleVM(num) {
+        vmState[num] = !vmState[num];
+        const box = document.getElementById(`vmBox${num}`);
+        box.style.borderColor = vmState[num]
+          ? "var(--aws-green)"
+          : "var(--aws-blue)";
+        box.style.background = vmState[num]
+          ? "rgba(16, 185, 129, 0.15)"
+          : "#1a233a";
+
+        let activeCount = Object.values(vmState).filter((v) => v).length;
+        let cpuUse = activeCount * 4; // 4 vCPUs por VM
+        let ramUse = activeCount * 16; // 16 GB por VM
+
+        document.getElementById("vmCpuText").innerText = `${cpuUse} / 16 vCPUs`;
+        document.getElementById("vmCpuFill").style.width =
+          `${(cpuUse / 16) * 100}%`;
+
+        document.getElementById("vmRamText").innerText = `${ramUse} / 64 GB`;
+        document.getElementById("vmRamFill").style.width =
+          `${(ramUse / 64) * 100}%`;
+      }
+
+      /* ==========================================
+       SIMULADOR INFRAESTRUCTURA (SLIDE 6)
+    ========================================== */
+      let simVms = 0;
+      let simCnts = 0;
+
+      function addSimVM() {
+        if (simVms + simCnts >= 20) return;
+        simVms++;
+        updateSimDisplay();
+      }
+
+      function addSimContainer() {
+        if (simVms + simCnts >= 20) return;
+        simCnts++;
+        updateSimDisplay();
+      }
+
+      function resetSimInfra() {
+        simVms = 0;
+        simCnts = 0;
+        updateSimDisplay();
+      }
+
+      function updateSimDisplay() {
+        document.getElementById("simVmCount").innerText = simVms;
+        document.getElementById("simCntCount").innerText = simCnts;
+
+        const grid = document.getElementById("infraDisplayGrid");
+        grid.innerHTML = "";
+
+        for (let i = 0; i < simVms; i++) {
+          grid.innerHTML += `<div class="card" style="padding:0.4rem 0.8rem; background:#312e81; border:1px solid var(--aws-blue); font-size:0.75rem;">🖥️ VM (OS + App)</div>`;
+        }
+        for (let i = 0; i < simCnts; i++) {
+          grid.innerHTML += `<div class="card" style="padding:0.4rem 0.8rem; background:#064e3b; border:1px solid var(--aws-green); font-size:0.75rem;">📦 Contenedor</div>`;
+        }
+
+        let ramPct = Math.min(100, simVms * 25 + simCnts * 5);
+        let diskGb = simVms * 20 + simCnts * 0.5;
+
+        document.getElementById("simRamText").innerText = `${ramPct}%`;
+        document.getElementById("simRamFill").style.width = `${ramPct}%`;
+
+        document.getElementById("simDiskText").innerText =
+          `${diskGb.toFixed(1)} GB`;
+        document.getElementById("simDiskFill").style.width =
+          `${Math.min(100, (diskGb / 100) * 100)}%`;
+      }
+
+      /* ==========================================
+       TABLA COMPARATIVA (SLIDE 7)
+    ========================================== */
+      function explainRow(key, text) {
+        const panel = document.getElementById("tableRowExplain");
+        panel.classList.add("active");
+        document.getElementById("tableRowTitle").innerText =
+          "Análisis Conceptual:";
+        document.getElementById("tableRowText").innerText = text;
+      }
+
+      /* ==========================================
+       ANALOGÍA VISUAL (SLIDE 8)
+    ========================================== */
+      function setAnalogyMode(mode) {
+        const container = document.getElementById("analogyCardContainer");
+        const realBtn = document.getElementById("realArchBtn");
+
+        if (mode === "analogy") {
+          container.innerHTML = `
+          <div class="card">
+            <div class="card-title">🏡 Casa Unifamiliar (Máquina Virtual)</div>
+            <p style="font-size:0.85rem;">Arrendar una casa completa. Cada inquilino tiene su propia cocina, baño, tuberías e infraestructura privada.</p>
+            <ul style="margin-top:0.5rem;">
+              <li>Aislamiento total.</li>
+              <li>Mayor costo y mantenimiento.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">🏢 Edificio de Departamentos (Contenedores)</div>
+            <p style="font-size:0.85rem;">Arrendar un departamento. Cada familia tiene su espacio privado, pero comparten cimientos, cañerías y entrada principal.</p>
+            <ul style="margin-top:0.5rem;">
+              <li>Uso eficiente de la estructura.</li>
+              <li>Aislamiento práctico y ligero.</li>
+            </ul>
+          </div>
+        `;
+        } else {
+          container.innerHTML = `
+          <div class="card">
+            <div class="card-title">🖥️ Arquitectura VM Real</div>
+            <p style="font-size:0.85rem;">Servidor corriendo Hypervisor con máquinas virtuales independientes que incluyen Guest OS completo.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">📦 Arquitectura Contenedor Real</div>
+            <p style="font-size:0.85rem;">Servidor corriendo Container Runtime sobre Host OS, compartiendo cgroups y Namespaces del Kernel.</p>
+          </div>
+        `;
+        }
+      }
+      setAnalogyMode("analogy");
+
+      /* ==========================================
+       CASOS DE USO (SLIDE 9)
+    ========================================== */
+      function showUseCases(type) {
+        const grid = document.getElementById("useCaseCardsGrid");
+        if (type === "vm") {
+          grid.innerHTML = `
+          <div class="card"><div class="card-title">🏛️ Aplicaciones Monolíticas</div><p style="font-size:0.8rem;">Sistemas legacy que requieren instalaciones complejas de SO.</p></div>
+          <div class="card"><div class="card-title">🪟 Windows Server Especifico</div><p style="font-size:0.8rem;">Aplica cuando se dependen de controladores o versiones fijas de SO.</p></div>
+          <div class="card"><div class="card-title">🔒 Estricto Cumplimiento</div><p style="font-size:0.8rem;">Aislamiento físico/hardware obligatorio por regulaciones.</p></div>
+        `;
+        } else {
+          grid.innerHTML = `
+          <div class="card"><div class="card-title">🚀 Microservicios & APIs</div><p style="font-size:0.8rem;">Servicios ligeros y desacoplados que escalan rápido.</p></div>
+          <div class="card"><div class="card-title">🔄 Entornos CI/CD</div><p style="font-size:0.8rem;">Despliegues continuos idénticos entre Desarrollo y Producción.</p></div>
+          <div class="card"><div class="card-title">⚡ Escalado Ultrarrápido</div><p style="font-size:0.8rem;">Atención de picos de tráfico en cuestión de segundos.</p></div>
+        `;
+        }
+      }
+      showUseCases("vm");
+
+      /* ==========================================
+       SIMULADOR ESCALABILIDAD (SLIDE 14)
+    ========================================== */
+      let currentTraffic = 100;
+      let scaleStrategy = "vm";
+
+      function setTraffic(num) {
+        currentTraffic = num;
+        document.getElementById("trafficNumDisplay").innerText =
+          num.toLocaleString();
+        renderScaling();
+      }
+
+      function setScaleStrategy(strat) {
+        scaleStrategy = strat;
+        document.getElementById("scaleVmBtn").className =
+          strat === "vm" ? "btn btn-orange" : "btn";
+        document.getElementById("scaleCntBtn").className =
+          strat === "cnt" ? "btn btn-orange" : "btn";
+        renderScaling();
+      }
+
+      function renderScaling() {
+        const box = document.getElementById("scaleVisualBox");
+        const text = document.getElementById("scaleFeedbackText");
+        box.innerHTML = "";
+
+        let count =
+          scaleStrategy === "vm"
+            ? Math.ceil(currentTraffic / 2500)
+            : Math.ceil(currentTraffic / 1000);
+
+        for (let i = 0; i < count; i++) {
+          if (scaleStrategy === "vm") {
+            box.innerHTML += `<div class="card" style="background:#312e81; padding:0.5rem;">🖥️ EC2 Instance<br><small>Arrancó en ~3 mins</small></div>`;
+          } else {
+            box.innerHTML += `<div class="card" style="background:#064e3b; padding:0.5rem;">📦 ECS Task<br><small>Arrancó en ~2 segs</small></div>`;
+          }
+        }
+
+        if (scaleStrategy === "vm") {
+          text.innerText = `Escalando con VMs: Se crearon ${count} instancias EC2. Tiempo total de aprovisionamiento estimado: 3 a 5 minutos.`;
+        } else {
+          text.innerText = `Escalando con Contenedores: Se crearon ${count} réplicas de contenedores en Fargate. Tiempo estimado: 2 a 5 segundos.`;
+        }
+      }
+      renderScaling();
+
+      /* ==========================================
+       ESCENARIOS ARQUITECTÓNICOS (SLIDE 15)
+    ========================================== */
+      const scenarios = [
+        {
+          q: "Tengo una aplicación legacy monolítica que requiere parches específicos de kernel en Windows Server 2016.",
+          correct: "vm",
+          desc: "Las VMs (EC2) son la mejor opción porque proveen control total del Sistema Operativo y Kernel personalizado.",
+        },
+        {
+          q: "Necesito desplegar 15 microservicios desacoplados con despliegues continuos rápidos.",
+          correct: "cnt",
+          desc: "Los contenedores (ECS / Fargate) son ideales para microservicios por su ligereza y rápido inicio.",
+        },
+        {
+          q: "Quiero ejecutar una tarea por lotes sin preocuparme por gestionar o parchear servidores.",
+          correct: "cnt",
+          desc: "Contenedores sobre AWS Fargate permiten ejecutar tareas sin administrar infraestructura (Serverless).",
+        },
+      ];
+      let currentScenIdx = 0;
+
+      function renderScenario() {
+        const sc = scenarios[currentScenIdx];
+        document.getElementById("scenNumTitle").innerText =
+          `Escenario ${currentScenIdx + 1} de ${scenarios.length}`;
+        document.getElementById("scenQuestionText").innerText = sc.q;
+        document.getElementById("scenResultPanel").classList.remove("active");
+      }
+
+      function evaluateScenarioChoice(choice) {
+        const sc = scenarios[currentScenIdx];
+        const panel = document.getElementById("scenResultPanel");
+        panel.classList.add("active");
+
+        if (choice === sc.correct) {
+          document.getElementById("scenResultTitle").innerText =
+            "✅ ¡Elección Recomendada!";
+        } else {
+          document.getElementById("scenResultTitle").innerText =
+            "💡 Consideración Alternativa:";
+        }
+        document.getElementById("scenResultDesc").innerText = sc.desc;
+      }
+
+      function nextScenario() {
+        currentScenIdx = (currentScenIdx + 1) % scenarios.length;
+        renderScenario();
+      }
+      renderScenario();
+
+      /* ==========================================
+       QUIZ FINAL (SLIDE 16)
+    ========================================== */
+      const quizQuestions = [
+        {
+          q: "¿Qué componente software se encarga de virtualizar el hardware físico para crear Máquinas Virtuales?",
+          options: [
+            "Container Runtime",
+            "Hypervisor",
+            "Docker Engine",
+            "Amazon ECR",
+          ],
+          correct: 1,
+          exp: "El Hypervisor abstrae los recursos físicos (CPU, RAM) para crear máquinas virtuales aisladas.",
+        },
+        {
+          q: "¿Qué servicio de AWS te permite ejecutar contenedores sin administrar servidores EC2 subyacentes?",
+          options: ["Amazon EC2", "AWS Fargate", "Amazon EBS", "AWS IAM"],
+          correct: 1,
+          exp: "AWS Fargate es el motor de cómputo Serverless para contenedores en ECS y EKS.",
+        },
+      ];
+      let currentQuizIdx = 0;
+
+      function renderQuiz() {
+        const q = quizQuestions[currentQuizIdx];
+        document.getElementById("quizCounter").innerText =
+          `Pregunta ${currentQuizIdx + 1} de ${quizQuestions.length}`;
+        document.getElementById("quizQuestionText").innerText = q.q;
+        document.getElementById("quizExplainBox").classList.remove("active");
+
+        const box = document.getElementById("quizOptionsBox");
+        box.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+          box.innerHTML += `<div class="quiz-option" onclick="selectQuizOption(${idx}, this)">${opt}</div>`;
+        });
+      }
+
+      function selectQuizOption(idx, el) {
+        const q = quizQuestions[currentQuizIdx];
+        const options = document.querySelectorAll(".quiz-option");
+        options.forEach((o) => o.classList.remove("correct", "incorrect"));
+
+        if (idx === q.correct) {
+          el.classList.add("correct");
+        } else {
+          el.classList.add("incorrect");
+          options[q.correct].classList.add("correct");
+        }
+
+        document.getElementById("quizExplainBox").classList.add("active");
+        document.getElementById("quizExplainText").innerText = q.exp;
+      }
+
+      function nextQuizQuestion() {
+        currentQuizIdx = (currentQuizIdx + 1) % quizQuestions.length;
+        renderQuiz();
+      }
+      renderQuiz();
+
+      /* ==========================================
+       MINI DESAFÍO FINAL (SLIDE 17)
+    ========================================== */
+      function generateArchDiagram() {
+        const app = document.getElementById("archAppType").value;
+        const op = document.getElementById("archOpModel").value;
+        const stack = document.getElementById("archGeneratedStack");
+        const exp = document.getElementById("archExplanationText");
+
+        if (app === "micro" && op === "serverless") {
+          stack.innerHTML = `
+          <div class="stack-layer layer-container">Amazon ECS / Task</div>
+          <div class="stack-layer layer-hypervisor">AWS Fargate (Serverless)</div>
+        `;
+          exp.innerText =
+            "Arquitectura ideal para microservicios: Máxima agilidad, escalado automático sin servidores.";
+        } else if (app === "legacy") {
+          stack.innerHTML = `
+          <div class="stack-layer layer-vm">Amazon EC2 (Windows Server)</div>
+          <div class="stack-layer layer-hardware">AWS Nitro Hypervisor</div>
+        `;
+          exp.innerText =
+            "Arquitectura orientada a aplicaciones monolíticas con dependencias de SO específicas.";
+        } else {
+          stack.innerHTML = `
+          <div class="stack-layer layer-container">Contenedores Docker</div>
+          <div class="stack-layer layer-vm">Cluster Amazon EC2</div>
+        `;
+          exp.innerText =
+            "Arquitectura de contenedores sobre instancias EC2 dedicadas para control total del cluster.";
+        }
+      }
+      generateArchDiagram();
+
+      /* ==========================================
+       GLOSARIO Y MODALES
+    ========================================== */
+      function openGlossaryTerm(term) {
+        alert(
+          `Término: ${term}\n\nRevisa la documentación oficial de AWS para profundizar en los conceptos de la certificación Cloud Practitioner.`,
+        );
+      }
+
+      function openExplainModal() {
+        document.getElementById("explainModal").style.display = "flex";
+      }
+
+      function closeExplainModal() {
+        document.getElementById("explainModal").style.display = "none";
+      }
+
+      function toggleExamMode() {
+        const btn = document.getElementById("examModeBtn");
+        btn.classList.toggle("btn-orange");
+        alert(
+          "🎯 Modo Examen AWS Activado: Se priorizarán los conceptos clave evaluados en el examen Cloud Practitioner (EC2, ECS, Fargate, ECR).",
+        );
+      }
+
+      // Inicializar vista
+      updateView();
+    </script>
+  </body>
+</html>

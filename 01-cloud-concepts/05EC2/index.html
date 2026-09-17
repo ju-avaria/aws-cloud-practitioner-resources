@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amazon EC2 — Clase Interactiva AWS Cloud Practitioner</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #0073bb;
+        --aws-light-blue: #38bdf8;
+        --aws-green: #10b981;
+        --aws-purple: #a855f7;
+        --aws-red: #ef4444;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HEADER Y BARRA DE PROGRESO */
+      header {
+        height: 60px;
+        background: #090d16;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        z-index: 10;
+      }
+      .brand {
+        font-weight: bold;
+        color: var(--aws-orange);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .progress-bar-container {
+        flex-grow: 1;
+        max-width: 400px;
+        height: 8px;
+        background: var(--card-border);
+        border-radius: 4px;
+        margin: 0 1.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--aws-orange),
+          var(--aws-light-blue)
+        );
+        transition: width 0.3s ease;
+      }
+      .header-controls {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .btn:hover {
+        background: #334155;
+        border-color: var(--aws-light-blue);
+      }
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-orange:hover {
+        background: #e68a00;
+        color: #000;
+      }
+
+      /* LAYOUT PRINCIPAL DE SLIDES */
+      main {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .slide-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.4s ease,
+          transform 0.4s ease;
+        transform: scale(0.98);
+        padding: 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow-y: auto;
+      }
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      /* COMPONENTES DE DIAPOSITIVAS */
+      .slide-header {
+        margin-bottom: 1.5rem;
+      }
+      .slide-num {
+        font-size: 0.85rem;
+        color: var(--aws-orange);
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .slide-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-top: 0.2rem;
+      }
+      .slide-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      }
+      .card-title {
+        color: var(--aws-light-blue);
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .exam-tip {
+        background: rgba(255, 153, 0, 0.1);
+        border-left: 4px solid var(--aws-orange);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+        margin-top: 1rem;
+      }
+      .exam-tip-title {
+        color: var(--aws-orange);
+        font-weight: bold;
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+      }
+
+      /* INTERACTIVOS Y TABLAS */
+      .interactive-box {
+        background: #0b1120;
+        border: 1px dashed var(--card-border);
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--card-border);
+        padding: 0.75rem;
+        text-align: left;
+        font-size: 0.9rem;
+      }
+      th {
+        background: #111827;
+        color: var(--aws-orange);
+      }
+      tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .quiz-option {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .quiz-option:hover {
+        border-color: var(--aws-light-blue);
+        background: #26334d;
+      }
+      .quiz-option.correct {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--aws-green);
+      }
+      .quiz-option.incorrect {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--aws-red);
+      }
+
+      /* MENÚ DESPLEGABLE OCULTO (DRAWER) */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -340px;
+        width: 340px;
+        height: 100%;
+        background: #0d1322;
+        border-left: 1px solid var(--card-border);
+        z-index: 100;
+        transition: right 0.3s ease;
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .sidebar.open {
+        right: 0;
+      }
+      .sidebar-item {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+      .sidebar-item:hover,
+      .sidebar-item.active {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      footer {
+        height: 60px;
+        background: #090d16;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+      }
+
+      ul {
+        padding-left: 1.2rem;
+      }
+      li {
+        margin-bottom: 0.5rem;
+        color: #cbd5e1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
+    <header>
+      <div class="brand">
+        🚀 AWS Cloud Practitioner — Amazon EC2 Masterclass
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="header-controls">
+        <span
+          id="slideCounter"
+          style="font-size: 0.85rem; color: var(--text-muted)"
+          >1 / 12</span
+        >
+        <button class="btn" onclick="toggleSidebar()">☰ Índice</button>
+        <button class="btn" onclick="toggleFullScreen()">
+          ⛶ Pantalla Completa
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL DE DIAPOSITIVAS -->
+    <main>
+      <div class="slide-container" id="slideContainer">
+        <!-- SLIDE 1: PORTADA -->
+        <div class="slide active">
+          <div style="text-align: center; max-width: 800px; margin: 0 auto">
+            <span class="slide-num">Clase Interactiva en Vivo</span>
+            <h1 class="slide-title" style="font-size: 3rem; margin-top: 0.5rem">
+              Amazon EC2
+            </h1>
+            <p class="slide-subtitle" style="margin-top: 0.8rem">
+              Elastic Compute Cloud — Conceptos Fundamentales para AWS Cloud
+              Practitioner
+            </p>
+            <div style="margin-top: 2.5rem">
+              <button
+                class="btn btn-orange"
+                style="padding: 0.8rem 2.5rem; font-size: 1.1rem"
+                onclick="nextSlide()"
+              >
+                Comenzar Presentación →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 2: ¿QUÉ ES EC2? -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 02</span>
+            <h2 class="slide-title">¿Qué es Amazon EC2?</h2>
+            <p class="slide-subtitle">
+              Capacidad de cómputo modificable bajo demanda en la nube
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🖥️ Infraestructura Tradicional</div>
+              <ul>
+                <li>Comprar servidores físicos por adelantado.</li>
+                <li>Semanas de espera para instalación y cableado.</li>
+                <li>Capacidad fija y difícil de modificar.</li>
+                <li>Mantenimiento físico y costos continuos.</li>
+              </ul>
+            </div>
+            <div class="card" style="border-color: var(--aws-orange)">
+              <div class="card-title" style="color: var(--aws-orange)">
+                ☁️ Amazon EC2 (IaaS)
+              </div>
+              <ul>
+                <li>Servidores virtuales (instancias) listos en segundos.</li>
+                <li>Paga solo por la capacidad que utilizas.</li>
+                <li>Aumenta o disminuye recursos fácilmente (Elasticidad).</li>
+                <li>AWS administra la infraestructura física subyacente.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3: EC2 COMO MÁQUINA VIRTUAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 03</span>
+            <h2 class="slide-title">EC2 como Máquina Virtual</h2>
+            <p class="slide-subtitle">
+              Aislamiento sobre hardware compartido administrado por AWS
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="interactive-box">
+              <div
+                style="
+                  font-weight: bold;
+                  color: var(--aws-light-blue);
+                  margin-bottom: 1rem;
+                "
+              >
+                Jerarquía Virtualizada
+              </div>
+              <div
+                style="
+                  border: 1px solid var(--aws-blue);
+                  padding: 0.5rem;
+                  margin-bottom: 0.5rem;
+                  border-radius: 4px;
+                "
+              >
+                AWS Region / Availability Zone
+              </div>
+              <div
+                style="
+                  border: 1px solid var(--card-border);
+                  padding: 0.5rem;
+                  margin-bottom: 0.5rem;
+                  border-radius: 4px;
+                  background: #1e293b;
+                "
+              >
+                Host Físico & Hypervisor (AWS Managed)
+              </div>
+              <div
+                style="
+                  border: 2px solid var(--aws-orange);
+                  padding: 0.8rem;
+                  border-radius: 6px;
+                  background: #0f172a;
+                "
+              >
+                <strong>🖥️ Instancia EC2 Virtual</strong>
+                <div
+                  style="
+                    font-size: 0.8rem;
+                    color: var(--text-muted);
+                    margin-top: 0.3rem;
+                  "
+                >
+                  SO Invitado + Aplicación (Customer Managed)
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🎯 Concepto de Examen</div>
+              <p>
+                EC2 es un servicio
+                <strong>IaaS (Infraestructura como Servicio)</strong>.
+              </p>
+              <br />
+              <p>
+                El cliente mantiene control total sobre el Sistema Operativo,
+                configuración de red, seguridad y las aplicaciones que se
+                ejecutan dentro.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4: ANATOMÍA DE UNA INSTANCIA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 04</span>
+            <h2 class="slide-title">Anatomía de una Instancia EC2</h2>
+            <p class="slide-subtitle">
+              Los elementos clave que componen un servidor virtual
+            </p>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title">💿 AMI</div>
+              <p style="font-size: 0.85rem">
+                Plantilla que contiene el Sistema Operativo y configuraciones de
+                inicio.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">⚙️ Instance Type</div>
+              <p style="font-size: 0.85rem">
+                Combinación de recursos (CPU, Memoria RAM, Red).
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">💾 Storage</div>
+              <p style="font-size: 0.85rem">
+                EBS (Persistente en red) o Instance Store (Efímero en host).
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">🛡️ Security Group</div>
+              <p style="font-size: 0.85rem">
+                Firewall virtual que controla el tráfico de entrada y salida.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">🔑 Key Pair</div>
+              <p style="font-size: 0.85rem">
+                Llaves criptográficas para autenticación SSH/RDP segura.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">🌐 IP Privada / Pública</div>
+              <p style="font-size: 0.85rem">
+                Direccionamiento de red dentro de la VPC e Internet.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5: EBS VS INSTANCE STORE -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 05</span>
+            <h2 class="slide-title">Almacenamiento: EBS vs Instance Store</h2>
+            <p class="slide-subtitle">
+              Diferencia crítica para el examen Cloud Practitioner
+            </p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>Amazon EBS</th>
+                <th>Instance Store</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ubicación</strong></td>
+                <td>Red (Persistente e independiente)</td>
+                <td>Físicamente unido al host</td>
+              </tr>
+              <tr>
+                <td><strong>Al Detener Instancia</strong></td>
+                <td>
+                  <span style="color: var(--aws-green)">✓ Datos Persisten</span>
+                </td>
+                <td>
+                  <span style="color: var(--aws-red)">❌ Datos se pierden</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Uso Típico</strong></td>
+                <td>Sistema Operativo, Bases de datos</td>
+                <td>Cachés, Buffers temporales</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="exam-tip">
+            <div class="exam-tip-title">💡 Clave de Examen</div>
+            <p>
+              Los volúmenes <strong>EBS</strong> sobreviven si la instancia se
+              detiene. El almacenamiento <strong>Instance Store</strong> es
+              efímero y se borra al detener la instancia.
+            </p>
+          </div>
+        </div>
+
+        <!-- SLIDE 6: SECURITY GROUPS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 06</span>
+            <h2 class="slide-title">Security Groups (Firewalls Virtuales)</h2>
+            <p class="slide-subtitle">
+              Control del tráfico a nivel de instancia
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Reglas Principales</div>
+              <ul>
+                <li>Funcionan a nivel de <strong>Instancia</strong>.</li>
+                <li>
+                  Son <strong>Stateful</strong>: Si el tráfico de entrada se
+                  permite, la respuesta sale automáticamente.
+                </li>
+                <li>
+                  Solo soportan reglas de <strong>ALLOW (Permitir)</strong>.
+                  Deniegan todo por defecto.
+                </li>
+              </ul>
+            </div>
+            <div class="interactive-box">
+              <div style="margin-bottom: 1rem">
+                Simulador Inbound (Entrante)
+              </div>
+              <button class="btn" onclick="testSgRule(true)">
+                Permitir HTTP (Puerto 80)
+              </button>
+              <button
+                class="btn"
+                style="margin-left: 0.5rem"
+                onclick="testSgRule(false)"
+              >
+                Sin Regla SSH (Puerto 22)
+              </button>
+              <div
+                id="sg-result"
+                style="margin-top: 1.5rem; font-weight: bold; min-height: 40px"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: MODOS DE COMPRA DE EC2 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 07</span>
+            <h2 class="slide-title">Modos de Compra de EC2</h2>
+            <p class="slide-subtitle">
+              Estrategias de optimización de costos en la nube
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <strong style="color: var(--aws-orange)">On-Demand</strong>
+              <p style="font-size: 0.85rem; margin-top: 0.3rem">
+                Pago por segundo/hora sin compromiso. Ideal para pruebas y
+                cargas impredecibles.
+              </p>
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-light-blue)"
+                >Reserved Instances / Savings Plans</strong
+              >
+              <p style="font-size: 0.85rem; margin-top: 0.3rem">
+                Compromiso continuo de 1 o 3 años. Descuentos significativos
+                (hasta 72%).
+              </p>
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-purple)">Spot Instances</strong>
+              <p style="font-size: 0.85rem; margin-top: 0.3rem">
+                Aprovecha capacidad ociosa con hasta 90% de descuento. Puede ser
+                interrumpida por AWS.
+              </p>
+            </div>
+            <div class="card">
+              <strong style="color: var(--aws-green)">Dedicated Hosts</strong>
+              <p style="font-size: 0.85rem; margin-top: 0.3rem">
+                Servidor físico dedicado para cumplir regulaciones estrictas o
+                licencias software (BYOL).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 8: ESCALABILIDAD V VS H -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 08</span>
+            <h2 class="slide-title">Escalabilidad: Vertical vs Horizontal</h2>
+            <p class="slide-subtitle">
+              Adaptando la infraestructura según la demanda de los usuarios
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                Scale Up (Vertical)
+              </div>
+              <p style="font-size: 0.85rem; margin-bottom: 1rem">
+                Incrementar recursos a la misma instancia.
+              </p>
+              <div id="scaleUpBox" style="font-size: 1.5rem; margin: 1rem 0">
+                🖥️ t3.micro
+              </div>
+              <button class="btn btn-orange" onclick="scaleUpDemo()">
+                Aumentar Tamaño ➔
+              </button>
+            </div>
+            <div class="card" style="text-align: center">
+              <div class="card-title" style="justify-content: center">
+                Scale Out (Horizontal)
+              </div>
+              <p style="font-size: 0.85rem; margin-bottom: 1rem">
+                Agregar más instancias idénticas.
+              </p>
+              <div id="scaleOutBox" style="font-size: 1.5rem; margin: 1rem 0">
+                🖥️
+              </div>
+              <button class="btn btn-orange" onclick="scaleOutDemo()">
+                Agregar Instancia ➔
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 9: AUTO SCALING Y LOAD BALANCER -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 09</span>
+            <h2 class="slide-title">Auto Scaling + Elastic Load Balancing</h2>
+            <p class="slide-subtitle">
+              Alta disponibilidad y distribución automática de tráfico
+            </p>
+          </div>
+          <div class="interactive-box">
+            <div style="font-size: 0.9rem; margin-bottom: 1rem">
+              Simulador de Tráfico de Clientes
+            </div>
+            <div class="grid-3" style="align-items: center">
+              <div>
+                👥 Usuarios Entrantes: <br /><strong
+                  id="userCount"
+                  style="color: var(--aws-orange); font-size: 1.5rem"
+                  >100</strong
+                >
+              </div>
+              <div>➔ ⚖️ Load Balancer ➔</div>
+              <div
+                id="asgBoxes"
+                style="display: flex; gap: 0.4rem; justify-content: center"
+              >
+                <div
+                  style="
+                    padding: 0.4rem;
+                    background: var(--card-bg);
+                    border: 1px solid var(--aws-orange);
+                    border-radius: 4px;
+                  "
+                >
+                  🖥️ EC2 #1
+                </div>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="100"
+              max="1000"
+              value="100"
+              step="300"
+              style="width: 80%; margin-top: 1.5rem"
+              oninput="simTraffic(this.value)"
+            />
+          </div>
+        </div>
+
+        <!-- SLIDE 10: RESPONSABILIDAD COMPARTIDA -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 10</span>
+            <h2 class="slide-title">
+              Modelo de Responsabilidad Compartida en EC2
+            </h2>
+            <p class="slide-subtitle">
+              Línea divisoria en Infraestructura como Servicio (IaaS)
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="border-color: var(--aws-blue)">
+              <div class="card-title" style="color: var(--aws-blue)">
+                ☁️ AWS Responsable de (OF the Cloud):
+              </div>
+              <ul>
+                <li>Seguridad física de Centros de Datos.</li>
+                <li>Hardware de servidores y discos.</li>
+                <li>Infraestructura de red subyacente.</li>
+                <li>Hypervisor (Nitro) y virtualización base.</li>
+              </ul>
+            </div>
+            <div class="card" style="border-color: var(--aws-purple)">
+              <div class="card-title" style="color: var(--aws-purple)">
+                👤 Cliente Responsable de (IN the Cloud):
+              </div>
+              <ul>
+                <li>Parches y actualizaciones del Sistema Operativo.</li>
+                <li>Configuración de Security Groups / Firewalls.</li>
+                <li>Gestión de acceso (IAM) y datos almacenados.</li>
+                <li>Código y software de la aplicación.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 11: QUIZ PRACTITIONER -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 11</span>
+            <h2 class="slide-title">Pregunta Tipo Examen Cloud Practitioner</h2>
+            <p class="slide-subtitle">Aplica los conceptos aprendidos</p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <p style="font-size: 1.1rem; margin-bottom: 1.2rem">
+              Una empresa necesita ejecutar un procesamiento por lotes que
+              tolera interrupciones y busca reducir los costos en un 80-90%
+              comparado con el precio bajo demanda. ¿Qué opción debe elegir?
+            </p>
+            <div class="quiz-option" onclick="checkQuiz(this, false)">
+              A) Reserved Instances
+            </div>
+            <div class="quiz-option" onclick="checkQuiz(this, true)">
+              B) Spot Instances
+            </div>
+            <div class="quiz-option" onclick="checkQuiz(this, false)">
+              C) On-Demand Instances
+            </div>
+            <div class="quiz-option" onclick="checkQuiz(this, false)">
+              D) Dedicated Hosts
+            </div>
+            <div
+              id="quizExp"
+              style="
+                display: none;
+                margin-top: 1rem;
+                padding: 0.8rem;
+                background: #0b1120;
+                border-radius: 6px;
+                font-size: 0.9rem;
+              "
+            >
+              <strong style="color: var(--aws-green)">¡Correcto!</strong> Las
+              **Spot Instances** ofrecen hasta un 90% de descuento aprovechando
+              capacidad ociosa de AWS, ideales para cargas de trabajo tolerantes
+              a interrupciones.
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 12: RESUMEN FINAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 12</span>
+            <h2 class="slide-title">Resumen: 6 Puntos Clave para Recordar</h2>
+            <p class="slide-subtitle">
+              Síntesis para la preparación del examen
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <ol>
+                <li>
+                  <strong>EC2:</strong> Servidores virtuales bajo demanda
+                  (IaaS).
+                </li>
+                <li><strong>AMI:</strong> Plantilla para lanzar instancias.</li>
+                <li><strong>EBS:</strong> Disco persistente basado en red.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <ol start="4">
+                <li>
+                  <strong>Security Group:</strong> Firewall virtual stateful.
+                </li>
+                <li>
+                  <strong>Spot Instances:</strong> Capacidad barata e
+                  interrumpible.
+                </li>
+                <li>
+                  <strong>Auto Scaling:</strong> Ajusta automáticamente la
+                  cantidad de instancias.
+                </li>
+              </ol>
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 2rem">
+            <button class="btn btn-orange" onclick="goToSlide(0)">
+              🔄 Reiniciar Presentación
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- MENÚ DESPLEGABLE OCULTO -->
+    <div class="sidebar" id="sidebar">
+      <h3 style="color: var(--aws-orange); margin-bottom: 1rem">
+        Índice de Diapositivas
+      </h3>
+      <div id="sidebarList"></div>
+    </div>
+
+    <!-- BARRA INFERIOR DE CONTROL -->
+    <footer>
+      <button class="btn" onclick="prevSlide()">← Anterior</button>
+      <div style="font-size: 0.85rem; color: var(--text-muted)">
+        Usa las flechas ◄ ► o Espacio para navegar
+      </div>
+      <button class="btn btn-orange" onclick="nextSlide()">Siguiente →</button>
+    </footer>
+
+    <script>
+      /* LÓGICA DE CONTROL Y NAVEGACIÓN DE SLIDES */
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const slideCounter = document.getElementById("slideCounter");
+      const sidebarList = document.getElementById("sidebarList");
+
+      // Inicialización del menú lateral flotante
+      slides.forEach((slide, idx) => {
+        const title =
+          slide.querySelector(".slide-title")?.innerText || `Slide ${idx + 1}`;
+        const item = document.createElement("div");
+        item.className = `sidebar-item ${idx === 0 ? "active" : ""}`;
+        item.innerText = `${idx + 1}. ${title}`;
+        item.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+        sidebarList.appendChild(item);
+      });
+
+      function updateView() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+
+        const items = sidebarList.querySelectorAll(".sidebar-item");
+        items.forEach((item, idx) => {
+          item.classList.toggle("active", idx === currentSlide);
+        });
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateView();
+        }
+      }
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateView();
+        }
+      }
+      function goToSlide(idx) {
+        currentSlide = idx;
+        updateView();
+      }
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+
+      function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+
+      // Navegación por teclado
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      });
+
+      /* LÓGICA INTERACTIVA DE SIMULADORES */
+      function testSgRule(allowed) {
+        const res = document.getElementById("sg-result");
+        if (allowed) {
+          res.innerHTML =
+            "<span style='color: var(--aws-green);'>🟢 Tráfico HTTP Permitido (ALLOW) por el Firewall</span>";
+        } else {
+          res.innerHTML =
+            "<span style='color: var(--aws-red);'>🔴 Tráfico SSH Bloqueado (DENY por defecto)</span>";
+        }
+      }
+
+      function scaleUpDemo() {
+        const box = document.getElementById("scaleUpBox");
+        box.innerText = "🖥️ t3.2xlarge (8 vCPU / 32GB RAM)";
+        box.style.color = "var(--aws-orange)";
+      }
+
+      function scaleOutDemo() {
+        const box = document.getElementById("scaleOutBox");
+        box.innerText += " 🖥️";
+      }
+
+      function simTraffic(val) {
+        document.getElementById("userCount").innerText = val;
+        const box = document.getElementById("asgBoxes");
+        let count = 1;
+        if (val > 400) count = 2;
+        if (val > 700) count = 3;
+
+        box.innerHTML = "";
+        for (let i = 1; i <= count; i++) {
+          box.innerHTML += `<div style="padding: 0.4rem; background: var(--card-bg); border: 1px solid var(--aws-orange); border-radius: 4px;">🖥️ EC2 #${i}</div>`;
+        }
+      }
+
+      function checkQuiz(el, isCorrect) {
+        const options = document.querySelectorAll(".quiz-option");
+        options.forEach((o) => o.classList.remove("correct", "incorrect"));
+        if (isCorrect) {
+          el.classList.add("correct");
+        } else {
+          el.classList.add("incorrect");
+        }
+        document.getElementById("quizExp").style.display = "block";
+      }
+
+      // Primera renderización
+      updateView();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS Cloud Practitioner — Ecosistema Interactivo de Servicios</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #0073bb;
+        --aws-light-blue: #38bdf8;
+        --aws-green: #10b981;
+        --aws-purple: #a855f7;
+        --aws-red: #ef4444;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+      }
+
+      /* HEADER */
+      header {
+        height: 60px;
+        background: #090d16;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .brand {
+        font-weight: bold;
+        color: var(--aws-orange);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .header-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .btn:hover {
+        background: #334155;
+        border-color: var(--aws-light-blue);
+      }
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-orange:hover {
+        background: #e68a00;
+        color: #000;
+      }
+      .btn-purple {
+        background: var(--aws-purple);
+        color: #fff;
+        border: none;
+        font-weight: bold;
+      }
+
+      /* LAYOUT & TABS */
+      nav.tabs {
+        background: #0d1322;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.5rem 1.5rem;
+        overflow-x: auto;
+      }
+      .tab-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+      .tab-btn.active {
+        background: var(--card-bg);
+        color: var(--aws-orange);
+        border-color: var(--aws-orange);
+      }
+
+      main {
+        flex-grow: 1;
+        padding: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* CARDS & GRIDS */
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 10px;
+        padding: 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        transition:
+          transform 0.2s,
+          border-color 0.2s;
+      }
+      .card:hover {
+        border-color: var(--aws-light-blue);
+        transform: translateY(-2px);
+      }
+      .card-title {
+        color: var(--aws-light-blue);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .badge-fundamental {
+        background: rgba(255, 153, 0, 0.2);
+        color: var(--aws-orange);
+        border: 1px solid var(--aws-orange);
+      }
+      .badge-frecuente {
+        background: rgba(56, 189, 248, 0.2);
+        color: var(--aws-light-blue);
+        border: 1px solid var(--aws-light-blue);
+      }
+      .badge-complementario {
+        background: rgba(168, 85, 247, 0.2);
+        color: var(--aws-purple);
+        border: 1px solid var(--aws-purple);
+      }
+
+      /* SEARCH & FILTERS */
+      .filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--card-border);
+      }
+      .search-input {
+        flex-grow: 1;
+        background: #0b1120;
+        border: 1px solid var(--card-border);
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+      .select-filter {
+        background: #0b1120;
+        border: 1px solid var(--card-border);
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
+
+      /* MODAL */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 200;
+      }
+      .modal-content {
+        background: var(--card-bg);
+        border: 1px solid var(--aws-light-blue);
+        border-radius: 12px;
+        max-width: 700px;
+        width: 90%;
+        padding: 1.5rem;
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+
+      /* DIAGRAM & ANIMATION STYLES */
+      .stack-layer {
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0.4rem;
+        font-size: 0.85rem;
+        border: 1px solid var(--card-border);
+      }
+      .layer-compute {
+        background: #312e81;
+        color: #c7d2fe;
+      }
+      .layer-storage {
+        background: #581c87;
+        color: #e9d5ff;
+      }
+      .layer-db {
+        background: #065f46;
+        color: #a7f3d0;
+      }
+      .layer-net {
+        background: #1e3a8a;
+        color: #93c5fd;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      code {
+        background: #0b1120;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        color: var(--aws-light-blue);
+        font-family: monospace;
+        font-size: 0.85rem;
+      }
+
+      .review-btn {
+        cursor: pointer;
+        font-size: 1rem;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+      }
+      .review-btn.active {
+        opacity: 1;
+      }
+
+      footer {
+        background: #090d16;
+        border-top: 1px solid var(--card-border);
+        padding: 1rem 1.5rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header>
+      <div class="brand">
+        ☁️ AWS Cloud Practitioner — Mapa Interactivo de Servicios
+      </div>
+      <div class="header-controls">
+        <button class="btn btn-purple" onclick="openExamModeModal()">
+          🎯 Modo Examen
+        </button>
+        <button class="btn" onclick="openReviewSummary()">
+          ⭐ Mi Repaso (<span id="reviewCount">0</span>)
+        </button>
+      </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="switchTab('explorer')">
+        🗺️ Explorador de Servicios
+      </button>
+      <button class="tab-btn" onclick="switchTab('arch')">
+        📐 Arquitectura Integradora
+      </button>
+      <button class="tab-btn" onclick="switchTab('compare')">
+        ⚠️ Comparador de Servicios
+      </button>
+      <button class="tab-btn" onclick="switchTab('game')">
+        🎮 Descubre el Servicio
+      </button>
+      <button class="tab-btn" onclick="switchTab('glossary')">
+        📖 Glosario
+      </button>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main>
+      <!-- TAB 1: EXPLORADOR GLOBAL -->
+      <div id="tab-explorer" class="tab-content active">
+        <div class="filter-bar">
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="🔍 Buscar servicio (ej. EC2, S3, NoSQL, Seguridad)..."
+            oninput="renderServices()"
+          />
+          <select
+            id="categoryFilter"
+            class="select-filter"
+            onchange="renderServices()"
+          >
+            <option value="ALL">Todas las Categorías</option>
+            <option value="Compute">Compute ⚙️</option>
+            <option value="Storage">Storage 💾</option>
+            <option value="Database">Database 🗄️</option>
+            <option value="Networking">Networking 🌐</option>
+            <option value="Security">Security 🔐</option>
+            <option value="Management">Management & Governance 🔧</option>
+            <option value="Integration">Application Integration 🔗</option>
+            <option value="Containers">Containers 📦</option>
+            <option value="AI">AI / Machine Learning 🤖</option>
+            <option value="Analytics">Analytics 📊</option>
+            <option value="Cost">Cost Management 💰</option>
+          </select>
+          <select
+            id="levelFilter"
+            class="select-filter"
+            onchange="renderServices()"
+          >
+            <option value="ALL">Todos los Niveles</option>
+            <option value="Fundamental">Fundamental</option>
+            <option value="Frecuente">Frecuente</option>
+            <option value="Complementario">Complementario</option>
+          </select>
+        </div>
+
+        <div id="servicesGrid" class="grid-4"></div>
+      </div>
+
+      <!-- TAB 2: ARQUITECTURA INTEGRADORA -->
+      <div id="tab-arch" class="tab-content">
+        <div class="card" style="margin-bottom: 1.5rem">
+          <h2 style="color: var(--aws-orange); margin-bottom: 0.5rem">
+            📐 Arquitectura Web Escalable en AWS
+          </h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted)">
+            Haz clic en cualquier componente del diagrama para inspeccionar su
+            rol técnico dentro del ecosistema.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="text-align: center; background: #0b1120">
+            <div
+              class="stack-layer layer-net"
+              onclick="inspectArchComponent('cf')"
+            >
+              🌐 Amazon CloudFront (CDN)
+            </div>
+            <div style="margin: 0.3rem 0">↓</div>
+            <div
+              class="stack-layer layer-net"
+              onclick="inspectArchComponent('alb')"
+            >
+              ⚖️ Elastic Load Balancer (ALB)
+            </div>
+            <div style="margin: 0.3rem 0">↓</div>
+            <div class="grid-2">
+              <div
+                class="stack-layer layer-compute"
+                onclick="inspectArchComponent('ec2')"
+              >
+                🖥️ EC2 Instance (Auto Scaling)
+              </div>
+              <div
+                class="stack-layer layer-compute"
+                onclick="inspectArchComponent('ecs')"
+              >
+                📦 ECS Task (Fargate)
+              </div>
+            </div>
+            <div style="margin: 0.3rem 0">↓</div>
+            <div class="grid-2">
+              <div
+                class="stack-layer layer-db"
+                onclick="inspectArchComponent('rds')"
+              >
+                🗄️ Amazon RDS / Aurora
+              </div>
+              <div
+                class="stack-layer layer-storage"
+                onclick="inspectArchComponent('s3')"
+              >
+                💾 Amazon S3 (Objetos)
+              </div>
+            </div>
+          </div>
+
+          <div class="card" id="archInspectCard">
+            <div class="card-title">
+              👈 Selecciona un componente del diagrama
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-muted)">
+              Descubre qué problema resuelve este servicio dentro de una
+              arquitectura web desacoplada de producción.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: COMPARADOR DE SERVICIOS -->
+      <div id="tab-compare" class="tab-content">
+        <div class="card" style="margin-bottom: 1.5rem">
+          <h2 style="color: var(--aws-orange); margin-bottom: 0.5rem">
+            ⚠️ Servicios que Suelen Confundirse
+          </h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted)">
+            Comparaciones clave directamente enfocadas en las preguntas trampa
+            del examen AWS Cloud Practitioner.
+          </p>
+        </div>
+
+        <div class="filter-bar">
+          <select
+            id="comparePairSelect"
+            class="select-filter"
+            style="width: 100%"
+            onchange="renderComparison()"
+          >
+            <option value="s3-ebs-efs">
+              S3 vs EBS vs EFS (Almacenamiento)
+            </option>
+            <option value="rds-dynamodb">
+              RDS vs DynamoDB (Bases de Datos)
+            </option>
+            <option value="cw-ct-config">
+              CloudWatch vs CloudTrail vs Config (Monitoreo y Gobierno)
+            </option>
+            <option value="sqs-sns">
+              SQS vs SNS (Integración de Aplicaciones)
+            </option>
+            <option value="ec2-lambda">
+              EC2 vs Lambda (Modelos de Cómputo)
+            </option>
+            <option value="sg-nacl">
+              Security Group vs Network ACL (Seguridad VPC)
+            </option>
+            <option value="kms-secrets">
+              KMS vs Secrets Manager (Seguridad y Claves)
+            </option>
+          </select>
+        </div>
+
+        <div id="compareResultBox" class="card"></div>
+      </div>
+
+      <!-- TAB 4: DESCUBRE EL SERVICIO (JUEGO DE ESCENARIOS) -->
+      <div id="tab-game" class="tab-content">
+        <div class="card" style="max-width: 800px; margin: 0 auto">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <span
+              style="font-weight: bold; color: var(--aws-orange)"
+              id="gameScoreText"
+              >Escenario 1 de 5</span
+            >
+            <span class="badge badge-frecuente" id="gameCatBadge">Compute</span>
+          </div>
+          <h3 style="margin: 1rem 0" id="gameScenarioText">
+            Tengo una aplicación web y necesito ejecutar código en servidores
+            Linux configurables donde tenga control total del Sistema Operativo.
+          </h3>
+
+          <div
+            id="gameOptionsGrid"
+            class="grid-2"
+            style="margin-top: 1.5rem"
+          ></div>
+
+          <div
+            id="gameFeedbackBox"
+            style="
+              display: none;
+              margin-top: 1.5rem;
+              padding: 1rem;
+              border-radius: 8px;
+              background: #0b1120;
+            "
+          >
+            <strong id="gameFeedbackTitle"></strong>
+            <p
+              id="gameFeedbackDesc"
+              style="font-size: 0.9rem; margin-top: 0.5rem"
+            ></p>
+            <button
+              class="btn btn-orange"
+              style="margin-top: 1rem"
+              onclick="nextGameScenario()"
+            >
+              Siguiente Escenario →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: GLOSARIO -->
+      <div id="tab-glossary" class="tab-content">
+        <div class="filter-bar">
+          <input
+            type="text"
+            id="glossarySearch"
+            class="search-input"
+            placeholder="🔍 Buscar término técnico (ej. Region, Durability, Serverless)..."
+            oninput="renderGlossary()"
+          />
+        </div>
+        <div id="glossaryGrid" class="grid-4"></div>
+      </div>
+    </main>
+
+    <!-- MODAL DETALLE DE SERVICIO -->
+    <div class="modal-overlay" id="serviceModal">
+      <div class="modal-content">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          "
+        >
+          <div>
+            <span class="badge" id="modalBadge"></span>
+            <h2
+              style="color: var(--aws-orange); margin-top: 0.4rem"
+              id="modalTitle"
+            ></h2>
+            <span
+              style="font-size: 0.85rem; color: var(--aws-light-blue)"
+              id="modalCategory"
+            ></span>
+          </div>
+          <button class="btn" onclick="closeServiceModal()">✕ Cerrar</button>
+        </div>
+
+        <div
+          style="margin-top: 1.2rem; font-size: 0.95rem"
+          id="modalBody"
+        ></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>
+        AWS Cloud Practitioner — Ecosistema Interactivo de Servicios AWS
+        (Actualizado a lineamientos oficiales de AWS)
+      </p>
+      <p style="margin-top: 0.3rem">
+        Nota: AWS actualiza y añade servicios continuamente. Consulta siempre la
+        documentación oficial de AWS para validar características vigentes.
+      </p>
+    </footer>
+
+    <script>
+      /* ==========================================
+       BASE DE DATOS DE SERVICIOS AWS
+    ========================================== */
+      const awsServices = [
+        {
+          id: "ec2",
+          name: "Amazon EC2",
+          category: "Compute",
+          icon: "⚙️",
+          level: "Fundamental",
+          type: "IaaS",
+          shortDesc:
+            "Máquinas virtuales configurables bajo demanda en la nube.",
+          problem:
+            "Necesito un servidor virtual donde pueda instalar mi propio software y controlar el SO.",
+          whatItDoes:
+            "Permite alquilar capacidad de cómputo (CPU, RAM) en la nube. Puedes elegir el SO, almacenamiento EBS y regras de red.",
+          useCases: [
+            "Aplicaciones web monolíticas",
+            "Servidores de desarrollo/pruebas",
+            "Software legacy que requiere acceso al SO",
+          ],
+          examTip:
+            "EC2 es Infrastructure as a Service (IaaS). Tú eres responsable de los parches del SO y la seguridad de la instancia.",
+          related: ["EBS", "VPC", "Auto Scaling", "ELB"],
+        },
+        {
+          id: "lambda",
+          name: "AWS Lambda",
+          category: "Compute",
+          icon: "⚡",
+          level: "Fundamental",
+          type: "Serverless",
+          shortDesc:
+            "Ejecución de código sin aprovisionar ni administrar servidores (Serverless).",
+          problem:
+            "Quiero ejecutar código en respuesta a eventos sin pagar por servidores inactivos 24/7.",
+          whatItDoes:
+            "Ejecuta tu código solo cuando se activa por un evento (subir archivo a S3, petición HTTP, cambio en BD). Pagas solo por milisegundos de ejecución.",
+          useCases: [
+            "Procesamiento de imágenes cargadas",
+            "APIs Serverless",
+            "Tareas automatizadas de mantenimiento",
+          ],
+          examTip:
+            "Serverless NO significa 'sin servidores', significa que AWS gestiona la infraestructura subyacente de forma transparente.",
+          related: ["S3", "API Gateway", "DynamoDB", "EventBridge"],
+        },
+        {
+          id: "s3",
+          name: "Amazon S3",
+          category: "Storage",
+          icon: "💾",
+          level: "Fundamental",
+          type: "Object Storage",
+          shortDesc:
+            "Almacenamiento de objetos altamente escalable, duradero y seguro.",
+          problem:
+            "Necesito almacenar archivos no estructurados (imágenes, videos, backups) de forma ilimitada.",
+          whatItDoes:
+            "Almacena datos como 'objetos' dentro de 'buckets'. Provee una durabilidad del 99.999999999% (11 nueves).",
+          useCases: [
+            "Alojamiento de sitios web estáticos",
+            "Data Lakes para analítica",
+            "Respaldo y recuperación ante desastres",
+          ],
+          examTip:
+            "S3 es almacenamiento de OBJETOS, no de bloques. No puedes instalar un Sistema Operativo directo en S3.",
+          related: ["CloudFront", "Glacier", "IAM", "EFS"],
+        },
+        {
+          id: "ebs",
+          name: "Amazon EBS",
+          category: "Storage",
+          icon: "💽",
+          level: "Fundamental",
+          type: "Block Storage",
+          shortDesc:
+            "Volúmenes de almacenamiento de bloques para instancias EC2.",
+          problem:
+            "Mi instancia EC2 necesita un disco duro virtual persistente para el Sistema Operativo y archivos.",
+          whatItDoes:
+            "Funciona como un disco duro virtual que se conecta a una instancia EC2 dentro de la misma AZ.",
+          useCases: [
+            "Disco de arranque para el SO de EC2",
+            "Bases de datos instaladas manualmente en EC2",
+          ],
+          examTip:
+            "EBS vive en una sola AZ. Si la instancia EC2 se elimina, el volumen EBS puede persistir independientemente si se configura así.",
+          related: ["EC2", "EFS", "S3"],
+        },
+        {
+          id: "rds",
+          name: "Amazon RDS",
+          category: "Database",
+          icon: "🗄️",
+          level: "Fundamental",
+          type: "Managed Service",
+          shortDesc:
+            "Servicio administrado para bases de datos relacionales (SQL).",
+          problem:
+            "Necesito una base de datos relacional sin la carga de gestionar parches, respaldos ni hardware.",
+          whatItDoes:
+            "Soporta motores populares (MySQL, PostgreSQL, MariaDB, Oracle, SQL Server). Automatiza backups, parches y Multi-AZ.",
+          useCases: [
+            "Aplicaciones transaccionales tradicionales (ERP, CRM)",
+            "Sistemas bancarios o e-commerce",
+          ],
+          examTip:
+            "Multi-AZ en RDS es para Alta Disponibilidad (failover automático). Las Read Replicas son para escalar lecturas.",
+          related: ["Aurora", "DynamoDB", "EC2"],
+        },
+        {
+          id: "dynamodb",
+          name: "Amazon DynamoDB",
+          category: "Database",
+          icon: "⚡",
+          level: "Fundamental",
+          type: "Serverless NoSQL",
+          shortDesc:
+            "Base de datos NoSQL clave-valor totalmente administrada y rápida.",
+          problem:
+            "Necesito almacenar datos clave-valor con respuesta de milisegundos a cualquier escala de tráfico.",
+          whatItDoes:
+            "Base de datos NoSQL Serverless que escala automáticamente de manera ilimitada sin necesidad de gestionar servidores.",
+          useCases: [
+            "Tablas de posiciones de videojuegos",
+            "Catálogos de productos",
+            "Carritos de compras e-commerce",
+          ],
+          examTip:
+            "DynamoDB es NoSQL, totalmente Serverless y ofrece latencia de milisegundos de un solo dígito.",
+          related: ["Lambda", "S3", "RDS"],
+        },
+        {
+          id: "vpc",
+          name: "Amazon VPC",
+          category: "Networking",
+          icon: "🌐",
+          level: "Fundamental",
+          type: "Networking",
+          shortDesc:
+            "Red virtual aislada lógicamente para tus recursos de AWS.",
+          problem:
+            "Necesito un entorno de red privado y seguro en la nube donde pueda controlar el direccionamiento IP y firewalls.",
+          whatItDoes:
+            "Permite definir bloques CIDR, crear subredes públicas/privadas, tablas de ruteo y pasarelas de Internet (IGW).",
+          useCases: [
+            "Aislamiento de la infraestructura de producción",
+            "Conexión segura con redes locales On-Premises",
+          ],
+          examTip:
+            "Una VPC es un recurso REGIONAL. Las subredes (subnets) son específicas de una Zona de Disponibilidad (AZ).",
+          related: ["EC2", "Security Groups", "Route 53", "Direct Connect"],
+        },
+        {
+          id: "cloudfront",
+          name: "Amazon CloudFront",
+          category: "Networking",
+          icon: "🚀",
+          level: "Frecuente",
+          type: "CDN",
+          shortDesc:
+            "Red de distribución de contenido (CDN) global de baja latencia.",
+          problem:
+            "Mis usuarios globales experimentan lentitud al cargar archivos e imágenes almacenados en una sola Región.",
+          whatItDoes:
+            "Distribuye contenido guardándolo en caché en una red mundial de Ubicaciones Periféricas (Edge Locations).",
+          useCases: [
+            "Aceleración de entrega de videos y sitios web",
+            "Protección contra ataques DDoS en el borde",
+          ],
+          examTip:
+            "CloudFront utiliza Edge Locations para reducir la latencia entregando contenido guardado en caché cerca del usuario.",
+          related: ["S3", "Route 53", "WAF", "ALB"],
+        },
+        {
+          id: "iam",
+          name: "AWS IAM",
+          category: "Security",
+          icon: "🔐",
+          level: "Fundamental",
+          type: "Security",
+          shortDesc:
+            "Gestión de identidades, usuarios, grupos, roles y permisos de acceso.",
+          problem:
+            "Necesito controlar de forma centralizada quién puede autenticarse y qué recursos puede utilizar en mi cuenta AWS.",
+          whatItDoes:
+            "Aplica el principio de menor privilegio mediante Políticas JSON asignadas a Usuarios, Grupos o Roles.",
+          useCases: [
+            "Otorgar acceso a desarrolladores",
+            "Permitir que una instancia EC2 acceda a S3 mediante un Rol sin llaves hardcodeadas",
+          ],
+          examTip:
+            "IAM es un servicio GLOBAL (no regional). Las credenciales de la cuenta Root nunca deben usarse para tareas cotidianas.",
+          related: ["Organizations", "KMS", "Control Tower"],
+        },
+        {
+          id: "cloudwatch",
+          name: "Amazon CloudWatch",
+          category: "Management",
+          icon: "📊",
+          level: "Fundamental",
+          type: "Monitoring",
+          shortDesc:
+            "Monitoreo de métricas, logs, alarmas y rendimiento de recursos AWS.",
+          problem:
+            "Necesito saber la utilización de CPU de mis servidores y recibir alertas si se sobrepasa un límite.",
+          whatItDoes:
+            "Recopila métricas operativas en tiempo real, guarda logs de aplicaciones y activa alarmas o acciones automáticas.",
+          useCases: [
+            "Alertas por correo si la CPU supera el 80%",
+            "Auto Scaling basado en demanda",
+            "Análisis de logs de servidor",
+          ],
+          examTip:
+            "CloudWatch monitorea el RENDIMIENTO y SALUD del sistema. CloudTrail audita ACCIONES y EVENTOS de la API.",
+          related: ["CloudTrail", "EC2", "Auto Scaling"],
+        },
+        {
+          id: "cloudtrail",
+          name: "AWS CloudTrail",
+          category: "Management",
+          icon: "📜",
+          level: "Fundamental",
+          type: "Audit",
+          shortDesc:
+            "Auditoría y registro de actividad de la cuenta y llamadas a la API.",
+          problem:
+            "Necesito saber quién eliminó un bucket de S3 o modificó una regla de firewall a las 3 AM.",
+          whatItDoes:
+            "Registra historial de acciones realizadas por usuarios, roles o servicios a través de la Consola, SDK o CLI.",
+          useCases: [
+            "Auditorías de cumplimiento y seguridad",
+            "Investigación de incidentes operacionales",
+          ],
+          examTip:
+            "CloudTrail = '¿Quién hizo qué y cuándo?' (Auditoría). CloudWatch = '¿Cómo está el rendimiento?' (Métricas).",
+          related: ["CloudWatch", "Config", "IAM"],
+        },
+        {
+          id: "fargate",
+          name: "AWS Fargate",
+          category: "Containers",
+          icon: "📦",
+          level: "Frecuente",
+          type: "Serverless Container",
+          shortDesc:
+            "Motor de cómputo Serverless para ejecutar contenedores ECS o EKS.",
+          problem:
+            "Quiero desplegar contenedores Docker sin tener que aprovisionar ni parchear servidores EC2 subyacentes.",
+          whatItDoes:
+            "AWS gestiona la infraestructura física y el escalado. Tú solo defines el tamaño del contenedor (CPU y RAM).",
+          useCases: [
+            "Microservicios e imágenes Docker en producción sin administrar servidores",
+          ],
+          examTip:
+            "Fargate elimina la necesidad de gestionar instancias EC2 al ejecutar contenedores Docker en ECS o EKS.",
+          related: ["ECS", "EKS", "ECR"],
+        },
+      ];
+
+      /* ==========================================
+       GLOSARIO TÉCNICO
+    ========================================== */
+      const glossaryTerms = [
+        {
+          term: "Region",
+          def: "Ubicación geográfica mundial que agrupa múltiples Zonas de Disponibilidad (AZs) aisladas.",
+        },
+        {
+          term: "Availability Zone (AZ)",
+          def: "Uno o más data centers aislados físicamente con energía, red y refrigeración redundantes dentro de una Región.",
+        },
+        {
+          term: "Edge Location",
+          def: "Punto de presencia global utilizado por CloudFront para entregar contenido en caché con baja latencia.",
+        },
+        {
+          term: "Serverless",
+          def: "Modelo de ejecución donde el proveedor gestiona los servidores y el usuario paga solo por uso exacto.",
+        },
+        {
+          term: "Durability",
+          def: "Garantía de que los datos almacenados no se perderán ni corromperán a lo largo del tiempo (ej. S3 11 nueves).",
+        },
+        {
+          term: "Availability",
+          def: "Porcentaje de tiempo que un servicio o aplicación permanece operativo y accesible.",
+        },
+        {
+          term: "IaaS",
+          def: "Infrastructure as a Service. Proveedor entrega bloques de cómputo/red base (ej. Amazon EC2).",
+        },
+        {
+          term: "PaaS",
+          def: "Platform as a Service. Proveedor gestiona SO y runtime; cliente gestiona código (ej. Elastic Beanstalk).",
+        },
+        {
+          term: "SaaS",
+          def: "Software as a Service. Aplicación completa gestionada en su totalidad por el proveedor.",
+        },
+      ];
+
+      /* ==========================================
+       DATOS DEL JUEGO DE ESCENARIOS
+    ========================================== */
+      const gameScenarios = [
+        {
+          q: "Tengo una aplicación web y necesito ejecutar código en servidores Linux configurables donde tenga control total del Sistema Operativo.",
+          cat: "Compute",
+          opts: ["Amazon EC2", "AWS Lambda", "Amazon S3", "AWS Fargate"],
+          correct: 0,
+          desc: "Amazon EC2 es un servicio IaaS que te otorga máquinas virtuales con control total sobre el Sistema Operativo.",
+        },
+        {
+          q: "Necesito almacenar millones de imágenes de productos y archivos estáticos de forma ilimitada y altamente durable.",
+          cat: "Storage",
+          opts: ["Amazon EBS", "Amazon S3", "Amazon RDS", "Amazon ElastiCache"],
+          correct: 1,
+          desc: "Amazon S3 es el servicio de almacenamiento de objetos diseñado para guardar archivos no estructurados de forma ilimitada.",
+        },
+        {
+          q: "Necesito auditar quién eliminó una tabla de base de datos a través de la consola de AWS a las 2:00 AM.",
+          cat: "Management",
+          opts: [
+            "Amazon CloudWatch",
+            "AWS CloudTrail",
+            "AWS Config",
+            "AWS Trusted Advisor",
+          ],
+          correct: 1,
+          desc: "AWS CloudTrail registra y audita todas las llamadas a la API y acciones realizadas por usuarios o roles en la cuenta.",
+        },
+      ];
+      let currentGameIdx = 0;
+
+      /* ==========================================
+       ESTADO Y LOCAL STORAGE (SISTEMA DE REPASO)
+    ========================================== */
+      let reviewList = JSON.parse(
+        localStorage.getItem("aws_review_list") || "[]",
+      );
+
+      function toggleReview(serviceId, event) {
+        if (event) event.stopPropagation();
+        if (reviewList.includes(serviceId)) {
+          reviewList = reviewList.filter((id) => id !== serviceId);
+        } else {
+          reviewList.push(serviceId);
+        }
+        localStorage.setItem("aws_review_list", JSON.stringify(reviewList));
+        updateReviewBadge();
+        renderServices();
+      }
+
+      function updateReviewBadge() {
+        document.getElementById("reviewCount").innerText = reviewList.length;
+      }
+
+      /* ==========================================
+       RENDERIZADO DEL EXPLORADOR
+    ========================================== */
+      function renderServices() {
+        const q = document.getElementById("searchInput").value.toLowerCase();
+        const cat = document.getElementById("categoryFilter").value;
+        const lvl = document.getElementById("levelFilter").value;
+        const grid = document.getElementById("servicesGrid");
+
+        grid.innerHTML = "";
+
+        const filtered = awsServices.filter((s) => {
+          const matchQ =
+            s.name.toLowerCase().includes(q) ||
+            s.shortDesc.toLowerCase().includes(q) ||
+            s.category.toLowerCase().includes(q) ||
+            s.useCases.some((u) => u.toLowerCase().includes(q));
+          const matchCat = cat === "ALL" || s.category === cat;
+          const matchLvl = lvl === "ALL" || s.level === lvl;
+          return matchQ && matchCat && matchLvl;
+        });
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">No se encontraron servicios que coincidan con la búsqueda.</div>`;
+          return;
+        }
+
+        filtered.forEach((s) => {
+          const isStarred = reviewList.includes(s.id);
+          const badgeClass =
+            s.level === "Fundamental"
+              ? "badge-fundamental"
+              : s.level === "Frecuente"
+                ? "badge-frecuente"
+                : "badge-complementario";
+
+          grid.innerHTML += `
+          <div class="card" onclick="openServiceModal('${s.id}')" style="cursor: pointer;">
+            <div class="card-title">
+              <span>${s.icon} ${s.name}</span>
+              <span class="review-btn ${isStarred ? "active" : ""}" onclick="toggleReview('${s.id}', event)">★</span>
+            </div>
+            <div style="margin: 0.4rem 0;">
+              <span class="badge ${badgeClass}">${s.level}</span>
+              <span style="font-size: 0.75rem; color: var(--aws-light-blue); margin-left: 0.4rem;">${s.type}</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">${s.shortDesc}</p>
+          </div>
+        `;
+        });
+      }
+
+      /* ==========================================
+       MODAL DETALLE DE SERVICIO (NIVELES 1-4)
+    ========================================== */
+      function openServiceModal(id) {
+        const s = awsServices.find((item) => item.id === id);
+        if (!s) return;
+
+        document.getElementById("modalTitle").innerText = `${s.icon} ${s.name}`;
+        document.getElementById("modalCategory").innerText =
+          `Categoría: ${s.category} | Tipo: ${s.type}`;
+        document.getElementById("modalBadge").className =
+          `badge ${s.level === "Fundamental" ? "badge-fundamental" : "badge-frecuente"}`;
+        document.getElementById("modalBadge").innerText = `Nivel: ${s.level}`;
+
+        document.getElementById("modalBody").innerHTML = `
+        <div style="background: #0b1120; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          <strong style="color: var(--aws-orange);">❓ Problema que resuelve:</strong>
+          <p style="margin-top: 0.3rem;">"${s.problem}"</p>
+        </div>
+
+        <h4 style="color: var(--aws-light-blue); margin-top: 1rem;">⚙️ ¿Qué hace realmente?</h4>
+        <p style="margin-top: 0.3rem; color: #cbd5e1;">${s.whatItDoes}</p>
+
+        <h4 style="color: var(--aws-light-blue); margin-top: 1rem;">💡 Casos de uso típicos:</h4>
+        <ul style="padding-left: 1.2rem; margin-top: 0.3rem; color: #cbd5e1;">
+          ${s.useCases.map((u) => `<li>${u}</li>`).join("")}
+        </ul>
+
+        <div style="border-left: 4px solid var(--aws-orange); background: rgba(255,153,0,0.1); padding: 0.8rem; margin-top: 1.2rem; border-radius: 0 6px 6px 0;">
+          <strong style="color: var(--aws-orange);">🎯 Clave para el examen Cloud Practitioner:</strong>
+          <p style="margin-top: 0.3rem; font-size: 0.9rem;">${s.examTip}</p>
+        </div>
+
+        <div style="margin-top: 1.2rem; font-size: 0.85rem; color: var(--text-muted);">
+          <strong>Servicios Relacionados:</strong> ${s.related.map((r) => `<code>${r}</code>`).join(" ")}
+        </div>
+      `;
+
+        document.getElementById("serviceModal").style.display = "flex";
+      }
+
+      function closeServiceModal() {
+        document.getElementById("serviceModal").style.display = "none";
+      }
+
+      /* ==========================================
+       ARQUITECTURA INTEGRADORA
+    ========================================== */
+      const archInfo = {
+        cf: {
+          name: "Amazon CloudFront",
+          role: "Entrega de Contenido (CDN)",
+          desc: "Recibe la solicitud inicial del usuario global y sirve contenido estático en caché desde Edge Locations con mínima latencia.",
+        },
+        alb: {
+          name: "Elastic Load Balancer (ALB)",
+          role: "Balanceador de Carga",
+          desc: "Recibe tráfico dinámico HTTP/HTTPS y lo distribuye equitativamente entre los contenedores ECS o instancias EC2 saludables.",
+        },
+        ec2: {
+          name: "Amazon EC2 Auto Scaling",
+          role: "Cómputo en Servidores",
+          desc: "Ejecuta el backend en servidores virtuales que aumentan o disminuyen automáticamente según el tráfico.",
+        },
+        ecs: {
+          name: "Amazon ECS / Fargate",
+          role: "Cómputo en Contenedores",
+          desc: "Ejecuta microservicios empaquetados en contenedores Docker de forma Serverless.",
+        },
+        rds: {
+          name: "Amazon RDS / Aurora",
+          role: "Base de Datos Relacional",
+          desc: "Almacena datos estructurados (transacciones, usuarios) con réplicas de lectura y alta disponibilidad Multi-AZ.",
+        },
+        s3: {
+          name: "Amazon S3",
+          role: "Almacenamiento de Objetos",
+          desc: "Almacena imágenes cargadas por usuarios, archivos estáticos y copias de seguridad de la base de datos.",
+        },
+      };
+
+      function inspectArchComponent(key) {
+        const info = archInfo[key];
+        const card = document.getElementById("archInspectCard");
+        card.innerHTML = `
+        <div class="card-title" style="color: var(--aws-orange);">${info.name}</div>
+        <div style="font-size: 0.85rem; color: var(--aws-light-blue); margin-bottom: 0.8rem;">Rol: ${info.role}</div>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">${info.desc}</p>
+      `;
+      }
+
+      /* ==========================================
+       COMPARADOR DE SERVICIOS
+    ========================================== */
+      const comparisons = {
+        "s3-ebs-efs": {
+          title: "S3 vs EBS vs EFS (Comparativa de Almacenamiento)",
+          headers: ["Característica", "Amazon S3", "Amazon EBS", "Amazon EFS"],
+          rows: [
+            ["Tipo", "Objetos", "Bloques", "Archivos (NFS)"],
+            [
+              "Uso Principal",
+              "Archivos estáticos, backups, Data Lakes",
+              "Disco de arranque/SO para EC2",
+              "Sistema de archivos compartido Multi-EC2",
+            ],
+            [
+              "Conexión",
+              "Vía API / HTTP a nivel global",
+              "Adjunto a 1 sola instancia EC2 en 1 AZ",
+              "Montable en cientos de EC2 simultáneamente",
+            ],
+            [
+              "Escalabilidad",
+              "Ilimitada automática",
+              "Tamaño fijo aprovisionado",
+              "Escala automáticamente hacia arriba/abajo",
+            ],
+          ],
+        },
+        "rds-dynamodb": {
+          title: "RDS vs DynamoDB (Bases de Datos)",
+          headers: ["Característica", "Amazon RDS", "Amazon DynamoDB"],
+          rows: [
+            [
+              "Modelo",
+              "Relacional (SQL / Tablas estructuradas)",
+              "NoSQL (Clave-Valor / Documentos JSON)",
+            ],
+            [
+              "Servidores",
+              "Servidor administrado (Eliges tipo de instancia)",
+              "Totalmente Serverless (Sin instancias)",
+            ],
+            [
+              "Escalabilidad",
+              "Vertical (Scale Up) / Read Replicas",
+              "Horizontal automática ilimitada",
+            ],
+            [
+              "Caso ideal",
+              "Transacciones complejas, relaciones y joins",
+              "Alta escala, latencia de milisegundos",
+            ],
+          ],
+        },
+        "cw-ct-config": {
+          title: "CloudWatch vs CloudTrail vs Config (Monitoreo y Gobierno)",
+          headers: [
+            "Servicio",
+            "¿Qué monitorea?",
+            "Pregunta clave que responde",
+          ],
+          rows: [
+            [
+              "Amazon CloudWatch",
+              "Métricas de rendimiento, salud de recursos, CPU, logs",
+              "¿Cómo se encuentra la salud de mi servidor?",
+            ],
+            [
+              "AWS CloudTrail",
+              "Historial de llamadas a API, eventos, acciones de usuarios",
+              "¿Quién eliminó este recurso y a qué hora?",
+            ],
+            [
+              "AWS Config",
+              "Historial de configuración y cumplimiento de reglas",
+              "¿Cómo ha cambiado la configuración del firewall en el tiempo?",
+            ],
+          ],
+        },
+      };
+
+      function renderComparison() {
+        const pair = document.getElementById("comparePairSelect").value;
+        const data = comparisons[pair] || comparisons["s3-ebs-efs"];
+        const box = document.getElementById("compareResultBox");
+
+        let tableHtml = `
+        <h3 style="color: var(--aws-orange); margin-bottom: 1rem;">${data.title}</h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <thead>
+              <tr style="background: #0b1120;">
+                ${data.headers.map((h) => `<th style="padding: 0.6rem; border: 1px solid var(--card-border); color: var(--aws-light-blue);">${h}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${data.rows
+                .map(
+                  (r) => `
+                <tr>
+                  ${r.map((cell, idx) => `<td style="padding: 0.6rem; border: 1px solid var(--card-border); ${idx === 0 ? "font-weight:bold;" : ""}">${cell}</td>`).join("")}
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+        box.innerHTML = tableHtml;
+      }
+
+      /* ==========================================
+       JUEGO DE ESCENARIOS
+    ========================================== */
+      function renderGameScenario() {
+        const sc = gameScenarios[currentGameIdx];
+        document.getElementById("gameScoreText").innerText =
+          `Escenario ${currentGameIdx + 1} de ${gameScenarios.length}`;
+        document.getElementById("gameCatBadge").innerText = sc.cat;
+        document.getElementById("gameScenarioText").innerText = sc.q;
+        document.getElementById("gameFeedbackBox").style.display = "none";
+
+        const grid = document.getElementById("gameOptionsGrid");
+        grid.innerHTML = "";
+        sc.opts.forEach((opt, idx) => {
+          grid.innerHTML += `
+          <button class="btn" style="padding: 0.8rem; justify-content: center;" onclick="checkGameAnswer(${idx})">${opt}</button>
+        `;
+        });
+      }
+
+      function checkGameAnswer(chosenIdx) {
+        const sc = gameScenarios[currentGameIdx];
+        const box = document.getElementById("gameFeedbackBox");
+        box.style.display = "block";
+
+        if (chosenIdx === sc.correct) {
+          document.getElementById("gameFeedbackTitle").innerText =
+            "✅ ¡Correcto!";
+          document.getElementById("gameFeedbackTitle").style.color =
+            "var(--aws-green)";
+        } else {
+          document.getElementById("gameFeedbackTitle").innerText =
+            "❌ Respuesta Incorrecta";
+          document.getElementById("gameFeedbackTitle").style.color =
+            "var(--aws-red)";
+        }
+        document.getElementById("gameFeedbackDesc").innerText = sc.desc;
+      }
+
+      function nextGameScenario() {
+        currentGameIdx = (currentGameIdx + 1) % gameScenarios.length;
+        renderGameScenario();
+      }
+
+      /* ==========================================
+       GLOSARIO
+    ========================================== */
+      function renderGlossary() {
+        const q = document.getElementById("glossarySearch").value.toLowerCase();
+        const grid = document.getElementById("glossaryGrid");
+        grid.innerHTML = "";
+
+        const filtered = glossaryTerms.filter(
+          (t) =>
+            t.term.toLowerCase().includes(q) || t.def.toLowerCase().includes(q),
+        );
+
+        filtered.forEach((t) => {
+          grid.innerHTML += `
+          <div class="card">
+            <strong style="color: var(--aws-orange);">${t.term}</strong>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">${t.def}</p>
+          </div>
+        `;
+        });
+      }
+
+      /* ==========================================
+       MODO EXAMEN / REPASO MODALS
+    ========================================== */
+      function openExamModeModal() {
+        alert(
+          "🎯 Modo Examen Activado:\n\nRecuerda que en el examen AWS Cloud Practitioner las preguntas evalúan el beneficio de negocio, el modelo de servicio (IaaS/PaaS/SaaS) y el principio de menor privilegio.",
+        );
+      }
+
+      function openReviewSummary() {
+        if (reviewList.length === 0) {
+          alert(
+            "★ Aún no has marcado servicios para repasar. Haz clic en la estrella (★) de cualquier tarjeta de servicio para guardarlo aquí.",
+          );
+          return;
+        }
+        document.getElementById("searchInput").value = "";
+        document.getElementById("categoryFilter").value = "ALL";
+        document.getElementById("levelFilter").value = "ALL";
+        switchTab("explorer");
+
+        const grid = document.getElementById("servicesGrid");
+        grid.innerHTML = "";
+
+        awsServices
+          .filter((s) => reviewList.includes(s.id))
+          .forEach((s) => {
+            grid.innerHTML += `
+          <div class="card" onclick="openServiceModal('${s.id}')" style="cursor: pointer; border-color: var(--aws-orange);">
+            <div class="card-title">
+              <span>${s.icon} ${s.name}</span>
+              <span class="review-btn active" onclick="toggleReview('${s.id}', event)">★</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">${s.shortDesc}</p>
+          </div>
+        `;
+          });
+      }
+
+      /* ==========================================
+       NAVEGACIÓN TABS
+    ========================================== */
+      function switchTab(tabId) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((content) => content.classList.remove("active"));
+
+        event.target.classList.add("active");
+        document.getElementById(`tab-${tabId}`).classList.add("active");
+      }
+
+      /* INICIALIZACIÓN */
+      renderServices();
+      renderComparison();
+      renderGameScenario();
+      renderGlossary();
+      updateReviewBadge();
+    </script>
+  </body>
+</html>

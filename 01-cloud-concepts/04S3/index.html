@@ -1,0 +1,2067 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS Certified Cloud Practitioner: Amazon S3 </title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #0073bb;
+        --aws-light-blue: #38bdf8;
+        --aws-green: #10b981;
+        --aws-red: #ef4444;
+        --aws-purple: #a855f7;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        height: 60px;
+        background: #090d16;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        z-index: 10;
+      }
+      .brand {
+        font-weight: bold;
+        color: var(--aws-orange);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .progress-bar-container {
+        flex-grow: 1;
+        max-width: 400px;
+        height: 8px;
+        background: var(--card-border);
+        border-radius: 4px;
+        margin: 0 1.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--aws-orange),
+          var(--aws-light-blue)
+        );
+        transition: width 0.3s ease;
+      }
+      .header-controls {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .btn {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+      }
+      .btn:hover {
+        background: #334155;
+        border-color: var(--aws-light-blue);
+      }
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+        font-weight: bold;
+      }
+      .btn-orange:hover {
+        background: #e68a00;
+      }
+
+      main {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .slide-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.4s ease,
+          transform 0.4s ease;
+        transform: scale(0.98);
+        padding: 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow-y: auto;
+      }
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+      }
+
+      .slide-header {
+        margin-bottom: 1.5rem;
+      }
+      .slide-num {
+        font-size: 0.85rem;
+        color: var(--aws-orange);
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .slide-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-top: 0.2rem;
+      }
+      .slide-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      }
+      .card-title {
+        color: var(--aws-light-blue);
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .exam-tip {
+        background: rgba(255, 153, 0, 0.1);
+        border-left: 4px solid var(--aws-orange);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+        margin-top: 1rem;
+      }
+      .exam-tip-title {
+        color: var(--aws-orange);
+        font-weight: bold;
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+      }
+
+      .diagram-box {
+        background: #0b1120;
+        border: 1px dashed var(--card-border);
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        font-family: monospace;
+      }
+      .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .flow-step {
+        background: var(--card-bg);
+        border: 1px solid var(--aws-light-blue);
+        padding: 0.75rem 1.2rem;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .flow-arrow {
+        color: var(--aws-orange);
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--card-border);
+        padding: 0.6rem;
+        text-align: left;
+      }
+      th {
+        background: #111827;
+        color: var(--aws-orange);
+      }
+      tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      footer {
+        height: 60px;
+        background: #090d16;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 2rem;
+      }
+
+      .quiz-option {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .quiz-option:hover {
+        border-color: var(--aws-light-blue);
+        background: #26334d;
+      }
+      .quiz-option.correct {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--aws-green);
+      }
+      .quiz-option.incorrect {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: var(--aws-red);
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        right: -320px;
+        width: 320px;
+        height: 100%;
+        background: #0d1322;
+        border-left: 1px solid var(--card-border);
+        z-index: 100;
+        transition: right 0.3s ease;
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+      .sidebar.open {
+        right: 0;
+      }
+      .sidebar-item {
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+      .sidebar-item:hover,
+      .sidebar-item.active {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      ul {
+        padding-left: 1.2rem;
+      }
+      li {
+        margin-bottom: 0.5rem;
+        color: #cbd5e1;
+      }
+      .badge {
+        background: var(--aws-blue);
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      select {
+        background: #0b1120;
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
+        width: 100%;
+        margin-top: 0.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">📦 AWS Cloud Practitioner — Amazon S3 </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="header-controls">
+        <span
+          id="slideCounter"
+          style="font-size: 0.85rem; color: var(--text-muted)"
+          >1 / 35</span
+        >
+        <button class="btn" onclick="toggleSidebar()">☰ Índice</button>
+        <button class="btn" onclick="toggleFullScreen()">
+          ⛶ Pantalla Completa
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="slide-container" id="slideContainer">
+        <!-- SLIDE 1: PORTADA -->
+        <div class="slide active">
+          <div style="text-align: center; max-width: 800px; margin: 0 auto">
+            <span class="slide-num">Clase Interactiva Oficial</span>
+            <h1 class="slide-title" style="font-size: 3rem; margin-top: 1rem">
+              Amazon S3 (Simple Storage Service)
+            </h1>
+            <p
+              class="slide-subtitle"
+              style="font-size: 1.3rem; margin-top: 1rem"
+            >
+              Dominio de Almacenamiento de Objetos para AWS Certified Cloud
+              Practitioner
+            </p>
+            <div style="margin-top: 3rem" class="flex-center">
+              <button
+                class="btn btn-orange"
+                style="padding: 0.8rem 2rem; font-size: 1.1rem"
+                onclick="nextSlide()"
+              >
+                Iniciar Clase →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 2: OBJETIVO PEDAGÓGICO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 02</span>
+            <h2 class="slide-title">Objetivo General y Enfoque</h2>
+            <p class="slide-subtitle">
+              Construyendo el modelo mental de decisiones en S3
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">🎯 Modelo Mental a Construir</div>
+              <p style="font-size: 0.95rem; line-height: 1.5">
+                "Tengo estos datos y estas necesidades. ¿Qué configuración o
+                clase de almacenamiento de S3 tiene sentido y por qué?"
+              </p>
+              <ul style="margin-top: 1rem">
+                <li>Estructura de Objetos, Buckets y Keys.</li>
+                <li>Estrategias de Storage Classes y Lifecycle.</li>
+                <li>
+                  Seguridad: IAM, Bucket Policies, Block Public Access y
+                  Encryption.
+                </li>
+                <li>Integraciones con CloudFront, Lambda y Analytics.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">Progresión Pedagógica</div>
+              <div
+                class="diagram-box"
+                style="font-size: 0.85rem; text-align: left"
+              >
+                Problema ➔ Amazon S3 ➔ Bucket ➔ Object ➔ Key ➔ Storage Class ➔
+                Lifecycle ➔ Versioning ➔ Replication ➔ Security ➔ Integraciones
+                ➔ Caso Práctico ➔ Examen
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3: INTRODUCCIÓN Y CONCEPTO S3 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 03 — Fundamentos</span>
+            <h2 class="slide-title">Amazon S3 en una Frase</h2>
+            <p class="slide-subtitle">
+              Almacenamiento de objetos diseñado para cualquier cantidad de
+              datos desde cualquier lugar
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card" style="margin-bottom: 1rem">
+                <div class="card-title">¿Qué es Amazon S3?</div>
+                <p>
+                  Amazon S3 es un servicio de <strong>almacenamiento de objetos</strong> que
+                  ofrece escalabilidad, disponibilidad de datos, seguridad y
+                  rendimiento líderes en la industria.
+                </p>
+              </div>
+              <div class="exam-tip">
+                <div class="exam-tip-title">🎯 Clave de Examen</div>
+                <p>
+                  S3 es almacenamiento de <strong>objetos</strong> (archivos), NO es
+                  almacenamiento de bloques (EBS) ni un sistema de archivos
+                  tradicional (EFS).
+                </p>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <div class="flex-center" style="flex-direction: column">
+                <div class="flow-step">📱 Aplicación / Cliente</div>
+                <div class="flow-arrow">↓ HTTPS API ↓</div>
+                <div class="flow-step" style="border-color: var(--aws-orange)">
+                  📦 Amazon S3
+                </div>
+                <div class="flow-arrow">↓ Almacena ↓</div>
+                <div style="font-size: 0.85rem; color: var(--aws-light-blue)">
+                  Imágenes, Videos, Docs, Backups, Datasets, Logs
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4: ¿POR QUÉ EXISTE S3? -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 04 — Cambiando el Modelo Mental</span>
+            <h2 class="slide-title">¿Por qué existe Amazon S3?</h2>
+            <p class="slide-subtitle">
+              Evolución de servidores tradicionales a almacenamiento de objetos
+              sin límites
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="border-top: 4px solid var(--aws-red)">
+              <div class="card-title" style="color: var(--aws-red)">
+                ❌ Servidor Tradicional (Discos)
+              </div>
+              <ul>
+                <li>Capacidad limitada del disco local.</li>
+                <li>Mantenimiento y aprovisionamiento manual.</li>
+                <li>Riesgo de fallo de hardware y pérdida de datos.</li>
+                <li>Escalar requiere cambiar o agregar discos físicos.</li>
+              </ul>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--aws-green)">
+              <div class="card-title" style="color: var(--aws-green)">
+                ✅ Almacenamiento en Amazon S3
+              </div>
+              <ul>
+                <li>Capacidad virtualmente ilimitada.</li>
+                <li>Totalmente administrado (sin servidores que gestionar).</li>
+                <li>Diseñado para 99.999999999% (11 nueves) de durabilidad.</li>
+                <li>Pagas solo por lo que usas exactamente.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5: MODELO MENTAL FUNDAMENTAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 05 — Conceptos Núcleo</span>
+            <h2 class="slide-title">
+              Modelo Mental: Account ➔ Bucket ➔ Object ➔ Key
+            </h2>
+            <p class="slide-subtitle">
+              Jerarquía lógica del almacenamiento de objetos
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Componentes Principales</div>
+              <ul>
+                <li>
+                  <strong>Bucket:</strong> Contenedor lógico globalmente único
+                  en la cuenta AWS donde se guardan los objetos.
+                </li>
+                <li>
+                  <strong>Object:</strong> El archivo real alojado dentro del
+                  bucket.
+                </li>
+                <li>
+                  <strong>Key:</strong> Identificador único (ruta lógica) dentro
+                  del bucket.
+                </li>
+              </ul>
+            </div>
+            <div class="diagram-box" style="text-align: left">
+              <p style="color: var(--aws-orange)">
+                <strong>Ejemplo de Identificación:</strong>
+              </p>
+              <p style="margin-top: 0.5rem">
+                <strong>Bucket:</strong> <code>mi-empresa-bucket</code>
+              </p>
+              <p style="margin-top: 0.5rem">
+                <strong>Key:</strong> <code>imagenes/2026/perfil.jpg</code>
+              </p>
+              <p style="margin-top: 0.5rem; color: var(--aws-light-blue)">
+                <strong>URL Completa:</strong><br /><code
+                  >https://mi-empresa-bucket.s3.amazonaws.com/imagenes/2026/perfil.jpg</code
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 6: SIMULADOR DE BUCKET Y KEYS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 06 — Simulador</span>
+            <h2 class="slide-title">Simulador de Bucket y Keys Lógicas</h2>
+            <p class="slide-subtitle">
+              S3 no usa un sistema de archivos real con carpetas, sino una
+              estructura plana basada en Keys
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Añadir Objeto al Bucket</div>
+              <label>Nombre del Bucket (Globalmente Único):</label>
+              <input
+                type="text"
+                id="simBucketName"
+                value="mi-app-prod-2026"
+                disabled
+              />
+
+              <label style="margin-top: 0.8rem; display: block"
+                >Escribe una Key (ej. documentos/contrato.pdf):</label
+              >
+              <input
+                type="text"
+                id="simObjectKey"
+                placeholder="imagenes/logo.png"
+              />
+
+              <button
+                class="btn btn-orange"
+                style="margin-top: 1rem; width: 100%"
+                onclick="addSimObject()"
+              >
+                Guardar Objeto en Bucket
+              </button>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  color: var(--text-muted);
+                  margin-top: 0.5rem;
+                "
+              >
+                Las "carpetas" que ves en la consola son simulaciones basadas en
+                los prefijos de las Keys.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">📦 Estructura Lógica en Bucket</div>
+              <div
+                id="simTree"
+                style="
+                  font-family: monospace;
+                  font-size: 0.85rem;
+                  background: #0b1120;
+                  padding: 1rem;
+                  border-radius: 8px;
+                  min-height: 180px;
+                "
+              >
+                📦 mi-app-prod-2026<br />
+                │── 📄 index.html<br />
+                │── 📁 imagenes/<br />
+                │&nbsp;&nbsp;&nbsp;└── 📄 banner.png
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7: ESTRUCTURA DEL OBJETO -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 07 — Profundización</span>
+            <h2 class="slide-title">Anatomía de un Objeto en S3</h2>
+            <p class="slide-subtitle">
+              Un objeto no es solo un archivo de datos
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Componentes de un Objeto</div>
+              <ul>
+                <li>
+                  <strong>Data (Value):</strong> La secuencia de bytes del
+                  archivo en sí.
+                </li>
+                <li>
+                  <strong>Key (Name):</strong> Identificador de nombre
+                  completo.
+                </li>
+                <li>
+                  <strong>Metadata:</strong> Paquetes clave-valor sobre el
+                  objeto (ej. Content-Type: image/png).
+                </li>
+                <li>
+                  <strong>Tags:</strong> Etiquetas de clasificación para costos
+                  o seguridad.
+                </li>
+                <li>
+                  <strong>Version ID:</strong> Identificador único cuando
+                  Versioning está activo.
+                </li>
+              </ul>
+            </div>
+            <div class="diagram-box" style="text-align: left">
+              <p style="color: var(--aws-orange); font-weight: bold">
+                Object Payload Breakdown:
+              </p>
+              <pre
+                style="
+                  color: var(--aws-light-blue);
+                  margin-top: 0.5rem;
+                  font-size: 0.8rem;
+                "
+              >
+Object {
+  Key: "docs/contrato.pdf",
+  Data: [Binary Data Stream],
+  Metadata: {
+    "Content-Type": "application/pdf",
+    "Author": "Legal Dept"
+  },
+  Tags: { "env": "production" },
+  VersionId: "v1.0.3"
+}
+            </pre
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 8: STORAGE CLASSES — INTRODUCCIÓN -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 08 — Storage Classes</span>
+            <h2 class="slide-title">Ecosistema de Clases de Almacenamiento</h2>
+            <p class="slide-subtitle">
+              Optimización de costos según la frecuencia de acceso y la
+              resiliencia
+            </p>
+          </div>
+          <div class="diagram-box" style="margin-bottom: 1.5rem">
+            <div class="flex-center" style="font-size: 0.85rem">
+              <span>⚡ Acceso Frecuente</span> ➔
+              <span class="badge">S3 Standard</span> ➔
+              <span class="badge">Intelligent-Tiering</span> ➔
+              <span class="badge">Standard-IA</span> ➔
+              <span class="badge">One Zone-IA</span> ➔
+              <span class="badge">Glacier Instant</span> ➔
+              <span class="badge">Glacier Flexible</span> ➔
+              <span class="badge">Glacier Deep Archive</span> ➔
+              <span>🧊 Acceso Muy Poco Frecuente</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Factores que Diferencian las Clases</div>
+            <div class="grid-3" style="font-size: 0.85rem">
+              <div>• Frecuencia de Acceso</div>
+              <div>• Durabilidad / Disponibilidad</div>
+              <div>• Latencia de Recuperación</div>
+              <div>• Costo de Almacenamiento</div>
+              <div>• Costo de Recuperación</div>
+              <div>• Requisitos de Uso</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 9: COMPARADOR DE STORAGE CLASSES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 09 — Storage Classes</span>
+            <h2 class="slide-title">
+              Tabla Comparativa de Clases de Almacenamiento
+            </h2>
+            <p class="slide-subtitle">
+              Resumen técnico alineado con las preguntas de examen
+            </p>
+          </div>
+          <div style="max-height: 380px; overflow-y: auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Storage Class</th>
+                  <th>Acceso</th>
+                  <th>Latencia</th>
+                  <th>Resiliencia (AZs)</th>
+                  <th>Costo Almacenamiento</th>
+                  <th>Palabras Clave Examen</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>S3 Standard</strong></td>
+                  <td>Frecuente</td>
+                  <td>Milisegundos</td>
+                  <td>≥ 3 AZs</td>
+                  <td>Alto</td>
+                  <td>Hot data, web assets, active DBs</td>
+                </tr>
+                <tr>
+                  <td><strong>Intelligent-Tiering</strong></td>
+                  <td>Desconocido/Cambiante</td>
+                  <td>Milisegundos</td>
+                  <td>≥ 3 AZs</td>
+                  <td>Automático + fee</td>
+                  <td>Auto-cost savings, unknown access</td>
+                </tr>
+                <tr>
+                  <td><strong>Standard-IA</strong></td>
+                  <td>Poco frecuente</td>
+                  <td>Milisegundos</td>
+                  <td>≥ 3 AZs</td>
+                  <td>Medio-Bajo</td>
+                  <td>Infrequent, critical backups</td>
+                </tr>
+                <tr>
+                  <td><strong>One Zone-IA</strong></td>
+                  <td>Poco frecuente</td>
+                  <td>Milisegundos</td>
+                  <td>1 AZ</td>
+                  <td>Bajo</td>
+                  <td>Non-critical, reproducible data</td>
+                </tr>
+                <tr>
+                  <td><strong>Glacier Instant</strong></td>
+                  <td>Raro (Trimestral)</td>
+                  <td>Milisegundos</td>
+                  <td>≥ 3 AZs</td>
+                  <td>Muy Bajo</td>
+                  <td>Archived, instant access needed</td>
+                </tr>
+                <tr>
+                  <td><strong>Glacier Flexible</strong></td>
+                  <td>1-2 veces/año</td>
+                  <td>Minutos a Horas</td>
+                  <td>≥ 3 AZs</td>
+                  <td>Ultra Bajo</td>
+                  <td>Legacy archive, flexible retrieval</td>
+                </tr>
+                <tr>
+                  <td><strong>Glacier Deep Archive</strong></td>
+                  <td>Rarísimo</td>
+                  <td>12 - 48 Horas</td>
+                  <td>≥ 3 AZs</td>
+                  <td>El más bajo de AWS</td>
+                  <td>Compliance, 7-10 years retention</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SLIDE 10: INTELLIGENT-TIERING EN DETALLE -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 10 — Storage Classes</span>
+            <h2 class="slide-title">S3 Intelligent-Tiering</h2>
+            <p class="slide-subtitle">
+              Optimización automática sin impacto operativo ni penalizaciones
+              por recuperación.
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">¿Cómo funciona?</div>
+                <p>
+                  Monitorea automáticamente los patrones de acceso a los
+                  objetos. Si un objeto no se accede por 30 días seguidos, lo
+                  mueve al nivel Infrequent Access. Si se vuelve a acceder,
+                  regresa al nivel Frequent Access.
+                </p>
+              </div>
+              <div class="exam-tip">
+                <div class="exam-tip-title">
+                  🎯 Cuándo Elegir Intelligent-Tiering
+                </div>
+                <p>
+                  Cuando los patrones de acceso son <strong>desconocidos,
+                  impredecibles o cambiantes</strong>. Sin tarifas de
+                  recuperación de datos.
+                </p>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                📦 Objeto Subido ➔ <strong>Frequent Access Tier</strong><br />
+                ↓ <i>(Sin accesos por 30 días)</i> ↓<br />
+                📉 <strong>Infrequent Access Tier</strong> (Ahorro
+                instantáneo)<br />
+                ↓ <i>(Acceso repentino detectado)</i> ↓<br />
+                ⚡ Regresa a <strong>Frequent Access Tier</strong> sin
+                interrupción
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 11: FAMILIA GLACIER EN DETALLE -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 11 — Storage Classes</span>
+            <h2 class="slide-title">
+              Amazon S3 Glacier: ¡No es solo "Backup"!
+            </h2>
+            <p class="slide-subtitle">
+              Diferenciando las 3 variantes de Glacier según la velocidad de
+              recuperación
+            </p>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title" style="font-size: 1rem">
+                Glacier Instant Retrieval
+              </div>
+              <p style="font-size: 0.85rem">
+                Recuperación en **milisegundos**. Para archivos archivados pero
+                que deben estar disponibles inmediatamente cuando se
+                solicitan.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title" style="font-size: 1rem">
+                Glacier Flexible Retrieval
+              </div>
+              <p style="font-size: 0.85rem">
+                Recuperación en <strong>minutos a horas</strong> (Expedited: 1-5 min,
+                Standard: 3-5 hrs, Bulk: 5-12 hrs). Para copias históricas.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title" style="font-size: 1rem">
+                Glacier Deep Archive
+              </div>
+              <p style="font-size: 0.85rem">
+                Recuperación en <strong>12 a 48 horas</strong>. La opción de menor costo en
+                todo AWS para retención regulatoria de largo plazo.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 12: SIMULADOR ELIGE LA STORAGE CLASS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 12 — Juego interactivo</span>
+            <h2 class="slide-title">Juego: ¿Qué Storage Class Seleccionar?</h2>
+            <p class="slide-subtitle">
+              Pon a prueba tu criterio según el escenario de negocio
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <p
+              style="font-size: 1.1rem; margin-bottom: 1rem"
+              id="gameScenarioText"
+            >
+              <strong>Escenario 1:</strong> Fotos de perfiles activas de una red
+              social consultadas miles de veces por minuto.
+            </p>
+            <div id="sc-options">
+              <div
+                class="quiz-option"
+                onclick="evalStorageGame(this, 'S3 Standard')"
+              >
+                S3 Standard
+              </div>
+              <div
+                class="quiz-option"
+                onclick="evalStorageGame(this, 'Intelligent-Tiering')"
+              >
+                S3 Intelligent-Tiering
+              </div>
+              <div
+                class="quiz-option"
+                onclick="evalStorageGame(this, 'Standard-IA')"
+              >
+                S3 Standard-IA
+              </div>
+              <div
+                class="quiz-option"
+                onclick="evalStorageGame(this, 'Glacier Deep Archive')"
+              >
+                S3 Glacier Deep Archive
+              </div>
+            </div>
+            <div
+              id="gameExp"
+              style="
+                display: none;
+                margin-top: 1rem;
+                padding: 1rem;
+                background: #0b1120;
+                border-radius: 6px;
+              "
+            ></div>
+          </div>
+        </div>
+
+        <!-- SLIDE 13: S3 LIFECYCLE MANAGEMENT -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 13 — Automatización</span>
+            <h2 class="slide-title">S3 Lifecycle Policies (Ciclo de Vida)</h2>
+            <p class="slide-subtitle">
+              Automatizando transiciones y expiración de objetos para reducir
+              costos
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">Acciones de Lifecycle</div>
+                <ul>
+                  <li>
+                    <strong>Transition Actions:</strong> Mueven automáticamente
+                    objetos a clases más económicas según la antigüedad.
+                  </li>
+                  <li>
+                    <strong>Expiration Actions:</strong> Eliminan
+                    permanentemente objetos expirados.
+                  </li>
+                </ul>
+              </div>
+              <div class="exam-tip">
+                <div class="exam-tip-title">🎯 Palabra Clave para Examen</div>
+                <p>
+                  Palabras como <strong>"Automate cost reduction", "Delete logs
+                  after 90 days", "Transition after 30 days"</strong> apuntan a S3
+                  Lifecycle Rules.
+                </p>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                S3 Standard ➔ <i>(30 Días)</i> ➔ S3 Standard-IA ➔
+                <i>(90 Días)</i> ➔ Glacier Flexible ➔ <i>(365 Días)</i> ➔ Delete
+                ❌
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 14: SIMULADOR DE LIFECYCLE BUILDER -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 14 — Simulador</span>
+            <h2 class="slide-title">
+              Constructor Visual de Regla de Lifecycle
+            </h2>
+            <p class="slide-subtitle">
+              Diseña una regla de automatización paso a paso
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Configura tu Regla de Lifecycle</div>
+              <label>1. Mover a Standard-IA después de (Días):</label>
+              <input type="text" id="lifeDays1" value="30" />
+              <label style="margin-top: 0.5rem; display: block"
+                >2. Mover a Glacier después de (Días):</label
+              >
+              <input type="text" id="lifeDays2" value="90" />
+              <label style="margin-top: 0.5rem; display: block"
+                >3. Eliminar objeto después de (Días):</label
+              >
+              <input type="text" id="lifeDays3" value="365" />
+              <button
+                class="btn btn-orange"
+                style="margin-top: 1rem; width: 100%"
+                onclick="updateLifecyclePreview()"
+              >
+                Generar Flujo Lógico
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-title">Regla Lógica Resultante</div>
+              <div
+                id="lifePreviewText"
+                class="diagram-box"
+                style="
+                  text-align: left;
+                  font-size: 0.85rem;
+                  color: var(--aws-light-blue);
+                "
+              >
+                Día 0: Carga en S3 Standard.<br />
+                Día 30: Transición a S3 Standard-IA.<br />
+                Día 90: Transición a Glacier Flexible.<br />
+                Día 365: Expiración y borrado automático.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 15: VERSIONING EN S3 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 15 — Protección de Datos</span>
+            <h2 class="slide-title">S3 Versioning (Control de Versiones)</h2>
+            <p class="slide-subtitle">
+              Mantiene múltiples variantes de un mismo objeto dentro del
+              bucket
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">Beneficios Principales</div>
+                <ul>
+                  <li>
+                    Protección contra sobrescrituras o eliminaciones
+                    accidentales.
+                  </li>
+                  <li>
+                    Permite recuperar versiones antiguas de un archivo.
+                  </li>
+                  <li>
+                    Un borrado ordinario solo coloca un <strong>Delete Marker</strong> que se
+                    puede revertir.
+                  </li>
+                </ul>
+              </div>
+              <div class="exam-tip">
+                <div class="exam-tip-title">⚠️ Impacto en Costos</div>
+                <p>
+                  Cada versión almacena el archivo completo, lo que incrementa
+                  el espacio utilizado y los costos de almacenamiento si no se
+                  combina con Lifecycle.
+                </p>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <p style="color: var(--aws-orange)"><strong>foto.jpg</strong></p>
+              <div
+                style="font-size: 0.8rem; margin-top: 0.5rem; text-align: left"
+              >
+                ├─ Version 3 (Latest)<br />
+                ├─ Version 2 (Anterior)<br />
+                └─ Version 1 (Original)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 16: VERSIONING + LIFECYCLE -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 16 — Optimización Avanzada</span>
+            <h2 class="slide-title">Versioning + Lifecycle Policies</h2>
+            <p class="slide-subtitle">
+              Gestión diferenciada entre Versiones Actuales y No Actuales
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Current vs Noncurrent Versions</div>
+              <p>
+                S3 Lifecycle permite aplicar reglas específicas para
+                **Noncurrent Versions** (versiones antiguas):
+              </p>
+              <ul style="margin-top: 0.5rem">
+                <li>
+                  Mover versiones antiguas a Glacier tras 30 días.
+                </li>
+                <li>
+                  Eliminar versiones antiguas tras 90 días mientras se conserva
+                  la versión actual activa.
+                </li>
+              </ul>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                <strong>Objeto foto.png</strong><br /><br />
+                🟢 Current Version ➔ Permanece en S3 Standard<br />
+                🟡 Noncurrent Version ➔ Lifecycle Policy ➔ Glacier /
+                Expiración
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 17: REPLICACIÓN EN S3 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 17 — Disponibilidad Global</span>
+            <h2 class="slide-title">S3 Replication (CRR y SRR)</h2>
+            <p class="slide-subtitle">
+              Copia automática e asíncrona de objetos entre buckets
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">Tipos de Replicación</div>
+                <ul>
+                  <li>
+                    <strong>Cross-Region Replication (CRR):</strong> Copia
+                    objetos a una Región AWS distinta para cumplir con desastres
+                    o latencia.
+                  </li>
+                  <li>
+                    <strong>Same-Region Replication (SRR):</strong> Copia
+                    objetos entre buckets de la misma Región AWS.
+                  </li>
+                </ul>
+              </div>
+              <div class="exam-tip">
+                <div class="exam-tip-title">🎯 Requisito Obligatorio</div>
+                <p>
+                  Para activar Replicación en S3, **Versioning DEBE estar
+                  activado** en ambos buckets (origen y destino).
+                </p>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                <strong>Region A (us-east-1)</strong> ➔ Bucket Origen<br />
+                ↓ <i>Replicación CRR (Asíncrona)</i> ↓<br />
+                <strong>Region B (eu-west-1)</strong> ➔ Bucket Destino
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 18: SEGURIDAD DE S3 — PILARES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 18 — Seguridad</span>
+            <h2 class="slide-title">Tríada de Seguridad en Amazon S3</h2>
+            <p class="slide-subtitle">
+              Autenticación, Autorización y Cifrado de Datos
+            </p>
+          </div>
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title">1. IAM Policies</div>
+              <p style="font-size: 0.85rem">
+                Políticas basadas en **identidades** (Usuarios, Grupos, Roles)
+                para especificar qué acciones pueden realizar sobre S3.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">2. Bucket Policies</div>
+              <p style="font-size: 0.85rem">
+                Políticas basadas en el **recurso** adjuntas directamente al
+                bucket de S3 en formato JSON.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">3. Encryption</div>
+              <p style="font-size: 0.85rem">
+                Protección de datos en tránsito (HTTPS) y en reposo (SSE-S3,
+                SSE-KMS).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 19: IAM VS BUCKET POLICIES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 19 — Seguridad</span>
+            <h2 class="slide-title">IAM Policies vs Bucket Policies</h2>
+            <p class="slide-subtitle">
+              ¿Cuándo usar cada mecanismo de permisos?
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">IAM Policy (Identity-Based)</div>
+              <p style="font-size: 0.85rem">
+                Se adjunta a un usuario/rol. Responde: *"¿A qué recursos de S3
+                tiene acceso este usuario?"*
+              </p>
+              <pre
+                style="
+                  background: #0b1120;
+                  padding: 0.5rem;
+                  margin-top: 0.5rem;
+                  font-size: 0.75rem;
+                  color: var(--aws-light-blue);
+                "
+              >
+User: Ana ➔ Allow s3:GetObject on arn:aws:s3:::bucket/*
+            </pre
+              >
+            </div>
+            <div class="card">
+              <div class="card-title">Bucket Policy (Resource-Based)</div>
+              <p style="font-size: 0.85rem">
+                Se adjunta al Bucket S3. Responde: *"¿Quién tiene permitido o
+                denegado el acceso a mi bucket?"*
+              </p>
+              <pre
+                style="
+                  background: #0b1120;
+                  padding: 0.5rem;
+                  margin-top: 0.5rem;
+                  font-size: 0.75rem;
+                  color: var(--aws-orange);
+                "
+              >
+Bucket: mi-bucket ➔ Deny Anonymous access if not HTTPS
+            </pre
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 20: S3 BLOCK PUBLIC ACCESS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 20 — Seguridad</span>
+            <h2 class="slide-title">S3 Block Public Access</h2>
+            <p class="slide-subtitle">
+              Capa centralizada de protección contra fugas de datos
+              involuntarias 
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">Capa de Protección Global</div>
+                <p>
+                  Funciona como un interruptor maestro a nivel de cuenta o de
+                  bucket que invalida cualquier permiso público accidental
+                  otorgado mediante Bucket Policies o ACLs.
+                </p>
+              </div>
+              <div class="exam-tip">
+                <div class="exam-tip-title">
+                  🎯 Ajuste Predeterminado en AWS
+                </div>
+                <p>
+                  Por defecto, **S3 Block Public Access está ACTIVADO** en todos
+                  los buckets nuevos creados en AWS.
+                </p>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <div style="color: var(--aws-red); font-weight: bold">
+                Internet Public Request
+              </div>
+              <div style="font-size: 1.5rem; color: var(--aws-orange)">⬇</div>
+              <div
+                style="
+                  background: var(--aws-red);
+                  color: white;
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  font-weight: bold;
+                "
+              >
+                🔒 S3 Block Public Access (Active)
+              </div>
+              <div style="font-size: 1.5rem; color: var(--aws-orange)">
+                ❌ ACCESS DENIED
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 21: CIFRADO EN S3 (ENCRYPTION) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 21 — Seguridad</span>
+            <h2 class="slide-title">Cifrado en Amazon S3 (Encryption)</h2>
+            <p class="slide-subtitle">
+              Protección de datos en Reposo y en Tránsito
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Encryption at Rest (En Reposo)</div>
+              <ul>
+                <li>
+                  <strong>SSE-S3:</strong> Claves gestionadas completamente por
+                  S3 (cifrado predeterminado).
+                </li>
+                <li>
+                  <strong>SSE-KMS:</strong> Claves gestionadas mediante AWS Key
+                  Management Service (KMS) con auditoría.
+                </li>
+                <li>
+                  <strong>SSE-C:</strong> Claves provistas por el cliente.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">Encryption in Transit (En Tránsito)</div>
+              <p>
+                Los datos se cifran durante la transmisión entre el cliente y S3
+                utilizando protocolos seguros **HTTPS / TLS**
+              </p>
+              <div class="exam-tip" style="margin-top: 1rem">
+                <div class="exam-tip-title">🎯 Concepto Clave</div>
+                <p>
+                  Cifrado = Confidencialidad de datos. Autorización (IAM) =
+                  Permiso de acceso.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 22: S3 OBJECT LOCK & WORM -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 22 — Cumplimiento</span>
+            <h2 class="slide-title">S3 Object Lock y Modelo WORM</h2>
+            <p class="slide-subtitle">
+              Write Once, Read Many para requerimientos regulatorios
+              estrictos
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">¿Qué es S3 Object Lock?</div>
+                <p>
+                  Impide que un objeto sea eliminado o sobrescrito durante un
+                  período de retención determinado o de forma indefinida.
+                </p>
+              </div>
+              <div class="card" style="margin-top: 1rem">
+                <div class="card-title">Modos de Retención</div>
+                <ul>
+                  <li>
+                    <strong>Compliance Mode:</strong> Nadie (ni siquiera el Root
+                    User) puede eliminar el objeto durante el período.
+                  </li>
+                  <li>
+                    <strong>Governance Mode:</strong> Usuarios con permisos
+                    especiales pueden eludir la retención.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.9rem">
+                🔒 <strong>WORM Model</strong><br /><br />
+                Objeto Subido ➔ Object Lock Activo ➔ 🚫 Imposible Modificar /
+                Borrar durante el periodo configurado
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 23: STATIC WEBSITE HOSTING EN S3 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 23 — Casos de Uso</span>
+            <h2 class="slide-title">S3 Static Website Hosting</h2>
+            <p class="slide-subtitle">
+              Alojamiento de contenido web estático de bajo costo
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Contenido Estático vs Dinámico</div>
+              <p>
+                <strong>Permitido en S3:</strong> Archivos HTML, CSS, JavaScript
+                del cliente, imágenes y videos.
+              </p>
+              <p style="margin-top: 0.5rem; color: var(--aws-red)">
+                <strong>NO Permitido:</strong> Scripts del lado del servidor
+                (PHP, Python, Node.js) ni bases de datos dinámicas.
+              </p>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                🌐 Navegador ➔ URL de Endpoint S3 ➔ S3 Bucket (index.html +
+                style.css)<br /><br />
+                <i>Para aceleración global:</i><br />
+                Navegador ➔ <strong>Amazon CloudFront (CDN)</strong> ➔ S3
+                Bucket
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 24: S3 + CLOUDFRONT -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 24 — Integración</span>
+            <h2 class="slide-title">S3 + Amazon CloudFront (CDN)</h2>
+            <p class="slide-subtitle">
+              Distribución global con baja latencia y caching en Edge
+              Locations
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">Beneficios de la Integración</div>
+                <ul>
+                  <li>
+                    Cachea el contenido del bucket en más de 600 Edge Locations
+                    en todo el mundo.
+                  </li>
+                  <li>
+                    Reduce la latencia de descarga para usuarios globales.
+                  </li>
+                  <li>
+                    Permite restringir el acceso directo al bucket mediante
+                    **Origin Access Control (OAC)**.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                👤 Usuario (Chile) ➔ ⚡ Edge Location (Santiago) ➔ 📦 S3 Bucket
+                (us-east-1)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 25: S3 + LAMBDA (EVENT-DRIVEN) -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 25 — Integración</span>
+            <h2 class="slide-title">S3 Event Notifications + AWS Lambda</h2>
+            <p class="slide-subtitle">
+              Arquitectura orientada a eventos en tiempo real
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Caso de Uso Típico</div>
+              <p>
+                S3 genera un evento automáticametne ante acciones como
+                `s3:ObjectCreated:*`. Este evento desencadena una
+                función **AWS Lambda** para procesar el archivo al
+                instante.
+              </p>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                1. Carga foto.jpg en S3 ➔<br />
+                2. S3 Event (`ObjectCreated`) ➔<br />
+                3. AWS Lambda ejecuta script ➔<br />
+                4. Genera miniatura (thumbnail) en S3 automáticamente
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 26: S3 + ANALYTICS & DATA LAKES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 26 — Integración Analytics</span>
+            <h2 class="slide-title">Amazon S3 como Data Lake</h2>
+            <p class="slide-subtitle">
+              El repositorio centralizado de datos no estructurados y
+              estructurados de AWS
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Integraciones Analíticas</div>
+              <ul>
+                <li>
+                  <strong>Amazon Athena:</strong> Consulta datos directamente en
+                  S3 usando SQL estándar.
+                </li>
+                <li>
+                  <strong>AWS Glue:</strong> Cataloga y realiza procesos ETL
+                  sobre datos en S3.
+                </li>
+                <li>
+                  <strong>Amazon EMR / Redshift Spectrum:</strong> Analítica
+                  masiva a gran escala.
+                </li>
+              </ul>
+            </div>
+            <div class="diagram-box">
+              <div style="font-size: 0.85rem">
+                CSV / JSON / Parquet ➔ <strong>Amazon S3 (Data Lake)</strong> ➔
+                Amazon Athena (SQL Queries)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 27: S3 ACCESS POINTS & PRESIGNED URLS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 27 — Características Avanzadas</span>
+            <h2 class="slide-title">S3 Access Points y Presigned URLs</h2>
+            <p class="slide-subtitle">
+              Gestión simplificada de permisos y accesos temporales
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">S3 Access Points</div>
+              <p style="font-size: 0.85rem">
+                Puntos de acceso con políticas individuales asignadas a un
+                bucket para simplificar permisos de múltiples aplicaciones.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">S3 Presigned URLs</div>
+              <p style="font-size: 0.85rem">
+                Proporciona acceso temporal a objetos privados sin modificar las
+                políticas del bucket (ej. enlace de descarga válido por 15
+                minutos).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 28: CONSISTENCY MODEL IN S3 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 28 — Arquitectura Interna</span>
+            <h2 class="slide-title">
+              S3 Strong Consistency (Consistencia Fuerte)
+            </h2>
+            <p class="slide-subtitle">
+              Comportamiento actual de S3 para todas las operaciones
+            </p>
+          </div>
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">
+                  Strong Read-After-Write Consistency
+                </div>
+                <p>
+                  Tras una escritura exitosa (PUT) de un objeto nuevo o
+                  sobrescritura de uno existente, cualquier lectura posterior
+                  (GET) devolverá inmediatamente el valor actualizado.
+                </p>
+              </div>
+            </div>
+            <div class="exam-tip">
+              <div class="exam-tip-title">
+                🎯 Nota de Examen Cloud Practitioner
+              </div>
+              <p>
+                S3 ofrece **Consistencia Fuerte automática** sin costos
+                adicionales ni cambios de configuración requeridos.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 29: DURABILITY VS AVAILABILITY EN S3 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 29 — Conceptos Esenciales</span>
+            <h2 class="slide-title">Durabilidad vs Disponibilidad en S3</h2>
+            <p class="slide-subtitle">
+              Garantías del servicio de almacenamiento
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="border-top: 4px solid var(--aws-blue)">
+              <div class="card-title">💾 Durabilidad (99.999999999%)</div>
+              <p>
+                Diseñado para **11 nueves** de durabilidad de objetos. Significa
+                que si almacenas 10,000,000 de objetos, se esperaría la pérdida
+                de un solo objeto cada 10,000 años.
+              </p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--aws-green)">
+              <div class="card-title">⚡ Disponibilidad (99.99%)</div>
+              <p>
+                Garantía de uptime del servicio para acceder a los datos
+                almacenados a lo largo de un año determinado según la Storage
+                Class.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 30: COSTOS EN S3 -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 30 — Facturación</span>
+            <h2 class="slide-title">Factores que Influyen en el Costo de S3</h2>
+            <p class="slide-subtitle">
+              Entendiendo el modelo de pago por uso de S3
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Pilares de Cobro</div>
+              <ul>
+                <li>
+                  <strong>Almacenamiento:</strong> GBs acumulados por mes.
+                </li>
+                <li>
+                  <strong>Solicitudes (Requests):</strong> Cantidad de
+                  operaciones (PUT, GET, LIST).
+                </li>
+                <li>
+                  <strong>Data Transfer OUT:</strong> Transferencia de datos
+                  saliente hacia Internet.
+                </li>
+                <li>
+                  <strong>Recuperación de Datos:</strong> Aplica a clases IA y
+                  Glacier.
+                </li>
+              </ul>
+            </div>
+            <div class="exam-tip">
+              <div class="exam-tip-title">
+                🎯 Regla de Transferencia de Datos
+              </div>
+              <p>
+                La transferencia de datos **Entrante (Data Transfer IN)** a S3
+                desde Internet es totalmente **GRATUITA**.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 31: MITOS Y CONFUSIONES FRECUENTES -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 31 — Repaso Anti-Trampas</span>
+            <h2 class="slide-title">⚠️ Mitos y Errores Frecuentes sobre S3</h2>
+            <p class="slide-subtitle">
+              Diferenciación rápida para evitar trampas en el examen
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <p>
+                ❌ <strong>"S3 es un disco duro virtual"</strong><br />
+                ➔ Falso: S3 es almacenamiento de objetos accedido por API, no un
+                sistema de archivos adjuntable a SO.
+              </p>
+            </div>
+            <div class="card">
+              <p>
+                ❌
+                <strong
+                  >"Cifrar mi bucket lo hace inaccesible para hackers"</strong
+                ><br />
+                ➔ Falso: Cifrado $\neq$ Autorización. Las políticas de
+                IAM/Bucket controlan quién accede.
+              </p>
+            </div>
+            <div class="card">
+              <p>
+                ❌
+                <strong>"Versioning equivale a tener un Backup completo"</strong
+                ><br />
+                ➔ Falso: Versioning guarda variantes en el mismo bucket, no es
+                un plan de backup aislado.
+              </p>
+            </div>
+            <div class="card">
+              <p>
+                ❌
+                <strong
+                  >"Un bucket privado bloquea incluso las URLs firmadas"</strong
+                ><br />
+                ➔ Falso: Las Presigned URLs permiten acceso temporal explícito a
+                objetos privados.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 32: QUIZ INTERACTIVO EXAMEN -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 32 — Evaluación Examen</span>
+            <h2 class="slide-title">Pregunta Tipo AWS Cloud Practitioner</h2>
+            <p class="slide-subtitle">
+              Aplica los detectores de palabras clave
+            </p>
+          </div>
+          <div
+            class="card"
+            style="max-width: 800px; margin: 0 auto; width: 100%"
+          >
+            <p style="font-size: 1.1rem; margin-bottom: 1rem">
+              Una empresa tiene registros de auditoría que deben conservarse
+              durante 7 años por cumplimiento legal. Los datos casi nunca se
+              consultan y se acepta un tiempo de recuperación de hasta 24 horas.
+              ¿Cuál es la clase de almacenamiento S3 MÁS rentable?
+            </p>
+            <div id="quiz-s3-1">
+              <div
+                class="quiz-option"
+                onclick="checkAnswer(this, false, 'q-s3-exp')"
+              >
+                A) S3 Standard-IA
+              </div>
+              <div
+                class="quiz-option"
+                onclick="checkAnswer(this, false, 'q-s3-exp')"
+              >
+                B) S3 Glacier Instant Retrieval
+              </div>
+              <div
+                class="quiz-option"
+                onclick="checkAnswer(this, true, 'q-s3-exp')"
+              >
+                C) S3 Glacier Deep Archive
+              </div>
+              <div
+                class="quiz-option"
+                onclick="checkAnswer(this, false, 'q-s3-exp')"
+              >
+                D) S3 Intelligent-Tiering
+              </div>
+            </div>
+            <div
+              id="q-s3-exp"
+              style="
+                display: none;
+                margin-top: 1rem;
+                padding: 1rem;
+                background: #0b1120;
+                border-radius: 6px;
+              "
+            >
+              <strong style="color: var(--aws-green)"
+                >¡Respuesta Correcta: C!</strong
+              ><br />
+              <strong>Palabra Clave:</strong> Retención a largo plazo (7 años),
+              acceso rarísimo, tiempo de recuperación largo $\rightarrow$ **S3
+              Glacier Deep Archive** ofrece el costo de almacenamiento más bajo
+              de AWS.
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 33: CASO PRÁCTICO INTEGRAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 33 — Caso Práctico</span>
+            <h2 class="slide-title">
+              Caso Práctico: Estrategia S3 para una Empresa
+            </h2>
+            <p class="slide-subtitle">
+              Diseñando la arquitectura óptima según el tipo de datos
+            </p>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Requerimientos de Datos</div>
+              <ul>
+                <li>
+                  1. Imágenes de usuarios en aplicación activa.
+                </li>
+                <li>
+                  2. Documentos legales que no deben borrarse jamás.
+                </li>
+                <li>
+                  3. Backups con patrones de uso impredecibles.
+                </li>
+                <li>
+                  4. Registros históricos con retención por 10 años.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">Configuración Propuesta</div>
+              <ul>
+                <li>1. **S3 Standard + CloudFront**</li>
+                <li>
+                  2. **S3 Object Lock (Compliance Mode) + Versioning**
+                </li>
+                <li>3. **S3 Intelligent-Tiering**</li>
+                <li>4. **S3 Lifecycle ➔ Glacier Deep Archive**</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 34: MAPA MENTAL INTEGRAL -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 34 — Resumen Visual</span>
+            <h2 class="slide-title">Mapa Mental de Amazon S3</h2>
+            <p class="slide-subtitle">
+              Visión panorámica de las capacidades de S3
+            </p>
+          </div>
+          <div class="diagram-box" style="font-size: 0.85rem; text-align: left">
+            <strong>AMAZON S3 (Object Storage)</strong><br />
+            ├── 📦 <strong>Estructura:</strong> Bucket ➔ Key ➔ Object (Data +
+            Metadata + VersionID)<br />
+            ├── ⚡ <strong>Storage Classes:</strong> Standard |
+            Intelligent-Tiering | IA | Glacier<br />
+            ├── 🔄 <strong>Administración:</strong> Lifecycle Rules | Versioning
+            | Replication (CRR/SRR)<br />
+            ├── 🔒 <strong>Seguridad:</strong> IAM | Bucket Policy | Block
+            Public Access | Encryption (SSE-KMS) | Object Lock<br />
+            └── 🔗 <strong>Integraciones:</strong> CloudFront | Lambda | Athena
+            | EventBridge
+          </div>
+        </div>
+
+        <!-- SLIDE 35: RESUMEN FINAL DE 12 COSAS -->
+        <div class="slide">
+          <div class="slide-header">
+            <span class="slide-num">Slide 35 — Cierre de la Clase</span>
+            <h2 class="slide-title">Si solo recuerdas 12 cosas de S3...</h2>
+            <p class="slide-subtitle">
+              Conceptos fundamentales para aprobar la certificación
+            </p>
+          </div>
+          <div class="grid-2" style="font-size: 0.85rem">
+            <div class="card">
+              <ol>
+                <li>
+                  S3 es almacenamiento de objetos ilimitado (hasta 5TB por
+                  objeto).
+                </li>
+                <li>Nombres de buckets son globalmente únicos.</li>
+                <li>Key = Identificador completo de un objeto.</li>
+                <li>
+                  Intelligent-Tiering es para patrones de acceso
+                  impredecibles.
+                </li>
+                <li>
+                  Glacier Deep Archive es el almacenamiento más económico de
+                  AWS.
+                </li>
+                <li>
+                  Lifecycle automatsa la transición de clases y expiración.
+                </li>
+              </ol>
+            </div>
+            <div class="card">
+              <ol start="7">
+                <li>
+                  Versioning evita la pérdida accidental por sobrescritura o
+                  borrado.
+                </li>
+                <li>CRR requiere que Versioning esté activado.</li>
+                <li>
+                  Block Public Access está activado por defecto.
+                </li>
+                <li>Object Lock proporciona inmutabilidad WORM.</li>
+                <li>11 nueves (99.999999999%) de durabilidad.</li>
+                <li>
+                  Data Transfer IN hacia S3 siempre es gratis.
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="sidebar" id="sidebar">
+      <h3 style="color: var(--aws-orange); margin-bottom: 1rem">
+        Índice de Slides
+      </h3>
+      <div id="sidebarList"></div>
+    </div>
+
+    <footer>
+      <button class="btn" onclick="prevSlide()">← Anterior</button>
+      <div style="font-size: 0.85rem; color: var(--text-muted)">
+        Navega con las flechas ◄ ► de tu teclado
+      </div>
+      <button class="btn btn-orange" onclick="nextSlide()">Siguiente →</button>
+    </footer>
+
+    <script>
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const slideCounter = document.getElementById("slideCounter");
+      const sidebarList = document.getElementById("sidebarList");
+
+      slides.forEach((slide, idx) => {
+        const title =
+          slide.querySelector(".slide-title")?.innerText || `Slide ${idx + 1}`;
+        const item = document.createElement("div");
+        item.className = `sidebar-item ${idx === 0 ? "active" : ""}`;
+        item.innerText = `${idx + 1}. ${title}`;
+        item.onclick = () => {
+          goToSlide(idx);
+          toggleSidebar();
+        };
+        sidebarList.appendChild(item);
+      });
+
+      function updateView() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+
+        const items = sidebarList.querySelectorAll(".sidebar-item");
+        items.forEach((item, idx) => {
+          item.classList.toggle("active", idx === currentSlide);
+        });
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateView();
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateView();
+        }
+      }
+
+      function goToSlide(index) {
+        currentSlide = index;
+        updateView();
+      }
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+
+      function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      });
+
+      function checkAnswer(el, isCorrect, expId) {
+        const parent = el.parentElement;
+        const options = parent.querySelectorAll(".quiz-option");
+        options.forEach((opt) => opt.classList.remove("correct", "incorrect"));
+
+        if (isCorrect) {
+          el.classList.add("correct");
+        } else {
+          el.classList.add("incorrect");
+        }
+        document.getElementById(expId).style.display = "block";
+      }
+
+      function addSimObject() {
+        const keyInput = document.getElementById("simObjectKey");
+        const tree = document.getElementById("simTree");
+        const val = keyInput.value.trim();
+        if (!val) return;
+
+        tree.innerHTML += `<br>│── 📄 ${val}`;
+        keyInput.value = "";
+      }
+
+      function evalStorageGame(el, choice) {
+        const parent = el.parentElement;
+        const options = parent.querySelectorAll(".quiz-option");
+        options.forEach((opt) => opt.classList.remove("correct", "incorrect"));
+
+        const exp = document.getElementById("gameExp");
+        exp.style.display = "block";
+
+        if (choice === "S3 Standard") {
+          el.classList.add("correct");
+          exp.innerHTML = `<strong style="color:var(--aws-green)">¡Correcto!</strong> Las imágenes activas de alto tráfico requieren acceso de milisegundos frecuente: <strong>S3 Standard</strong>.`;
+        } else {
+          el.classList.add("incorrect");
+          exp.innerHTML = `<strong style="color:var(--aws-red)">Incorrecto.</strong> Para datos de acceso frecuente se utiliza S3 Standard.`;
+        }
+      }
+
+      function updateLifecyclePreview() {
+        const d1 = document.getElementById("lifeDays1").value;
+        const d2 = document.getElementById("lifeDays2").value;
+        const d3 = document.getElementById("lifeDays3").value;
+
+        document.getElementById("lifePreviewText").innerHTML = `
+        Día 0: Carga de objeto en S3 Standard.<br>
+        Día ${d1}: Transición automática a S3 Standard-IA.<br>
+        Día ${d2}: Transición automática a Glacier Flexible.<br>
+        Día ${d3}: Expiración y eliminación definitiva del objeto.
+      `;
+      }
+
+      updateView();
+    </script>
+  </body>
+</html>
