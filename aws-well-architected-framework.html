@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Well-Architected Framework — Guía para Estudiantes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --aws-orange: #FF9900;
+    --aws-dark: #0D1117;
+    --aws-navy: #161B22;
+    --aws-card: #1C2230;
+    --aws-border: #2A3244;
+    --aws-text: #CDD5E0;
+    --aws-muted: #7A8899;
+    --aws-white: #F0F6FF;
+
+    --p1: #4ECDC4; /* Operational Excellence — teal */
+    --p2: #FF6B6B; /* Security — red */
+    --p3: #45B7D1; /* Reliability — blue */
+    --p4: #96E072; /* Performance — green */
+    --p5: #FFD93D; /* Cost — yellow */
+    --p6: #C77DFF; /* Sustainability — purple */
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--aws-dark);
+    color: var(--aws-text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #1a2640 0%, var(--aws-dark) 70%);
+    z-index: 0;
+  }
+
+  /* animated grid */
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(255,153,0,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,153,0,.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: gridShift 20s linear infinite;
+  }
+  @keyframes gridShift { from{background-position:0 0} to{background-position:48px 48px} }
+
+  .hero-content { position: relative; z-index: 1; max-width: 860px; }
+
+  .badge {
+    display: inline-block;
+    background: rgba(255,153,0,.12);
+    border: 1px solid rgba(255,153,0,.3);
+    color: var(--aws-orange);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: .35rem 1rem;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp .6s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 6vw, 4.2rem);
+    color: var(--aws-white);
+    line-height: 1.08;
+    animation: fadeUp .7s .1s ease both;
+  }
+  .hero h1 span { color: var(--aws-orange); }
+
+  .hero-sub {
+    margin-top: 1.2rem;
+    font-size: 1.1rem;
+    color: var(--aws-muted);
+    max-width: 600px;
+    margin-left: auto; margin-right: auto;
+    animation: fadeUp .7s .2s ease both;
+  }
+
+  .hero-stats {
+    display: flex; gap: 2.5rem; justify-content: center;
+    margin-top: 3rem;
+    animation: fadeUp .7s .3s ease both;
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.4rem; font-weight: 800;
+    color: var(--aws-orange);
+    line-height: 1;
+  }
+  .stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--aws-muted); margin-top: .2rem; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(22px) } to { opacity:1; transform:translateY(0) } }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,17,23,.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--aws-border);
+    padding: .6rem 1.5rem;
+    display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center;
+  }
+  nav a {
+    font-size: .75rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+    text-decoration: none; color: var(--aws-muted);
+    padding: .35rem .75rem; border-radius: 6px;
+    transition: color .2s, background .2s;
+  }
+  nav a:hover { color: var(--aws-white); background: rgba(255,255,255,.05); }
+
+  /* ── SECTIONS ── */
+  section { padding: 5rem 1.5rem; max-width: 1080px; margin: 0 auto; }
+
+  .section-label {
+    font-size: .72rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--aws-orange); margin-bottom: .6rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    color: var(--aws-white); line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+  .section-desc { color: var(--aws-muted); max-width: 640px; font-size: 1rem; line-height: 1.8; }
+
+  /* ── INTRO CARDS ── */
+  .intro-grid {
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin-top: 3rem;
+  }
+  .intro-card {
+    background: var(--aws-card);
+    border: 1px solid var(--aws-border);
+    border-radius: 14px;
+    padding: 1.8rem;
+    transition: transform .25s, border-color .25s;
+  }
+  .intro-card:hover { transform: translateY(-4px); border-color: rgba(255,153,0,.35); }
+  .intro-card-icon { font-size: 2rem; margin-bottom: .8rem; }
+  .intro-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--aws-white); margin-bottom: .5rem; }
+  .intro-card p { font-size: .9rem; color: var(--aws-muted); line-height: 1.65; }
+
+  /* ── PILLAR ACCORDION ── */
+  .pillars-list { margin-top: 3rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .pillar {
+    border-radius: 16px;
+    border: 1px solid var(--aws-border);
+    overflow: hidden;
+    transition: border-color .25s;
+  }
+  .pillar.open { border-color: var(--pillar-color,var(--aws-orange)); }
+
+  .pillar-header {
+    display: flex; align-items: center; gap: 1.2rem;
+    padding: 1.4rem 1.8rem;
+    cursor: pointer;
+    background: var(--aws-card);
+    user-select: none;
+    transition: background .2s;
+  }
+  .pillar-header:hover { background: #1e2a3a; }
+
+  .pillar-num {
+    width: 40px; height: 40px; flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--pillar-color, var(--aws-orange));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem;
+    color: #000;
+  }
+
+  .pillar-meta { flex: 1; }
+  .pillar-name {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem;
+    color: var(--aws-white);
+  }
+  .pillar-tagline { font-size: .82rem; color: var(--aws-muted); margin-top: .1rem; }
+
+  .pillar-chevron {
+    width: 24px; height: 24px; flex-shrink: 0;
+    color: var(--aws-muted);
+    transition: transform .3s;
+  }
+  .pillar.open .pillar-chevron { transform: rotate(180deg); }
+
+  .pillar-body {
+    display: none;
+    padding: 0 1.8rem 1.8rem;
+    background: var(--aws-navy);
+    border-top: 1px solid var(--aws-border);
+  }
+  .pillar.open .pillar-body { display: block; }
+
+  .pillar-body-inner { padding-top: 1.6rem; display: grid; gap: 2rem; }
+
+  /* principles */
+  .principles h4 {
+    font-family: 'Syne', sans-serif; font-size: .8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--pillar-color, var(--aws-orange));
+    margin-bottom: .8rem;
+  }
+  .principles ul { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+  .principles li {
+    display: flex; align-items: baseline; gap: .6rem;
+    font-size: .9rem; color: var(--aws-text);
+  }
+  .principles li::before {
+    content: '→';
+    color: var(--pillar-color, var(--aws-orange));
+    flex-shrink: 0;
+  }
+
+  /* use-cases */
+  .use-cases h4 {
+    font-family: 'Syne', sans-serif; font-size: .8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--pillar-color, var(--aws-orange));
+    margin-bottom: 1rem;
+  }
+
+  .cases-grid {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .case-card {
+    background: var(--aws-card);
+    border: 1px solid var(--aws-border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    transition: transform .2s;
+  }
+  .case-card:hover { transform: translateY(-3px); }
+
+  .case-industry {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--pillar-color, var(--aws-orange));
+    margin-bottom: .6rem;
+  }
+
+  .case-card h5 {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .92rem;
+    color: var(--aws-white); margin-bottom: .4rem; line-height: 1.3;
+  }
+
+  .case-card p { font-size: .82rem; color: var(--aws-muted); line-height: 1.65; }
+
+  .case-impact {
+    margin-top: .8rem;
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .75rem; color: var(--aws-white);
+    background: rgba(255,255,255,.05);
+    border-radius: 6px; padding: .3rem .6rem;
+    font-weight: 500;
+  }
+  .case-impact::before { content: '💡'; font-size: .8rem; }
+
+  /* description block */
+  .pillar-desc {
+    font-size: .95rem; color: var(--aws-muted); line-height: 1.8;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid var(--aws-border);
+  }
+
+  /* ── TOOL SECTION ── */
+  .tool-section {
+    background: linear-gradient(135deg, rgba(255,153,0,.08) 0%, rgba(255,153,0,.02) 100%);
+    border: 1px solid rgba(255,153,0,.25);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-top: 4rem;
+  }
+  .tool-section h3 {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.4rem;
+    color: var(--aws-white); margin-bottom: .8rem;
+  }
+  .tool-section p { font-size: .95rem; color: var(--aws-muted); line-height: 1.8; }
+  .tool-steps {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-top: 1.8rem;
+  }
+  .tool-step {
+    background: var(--aws-card); border-radius: 12px; padding: 1.2rem;
+    border: 1px solid var(--aws-border);
+  }
+  .step-num {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    color: var(--aws-orange); line-height: 1; margin-bottom: .4rem;
+  }
+  .tool-step h4 { font-family: 'Syne', sans-serif; font-size: .9rem; color: var(--aws-white); margin-bottom: .3rem; }
+  .tool-step p { font-size: .8rem; color: var(--aws-muted); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 3rem 1.5rem;
+    border-top: 1px solid var(--aws-border);
+    color: var(--aws-muted); font-size: .82rem;
+  }
+  footer span { color: var(--aws-orange); }
+
+  /* ── LENSES SECTION ── */
+  .lenses-grid {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    margin-top: 2rem;
+  }
+  .lens-chip {
+    background: var(--aws-card); border: 1px solid var(--aws-border);
+    border-radius: 10px; padding: 1rem 1.2rem;
+    display: flex; align-items: center; gap: .8rem;
+  }
+  .lens-chip-icon { font-size: 1.4rem; }
+  .lens-chip-text { font-size: .85rem; color: var(--aws-text); font-weight: 500; }
+
+  /* utility */
+  hr.divider { border: none; border-top: 1px solid var(--aws-border); margin: 1.5rem 0; }
+
+  .highlight-box {
+    background: rgba(255,153,0,.07);
+    border-left: 3px solid var(--aws-orange);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.2rem;
+    font-size: .9rem; color: var(--aws-text);
+    margin-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="badge">📐 Guía Educativa · AWS Cloud</div>
+    <h1>AWS <span>Well-Architected</span><br>Framework</h1>
+    <p class="hero-sub">Los 6 pilares que guían la construcción de sistemas cloud seguros, eficientes y resilientes — con casos de uso reales para cada industria.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">6</div><div class="stat-label">Pilares</div></div>
+      <div class="stat"><div class="stat-num">+300</div><div class="stat-label">Preguntas de revisión</div></div>
+      <div class="stat"><div class="stat-num">2006</div><div class="stat-label">Primer whitepaper</div></div>
+      <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Mejora continua</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#intro">¿Qué es?</a>
+  <a href="#pilares">Los 6 Pilares</a>
+  <a href="#lenses">Lentes</a>
+  <a href="#tool">Herramienta</a>
+  <a href="#proceso">Proceso de Revisión</a>
+</nav>
+
+<!-- ── INTRO ── -->
+<section id="intro">
+  <div class="section-label">Fundamentos</div>
+  <h2 class="section-title">¿Qué es el AWS Well-Architected Framework?</h2>
+  <p class="section-desc">
+    Es un conjunto de buenas prácticas, principios de diseño y conceptos clave que AWS proporciona para ayudar a los arquitectos de nube a construir infraestructura <strong>segura, de alto rendimiento, resiliente y eficiente</strong>. No es sólo documentación — es una metodología viva de evaluación continua.
+  </p>
+
+  <div class="highlight-box">
+    💬 <strong>Analogía:</strong> Construir un sistema cloud sin el Well-Architected Framework es como construir un rascacielos sin planos estructurales. Puede funcionar al inicio, pero los problemas se acumulan con el tiempo y el costo de corrección crece exponencialmente.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card">
+      <div class="intro-card-icon">🎯</div>
+      <h3>Medir tu arquitectura</h3>
+      <p>Compara tu arquitectura actual contra las mejores prácticas de la industria y obtén un diagnóstico honesto de dónde estás.</p>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-icon">🔍</div>
+      <h3>Identificar riesgos</h3>
+      <p>Detecta High Risk Issues (HRIs) y Medium Risk Issues (MRIs) antes de que se conviertan en incidentes costosos en producción.</p>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-icon">🗺️</div>
+      <h3>Guiar el desarrollo</h3>
+      <p>Aplica sus principios desde la fase de diseño de cada nuevo workload para asegurar una base sólida desde el primer commit.</p>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-icon">🔄</div>
+      <h3>Mejora continua</h3>
+      <p>El framework es un documento vivo. Evoluciona junto con las nuevas tecnologías como GenAI y los cambios regulatorios globales.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── PILLARS ── -->
+<section id="pilares" style="padding-top:2rem;">
+  <div class="section-label">Los 6 Pilares</div>
+  <h2 class="section-title">Cada pilar, un dominio crítico</h2>
+  <p class="section-desc">Cada pilar es un área de enfoque independiente pero interconectada. Expandí cada uno para ver sus principios de diseño y casos de uso reales por industria.</p>
+
+  <div class="pillars-list" id="pillars-list">
+
+    <!-- ──── PILAR 1: OPERATIONAL EXCELLENCE ──── -->
+    <div class="pillar" style="--pillar-color:var(--p1)">
+      <div class="pillar-header" onclick="togglePillar(this)">
+        <div class="pillar-num">01</div>
+        <div class="pillar-meta">
+          <div class="pillar-name">Operational Excellence</div>
+          <div class="pillar-tagline">Ejecutar, monitorear y mejorar continuamente los workloads</div>
+        </div>
+        <svg class="pillar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-body-inner">
+          <p class="pillar-desc">
+            Este pilar se centra en la capacidad de ejecutar cargas de trabajo de manera efectiva, obtener información sobre sus operaciones y mejorar continuamente los procesos. Las operaciones deben tratarse como código: automatizadas, versionadas y repetibles.
+          </p>
+          <div class="principles">
+            <h4>Principios de diseño clave</h4>
+            <ul>
+              <li>Realizar operaciones como código (Infrastructure as Code)</li>
+              <li>Hacer cambios frecuentes, pequeños y reversibles</li>
+              <li>Refinar los procedimientos operacionales continuamente</li>
+              <li>Anticipar fallas y diseñar para fallar con gracia</li>
+              <li>Aprender de todos los fallos operacionales</li>
+            </ul>
+          </div>
+          <div class="use-cases">
+            <h4>🏢 Casos de uso por industria</h4>
+            <div class="cases-grid">
+              <div class="case-card">
+                <div class="case-industry">🏦 Banca</div>
+                <h5>Automatización de deploys en core bancario</h5>
+                <p>Un banco multinacional usa pipelines CI/CD con AWS CodePipeline para desplegar actualizaciones al sistema de pagos en ventanas de mantenimiento de 2 minutos, con rollback automático ante errores.</p>
+                <div class="case-impact">Reducción del 85% en tiempo de inactividad por actualizaciones</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🛒 Retail</div>
+                <h5>Runbooks para eventos de alto tráfico</h5>
+                <p>Una cadena de retail define runbooks automatizados con AWS Systems Manager para el Cyber Monday. Cada alerta tiene un procedimiento de respuesta automático que escala recursos antes de que el cliente note degradación.</p>
+                <div class="case-impact">0 caídas en los últimos 3 eventos de Black Friday</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🏥 Salud</div>
+                <h5>Monitoreo de sistemas de historias clínicas</h5>
+                <p>Un hospital integra CloudWatch con dashboards personalizados y alarmas que detectan latencia en el sistema HIS (Hospital Information System), notificando al equipo de TI antes de que afecte la atención al paciente.</p>
+                <div class="case-impact">Detección temprana de incidentes 40 minutos antes del impacto</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🎮 Gaming</div>
+                <h5>Chaos Engineering para videojuegos online</h5>
+                <p>Un estudio de videojuegos implementa experimentos de caos con AWS Fault Injection Simulator para validar que su juego online mantiene la experiencia de usuario cuando una zona de disponibilidad falla inesperadamente.</p>
+                <div class="case-impact">Confianza demostrada en SLA del 99.95%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──── PILAR 2: SECURITY ──── -->
+    <div class="pillar" style="--pillar-color:var(--p2)">
+      <div class="pillar-header" onclick="togglePillar(this)">
+        <div class="pillar-num">02</div>
+        <div class="pillar-meta">
+          <div class="pillar-name">Security</div>
+          <div class="pillar-tagline">Proteger datos, sistemas y activos en la nube</div>
+        </div>
+        <svg class="pillar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-body-inner">
+          <p class="pillar-desc">
+            La seguridad incluye la capacidad de proteger datos, sistemas y activos mientras se aprovechan las tecnologías cloud. Se apoya en el Shared Responsibility Model: AWS asegura la infraestructura, el cliente asegura todo lo que construye sobre ella.
+          </p>
+          <div class="principles">
+            <h4>Principios de diseño clave</h4>
+            <ul>
+              <li>Implementar una base sólida de Identity & Access Management (IAM)</li>
+              <li>Habilitar trazabilidad (logs en todo)</li>
+              <li>Aplicar seguridad en todas las capas (defense in depth)</li>
+              <li>Automatizar las mejores prácticas de seguridad</li>
+              <li>Proteger datos en tránsito y en reposo</li>
+              <li>Mantener a las personas alejadas de los datos</li>
+              <li>Prepararse para eventos de seguridad (Incident Response Plan)</li>
+            </ul>
+          </div>
+          <div class="use-cases">
+            <h4>🔐 Casos de uso por industria</h4>
+            <div class="cases-grid">
+              <div class="case-card">
+                <div class="case-industry">💳 Fintech</div>
+                <h5>Zero Trust para pagos digitales</h5>
+                <p>Una startup fintech implementa IAM con principio de mínimo privilegio y MFA obligatorio. Cada microservicio tiene su propio rol con permisos exactos. GuardDuty monitorea comportamientos anómalos 24/7.</p>
+                <div class="case-impact">Cumplimiento PCI-DSS Level 1 logrado en 3 meses</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">⚖️ Legal</div>
+                <h5>Cifrado de datos de clientes</h5>
+                <p>Un estudio legal cifra toda la documentación sensible con AWS KMS. Las claves de cifrado se rotan automáticamente cada 90 días y los accesos quedan auditados en CloudTrail para cumplimiento regulatorio.</p>
+                <div class="case-impact">Auditorías de cumplimiento completadas sin observaciones</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🎓 Educación</div>
+                <h5>Protección de datos de menores (COPPA)</h5>
+                <p>Una plataforma EdTech para niños usa Amazon Macie para descubrir y clasificar automáticamente datos personales de estudiantes, aplicando políticas de retención y anonimización conforme a regulaciones de privacidad.</p>
+                <div class="case-impact">Cero brechas de datos en 5 años de operación</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🏭 Manufactura</div>
+                <h5>Seguridad en sistemas IoT industriales</h5>
+                <p>Una planta automotriz conecta 10,000 sensores IoT mediante AWS IoT Core con certificados X.509. Cada dispositivo está en una VPC privada y la comunicación con la nube usa TLS 1.3 obligatorio.</p>
+                <div class="case-impact">Superficie de ataque reducida en un 70%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──── PILAR 3: RELIABILITY ──── -->
+    <div class="pillar" style="--pillar-color:var(--p3)">
+      <div class="pillar-header" onclick="togglePillar(this)">
+        <div class="pillar-num">03</div>
+        <div class="pillar-meta">
+          <div class="pillar-name">Reliability</div>
+          <div class="pillar-tagline">Operar y recuperarse de fallas correctamente y de forma consistente</div>
+        </div>
+        <svg class="pillar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-body-inner">
+          <p class="pillar-desc">
+            La confiabilidad es la capacidad de un workload de ejecutar su función correcta y consistentemente cuando se espera que lo haga. Incluye recuperarse de interrupciones de infraestructura o servicio, adquirir recursos de cómputo dinámicamente y mitigar disrupciones.
+          </p>
+          <div class="principles">
+            <h4>Principios de diseño clave</h4>
+            <ul>
+              <li>Recuperarse automáticamente de fallas (auto-healing)</li>
+              <li>Probar los procedimientos de recuperación regularmente</li>
+              <li>Escalar horizontalmente para aumentar disponibilidad</li>
+              <li>Dejar de adivinar la capacidad (usar auto scaling)</li>
+              <li>Gestionar el cambio con automatización</li>
+            </ul>
+          </div>
+          <div class="use-cases">
+            <h4>🔄 Casos de uso por industria</h4>
+            <div class="cases-grid">
+              <div class="case-card">
+                <div class="case-industry">✈️ Aerolíneas</div>
+                <h5>Sistema de reservas multi-región</h5>
+                <p>Una aerolínea despliega su sistema de booking en 3 regiones AWS con Route 53 failover. Si us-east-1 falla, el tráfico migra a eu-west-1 en menos de 60 segundos. RTO: 1 min, RPO: 0 (datos replicados en tiempo real).</p>
+                <div class="case-impact">99.999% de disponibilidad — equivale a 5 min de downtime/año</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">📱 SaaS</div>
+                <h5>Circuit Breakers en microservicios</h5>
+                <p>Una plataforma B2B SaaS usa patrones de circuit breaker para aislar fallas. Si el servicio de notificaciones falla, el resto de la plataforma continúa operando en modo degradado sin afectar las funcionalidades core.</p>
+                <div class="case-impact">Eliminación de fallos en cascada que afectaban al 100% de usuarios</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🏪 E-commerce</div>
+                <h5>Recuperación ante desastres automatizada</h5>
+                <p>Un marketplace usa AWS Backup y snapshots automatizados de RDS Aurora. Simulan trimestralmente un DR Drill completo y han reducido el tiempo de recuperación de 8 horas (manual) a 22 minutos (automatizado).</p>
+                <div class="case-impact">De 8 horas a 22 minutos de Recovery Time</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">📡 Telecomunicaciones</div>
+                <h5>Auto Scaling para tráfico impredecible</h5>
+                <p>Un operador móvil usa Predictive Scaling para anticipar los picos de tráfico durante eventos deportivos. Sus instancias escalan 30 minutos antes del evento basándose en patrones históricos de uso.</p>
+                <div class="case-impact">Costo reducido en 35% manteniendo 100% de disponibilidad</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──── PILAR 4: PERFORMANCE EFFICIENCY ──── -->
+    <div class="pillar" style="--pillar-color:var(--p4)">
+      <div class="pillar-header" onclick="togglePillar(this)">
+        <div class="pillar-num">04</div>
+        <div class="pillar-meta">
+          <div class="pillar-name">Performance Efficiency</div>
+          <div class="pillar-tagline">Usar los recursos cloud de manera eficiente para cumplir los requerimientos</div>
+        </div>
+        <svg class="pillar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-body-inner">
+          <p class="pillar-desc">
+            La eficiencia de rendimiento se centra en el uso eficiente de los recursos TI y de cómputo para satisfacer los requisitos del sistema. Incluye seleccionar los tipos y tamaños de recursos correctos, monitorear el rendimiento y mantener la eficiencia a medida que el negocio evoluciona.
+          </p>
+          <div class="principles">
+            <h4>Principios de diseño clave</h4>
+            <ul>
+              <li>Democratizar tecnologías avanzadas (usar servicios managed)</li>
+              <li>Ser global en minutos (desplegarse en múltiples regiones)</li>
+              <li>Usar arquitecturas serverless donde sea posible</li>
+              <li>Experimentar con mayor frecuencia</li>
+              <li>Considerar la afinidad mecánica (el hardware importa)</li>
+            </ul>
+          </div>
+          <div class="use-cases">
+            <h4>⚡ Casos de uso por industria</h4>
+            <div class="cases-grid">
+              <div class="case-card">
+                <div class="case-industry">🎬 Media & Streaming</div>
+                <h5>CDN global para streaming de video</h5>
+                <p>Una plataforma de streaming usa Amazon CloudFront con 600+ puntos de presencia globales. El contenido se distribuye desde el edge más cercano al usuario, reduciendo la latencia de 200ms a menos de 20ms en la mayoría de regiones.</p>
+                <div class="case-impact">Reducción del 90% en latencia de carga de contenido</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🤖 IA / ML</div>
+                <h5>Instancias GPU para entrenamiento de modelos</h5>
+                <p>Una empresa de IA usa instancias p4d.24xlarge con GPUs NVIDIA A100 para entrenar modelos de NLP. Con Spot Instances, logran el mismo poder de cómputo a un 70% menos del costo on-demand.</p>
+                <div class="case-impact">Tiempo de entrenamiento: de 5 días a 18 horas</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🏦 Servicios Financieros</div>
+                <h5>Caché para consultas de alto volumen</h5>
+                <p>Un bróker de bolsa usa ElastiCache (Redis) para almacenar cotizaciones de acciones en memoria. Las consultas de precios responden en microsegundos en lugar de milisegundos, crítico para trading de alta frecuencia.</p>
+                <div class="case-impact">Latencia de 150ms → 0.8ms para consultas de precios</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🚗 Automoción</div>
+                <h5>Serverless para procesamiento de telemetría</h5>
+                <p>Una marca automotriz procesa telemetría de 2 millones de vehículos conectados con AWS Lambda + Kinesis. No mantienen servidores; pagan solo por los eventos procesados. En noches de bajo tráfico, el costo es casi cero.</p>
+                <div class="case-impact">60% de reducción en costos de infraestructura de datos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──── PILAR 5: COST OPTIMIZATION ──── -->
+    <div class="pillar" style="--pillar-color:var(--p5)">
+      <div class="pillar-header" onclick="togglePillar(this)">
+        <div class="pillar-num">05</div>
+        <div class="pillar-meta">
+          <div class="pillar-name">Cost Optimization</div>
+          <div class="pillar-tagline">Evitar gastos innecesarios y obtener el máximo valor del negocio</div>
+        </div>
+        <svg class="pillar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-body-inner">
+          <p class="pillar-desc">
+            La optimización de costos implica evitar gastos innecesarios. Los elementos clave incluyen comprender y controlar dónde se gasta el dinero, seleccionar los tipos de recursos más adecuados y en cantidad correcta, analizar el gasto a lo largo del tiempo y escalar para satisfacer las necesidades del negocio sin sobregastar.
+          </p>
+          <div class="principles">
+            <h4>Principios de diseño clave</h4>
+            <ul>
+              <li>Implementar gestión financiera en la nube (FinOps)</li>
+              <li>Adoptar un modelo de consumo (pagar solo por lo que se usa)</li>
+              <li>Medir la eficiencia global del sistema</li>
+              <li>Eliminar el gasto en tareas no diferenciadas (usar managed services)</li>
+              <li>Analizar y atribuir el gasto (tagging strategy)</li>
+            </ul>
+          </div>
+          <div class="use-cases">
+            <h4>💰 Casos de uso por industria</h4>
+            <div class="cases-grid">
+              <div class="case-card">
+                <div class="case-industry">🚀 Startup</div>
+                <h5>Rightsizing para controlar el burn rate</h5>
+                <p>Una startup SaaS descubre con AWS Cost Explorer que el 40% de sus instancias EC2 están sobre-aprovisionadas. Aplican rightsizing y Savings Plans de 1 año, reduciendo su factura mensual de $45,000 a $18,000.</p>
+                <div class="case-impact">$324,000 de ahorro anual — 3 meses de runway extra</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🏛️ Gobierno</div>
+                <h5>Etiquetado y chargeback por departamento</h5>
+                <p>Una agencia gubernamental implementa una estrategia de tagging que asigna cada recurso cloud a un departamento y proyecto. El reporte mensual de AWS Cost Allocation Tags permite repartir el costo real entre 40 unidades presupuestales.</p>
+                <div class="case-impact">Transparencia presupuestal total; reducción del 22% en waste</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🔬 Investigación</div>
+                <h5>Spot Instances para cómputo científico</h5>
+                <p>Un laboratorio farmacéutico corre simulaciones moleculares en clusters de Spot Instances. Con checkpointing automático, toleran interrupciones y pagan hasta un 90% menos que on-demand para workloads de 72+ horas.</p>
+                <div class="case-impact">Ahorro del 87% en costos de HPC vs instancias on-demand</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">📰 Media Digital</div>
+                <h5>Tiering de storage para archivos históricos</h5>
+                <p>Un medio de comunicación migra 200TB de archivos de video históricos a S3 Glacier Deep Archive. Los archivos de más de 90 días se mueven automáticamente con lifecycle policies. El costo de storage cae de $0.023 a $0.00099/GB/mes.</p>
+                <div class="case-impact">95% de reducción en costos de almacenamiento de archivos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──── PILAR 6: SUSTAINABILITY ──── -->
+    <div class="pillar" style="--pillar-color:var(--p6)">
+      <div class="pillar-header" onclick="togglePillar(this)">
+        <div class="pillar-num">06</div>
+        <div class="pillar-meta">
+          <div class="pillar-name">Sustainability</div>
+          <div class="pillar-tagline">Minimizar los impactos ambientales de los workloads cloud — añadido en 2021</div>
+        </div>
+        <svg class="pillar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-body-inner">
+          <p class="pillar-desc">
+            Incorporado como el sexto pilar en noviembre de 2021, la sostenibilidad se enfoca en minimizar el impacto ambiental de los workloads. Implica maximizar la utilización de recursos, usar hardware más eficiente, seleccionar regiones con mayor porcentaje de energía renovable y reducir el consumo total de energía.
+          </p>
+          <div class="principles">
+            <h4>Principios de diseño clave</h4>
+            <ul>
+              <li>Entender tu impacto ambiental (medir emisiones)</li>
+              <li>Establecer metas de sostenibilidad</li>
+              <li>Maximizar la utilización (evitar recursos idle)</li>
+              <li>Anticipar y adoptar ofertas de hardware más eficiente</li>
+              <li>Usar servicios managed para reducir huella de infraestructura</li>
+              <li>Reducir el impacto downstream del workload</li>
+            </ul>
+          </div>
+          <div class="use-cases">
+            <h4>🌱 Casos de uso por industria</h4>
+            <div class="cases-grid">
+              <div class="case-card">
+                <div class="case-industry">🌍 Corporativo ESG</div>
+                <h5>Selección de regiones con energía renovable</h5>
+                <p>Una empresa con compromisos Net Zero migra workloads a regiones AWS que operan con 100% energía renovable (eu-north-1 en Estocolmo, ca-west-1 en Calgary). Usa el Customer Carbon Footprint Tool para reportar en sus informes de sostenibilidad.</p>
+                <div class="case-impact">Reducción del 45% en emisiones de carbono del departamento TI</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🏗️ Construcción</div>
+                <h5>Apagado automático de ambientes de desarrollo</h5>
+                <p>Una constructora implementa AWS Instance Scheduler para apagar automáticamente todos los ambientes de desarrollo y QA de lunes a viernes a las 20:00 y los fines de semana. Las instancias corren solo 60 horas/semana en vez de 168.</p>
+                <div class="case-impact">64% menos horas de cómputo y proporcional reducción de emisiones</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">📦 Logística</div>
+                <h5>Optimización de rutas con IA eficiente</h5>
+                <p>Una empresa de delivery usa modelos de ML optimizados con distillation para calcular rutas. El modelo comprimido usa un 80% menos de cómputo que el original con menos de 3% de pérdida en precisión, reduciendo la huella por cada predicción.</p>
+                <div class="case-impact">Cómputo por predicción reducido en 80%; eficiencia de rutas +12%</div>
+              </div>
+              <div class="case-card">
+                <div class="case-industry">🏫 Universidad</div>
+                <h5>Consolidación de cargas de trabajo académicas</h5>
+                <p>Una universidad migra 200 servidores físicos on-premises (con utilización promedio del 8%) a AWS. Con consolidación en contenedores ECS, logra el mismo trabajo con una fracción de la infraestructura y elimina el consumo energético de su datacenter.</p>
+                <div class="case-impact">Equivalente a plantar 3,200 árboles en reducción de CO₂ anual</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pillars-list -->
+</section>
+
+<!-- ── LENSES ── -->
+<section id="lenses">
+  <div class="section-label">Más allá de los 6 pilares</div>
+  <h2 class="section-title">Lentes especializadas del Framework</h2>
+  <p class="section-desc">AWS amplía el Framework con <strong>lentes temáticas</strong> que aplican los 6 pilares a dominios específicos. Permiten evaluaciones más profundas para contextos particulares.</p>
+  <div class="lenses-grid">
+    <div class="lens-chip"><div class="lens-chip-icon">🤖</div><div class="lens-chip-text">Generative AI Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🔒</div><div class="lens-chip-text">Serverless Application Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">📊</div><div class="lens-chip-text">Data Analytics Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🏭</div><div class="lens-chip-text">IoT Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🎮</div><div class="lens-chip-text">Games Industry Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🏥</div><div class="lens-chip-text">Healthcare Industry Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">⚖️</div><div class="lens-chip-text">Financial Services Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">☁️</div><div class="lens-chip-text">SaaS Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🚚</div><div class="lens-chip-text">Migration Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🔧</div><div class="lens-chip-text">DevOps Guidance Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🏛️</div><div class="lens-chip-text">Government Lens</div></div>
+    <div class="lens-chip"><div class="lens-chip-icon">🌐</div><div class="lens-chip-text">Networking Lens</div></div>
+  </div>
+  <div class="highlight-box" style="margin-top:1.5rem;">
+    📌 <strong>Tip para estudiantes:</strong> Al evaluar una arquitectura, primero usa el framework base de 6 pilares, luego aplica la lente más relevante para tu industria. Ambas revisiones son complementarias, no alternativas.
+  </div>
+</section>
+
+<!-- ── HERRAMIENTA ── -->
+<section id="tool" style="padding-top:2rem;">
+  <div class="section-label">Herramienta oficial</div>
+  <h2 class="section-title">AWS Well-Architected Tool</h2>
+  <p class="section-desc">Disponible sin costo en la consola de AWS, esta herramienta te guía a través de un proceso de revisión estructurado respondiendo preguntas sobre tu workload.</p>
+
+  <div class="tool-section">
+    <h3>¿Cómo funciona una Well-Architected Review?</h3>
+    <p>El proceso transforma tu arquitectura de simplemente "funcional" a verdaderamente "well-architected" mediante un ciclo iterativo de evaluación y mejora.</p>
+    <div class="tool-steps">
+      <div class="tool-step">
+        <div class="step-num">01</div>
+        <h4>Definir el workload</h4>
+        <p>Identificar el sistema a evaluar, su alcance, equipo responsable y contexto de negocio.</p>
+      </div>
+      <div class="tool-step">
+        <div class="step-num">02</div>
+        <h4>Responder las preguntas</h4>
+        <p>Responder las preguntas de revisión para cada uno de los 6 pilares con honestidad.</p>
+      </div>
+      <div class="tool-step">
+        <div class="step-num">03</div>
+        <h4>Identificar HRIs y MRIs</h4>
+        <p>La herramienta clasifica los hallazgos en High Risk Issues y Medium Risk Issues.</p>
+      </div>
+      <div class="tool-step">
+        <div class="step-num">04</div>
+        <h4>Plan de mejoras</h4>
+        <p>Crear un milestone con las mejoras priorizadas y asignar responsables y fechas.</p>
+      </div>
+      <div class="tool-step">
+        <div class="step-num">05</div>
+        <h4>Revisar periódicamente</h4>
+        <p>Repetir la revisión cada 6-12 meses o ante cambios significativos en el workload.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROCESO ── -->
+<section id="proceso" style="padding-top:2rem;">
+  <div class="section-label">Para los estudiantes</div>
+  <h2 class="section-title">¿Por qué importa el WAF en tu carrera?</h2>
+  <p class="section-desc">El Well-Architected Framework no es solo un documento técnico — es el lenguaje común entre arquitectos, DevOps, product managers y directivos de tecnología.</p>
+
+  <div class="intro-grid" style="margin-top:2rem;">
+    <div class="intro-card">
+      <div class="intro-card-icon">📋</div>
+      <h3>Para arquitectos de soluciones</h3>
+      <p>Es la base de la certificación AWS Solutions Architect. Dominar sus pilares te diferencia en entrevistas y te permite diseñar sistemas que resisten el tiempo y el crecimiento.</p>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-icon">💼</div>
+      <h3>Para product managers</h3>
+      <p>Entender el framework te permite hablar el mismo idioma que tu equipo técnico, tomar mejores decisiones sobre tradeoffs y defender el valor de la deuda técnica ante stakeholders.</p>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-icon">📈</div>
+      <h3>Para CTOs y directores</h3>
+      <p>Es el marco de gobierno que permite comparar arquitecturas de manera objetiva, justificar inversiones en infraestructura y demostrar madurez tecnológica a inversores y clientes.</p>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-icon">🛡️</div>
+      <h3>Para equipos de seguridad</h3>
+      <p>El pilar de Seguridad codifica las mejores prácticas defensivas en un formato evaluable. Permite hacer auditorías estructuradas y seguir la madurez del programa de seguridad en el tiempo.</p>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:2rem;">
+    🎯 <strong>Recurso oficial:</strong> Toda la documentación, whitepapers de cada pilar y el acceso a la herramienta están disponibles en <strong>aws.amazon.com/architecture/well-architected</strong> — sin costo y siempre actualizados.
+  </div>
+</section>
+
+<footer>
+  <p>Basado en la documentación oficial del <span>AWS Well-Architected Framework</span> · aws.amazon.com/architecture/well-architected</p>
+  <p style="margin-top:.5rem; font-size:.75rem; color:#4A5568;">Documento educativo para uso en clases. Última actualización del framework: Noviembre 2024.</p>
+</footer>
+
+<script>
+  function togglePillar(header) {
+    const pillar = header.closest('.pillar');
+    const isOpen = pillar.classList.contains('open');
+    // close all
+    document.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
+    // open clicked (if wasn't open)
+    if (!isOpen) pillar.classList.add('open');
+  }
+
+  // Animate pillars on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.pillar, .intro-card, .case-card, .lens-chip, .tool-step').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity .5s ease, transform .5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
