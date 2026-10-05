@@ -1,0 +1,3477 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS Security Fundamentals — Masterclass Slides</title>
+    <style>
+      :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-card: #1e293b;
+        --bg-card-hover: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --accent-aws: #ff9900;
+        --accent-blue: #38bdf8;
+        --accent-green: #22c55e;
+        --accent-red: #ef4444;
+        --accent-purple: #a855f7;
+        --border-color: #334155;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      [data-theme="light"] {
+        --bg-primary: #f8fafc;
+        --bg-secondary: #ffffff;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f1f5f9;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --accent-aws: #d97706;
+        --accent-blue: #0284c7;
+        --accent-green: #16a34a;
+        --accent-red: #dc2626;
+        --accent-purple: #9333ea;
+        --border-color: #e2e8f0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-main);
+        font-family: var(--font-family);
+        line-height: 1.5;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        user-select: none;
+        transition:
+          background-color 0.3s,
+          color 0.3s;
+      }
+
+      header {
+        background-color: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+        height: 60px;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .logo-badge {
+        background-color: var(--accent-aws);
+        color: #000;
+        font-weight: 800;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+      }
+
+      .header-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .btn-ctrl {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+      }
+
+      .btn-ctrl:hover {
+        background-color: var(--bg-card-hover);
+        border-color: var(--accent-aws);
+      }
+
+      .progress-container {
+        width: 100%;
+        height: 4px;
+        background-color: var(--bg-secondary);
+        position: relative;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background-color: var(--accent-aws);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .stage {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .slide {
+        display: none;
+        width: 100%;
+        max-width: 1200px;
+        height: 100%;
+        max-height: 750px;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        flex-direction: column;
+        justify-content: space-between;
+        animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow-y: auto;
+      }
+
+      .slide.active {
+        display: flex;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: scale(0.98) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .slide-header {
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.75rem;
+      }
+
+      .slide-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .slide-subtitle {
+        font-size: 1.1rem;
+        color: var(--accent-blue);
+        margin-top: 0.25rem;
+        font-weight: 500;
+      }
+
+      .slide-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1.5rem;
+      }
+
+      p,
+      li {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+      }
+      strong {
+        color: var(--text-main);
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+        width: 100%;
+      }
+
+      .card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.25rem;
+        transition:
+          transform 0.2s,
+          border-color 0.2s;
+      }
+
+      .card:hover {
+        border-color: var(--accent-aws);
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--accent-aws);
+      }
+      .card h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.4rem;
+        color: var(--accent-blue);
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-right: 0.5rem;
+      }
+
+      .badge-aws {
+        background: rgba(255, 153, 0, 0.2);
+        color: var(--accent-aws);
+      }
+      .badge-client {
+        background: rgba(56, 189, 248, 0.2);
+        color: var(--accent-blue);
+      }
+
+      .options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .option-btn {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        font-size: 1rem;
+        transition: all 0.2s;
+      }
+
+      .option-btn:hover {
+        border-color: var(--accent-aws);
+        background-color: var(--bg-card-hover);
+      }
+
+      .option-btn.correct {
+        border-color: var(--accent-green) !important;
+        background-color: rgba(34, 197, 94, 0.15) !important;
+        color: var(--accent-green);
+      }
+
+      .option-btn.incorrect {
+        border-color: var(--accent-red) !important;
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: var(--accent-red);
+      }
+
+      .feedback-panel {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        display: none;
+        font-size: 1.05rem;
+      }
+
+      .feedback-panel.visible {
+        display: block;
+      }
+      .feedback-panel.success {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid var(--accent-green);
+      }
+      .feedback-panel.error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid var(--accent-red);
+      }
+
+      .comp-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      .comp-table th,
+      .comp-table td {
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 1rem;
+      }
+
+      .comp-table th {
+        background-color: var(--bg-primary);
+        color: var(--accent-aws);
+      }
+
+      .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .tag {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--accent-blue);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      footer {
+        background-color: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 60px;
+        z-index: 10;
+      }
+
+      .nav-btn-group {
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .btn-nav {
+        background-color: var(--accent-aws);
+        color: #000;
+        font-weight: 700;
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: opacity 0.2s;
+      }
+
+      .btn-nav:hover {
+        opacity: 0.85;
+      }
+      .btn-nav:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .slide-counter {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      body.presentation-mode header .header-title,
+      body.presentation-mode .btn-ctrl:not(#btnPres) {
+        display: none;
+      }
+      body.presentation-mode .slide {
+        max-width: 100vw;
+        max-height: 100vh;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      @media (max-width: 768px) {
+        .slide {
+          padding: 1.25rem;
+        }
+        .slide-title {
+          font-size: 1.5rem;
+        }
+        p,
+        li {
+          font-size: 1rem;
+        }
+        .card-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo-container">
+        <span class="logo-badge">AWS</span>
+        <span class="header-title"
+          >AWS Certified Cloud Practitioner — Security Fundamentals</span
+        >
+      </div>
+      <div class="header-controls">
+        <button class="btn-ctrl" id="btnTheme" onclick="toggleTheme()">
+          🌙 Modo Oscuro
+        </button>
+        <button
+          class="btn-ctrl"
+          id="btnPres"
+          onclick="togglePresentationMode()"
+        >
+          📺 Modo Presentación
+        </button>
+        <button
+          class="btn-ctrl"
+          id="btnFullscreen"
+          onclick="toggleFullscreen()"
+        >
+          ⛶ Pantalla Completa
+        </button>
+      </div>
+    </header>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="stage" id="stage">
+      <!-- Slide 1: Portada -->
+      <div class="slide active">
+        <div class="slide-body" style="text-align: center; align-items: center">
+          <div style="font-size: 3.5rem; margin-bottom: 1rem">
+            ☁️ 🔒 🆔 💾 ⚙️
+          </div>
+          <h1
+            style="
+              font-size: 3rem;
+              color: var(--accent-aws);
+              margin-bottom: 0.5rem;
+            "
+          >
+            AWS Security Fundamentals
+          </h1>
+          <p
+            style="
+              font-size: 1.5rem;
+              color: var(--accent-blue);
+              margin-bottom: 2rem;
+            "
+          >
+            AWS Certified Cloud Practitioner
+          </p>
+          <div
+            class="card"
+            style="
+              max-width: 600px;
+              padding: 1.5rem;
+              border-color: var(--accent-aws);
+            "
+          >
+            <p
+              style="
+                font-size: 1.2rem;
+                font-style: italic;
+                color: var(--text-main);
+              "
+            >
+              "Comprender la seguridad antes de memorizar los servicios."
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Objetivos de la clase -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🎯 ¿Qué vamos a aprender?</div>
+          <div class="slide-subtitle">
+            Ruta completa de preparación para el examen
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>1. Fundamentos & CIA</h3>
+              <p>Tríada CIA, capas de defensa y modelo conceptual.</p>
+            </div>
+            <div class="card">
+              <h3>2. Responsabilidad Compartida</h3>
+              <p>Security OF the Cloud vs Security IN the Cloud.</p>
+            </div>
+            <div class="card">
+              <h3>3. Identidad & Accesos</h3>
+              <p>IAM, Users, Roles, MFA, Least Privilege y SCP.</p>
+            </div>
+            <div class="card">
+              <h3>4. Protección & Cifrado</h3>
+              <p>Encryption at Rest/Transit, AWS KMS.</p>
+            </div>
+            <div class="card">
+              <h3>5. Redes & Firewalls</h3>
+              <p>Security Groups, NACLs, AWS WAF, Shield.</p>
+            </div>
+            <div class="card">
+              <h3>6. Configuración & Cumplimiento</h3>
+              <p>AWS Config, AWS Trusted Advisor, AWS Artifact.</p>
+            </div>
+            <div class="card">
+              <h3>7. Detección & Monitoreo</h3>
+              <p>CloudTrail, CloudWatch, GuardDuty, Inspector.</p>
+            </div>
+            <div class="card">
+              <h3>8. Evaluación & Cheat Sheet</h3>
+              <p>Casos prácticos, comparaciones directas y Quiz.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: ¿Qué significa seguridad? -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🛡️ ¿Qué significa seguridad en la nube?</div>
+          <div class="slide-subtitle">
+            Protección integral de activos digitales
+          </div>
+        </div>
+        <div class="slide-body">
+          <p>
+            Seguridad en AWS consiste en proteger activamente los siguientes
+            componentes:
+          </p>
+          <div class="card-grid">
+            <div class="card">
+              <h3>💾 Datos</h3>
+              <p>Archivos en S3, bases de datos y backups.</p>
+            </div>
+            <div class="card">
+              <h3>👤 Identidades</h3>
+              <p>Usuarios, credenciales y roles de servicio.</p>
+            </div>
+            <div class="card">
+              <h3>💻 Aplicaciones</h3>
+              <p>Código ejecutable, APIs y microservicios.</p>
+            </div>
+            <div class="card">
+              <h3>🏗️ Infraestructura</h3>
+              <p>Instancias EC2, almacenamiento y hardware.</p>
+            </div>
+            <div class="card">
+              <h3>🌐 Redes</h3>
+              <p>Subredes, routers y firewalls virtuales.</p>
+            </div>
+            <div class="card">
+              <h3>⚙️ Configuraciones</h3>
+              <p>Reglas de cumplimiento y buenas prácticas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Tríada CIA -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📐 Los tres objetivos de seguridad (Tríada CIA)
+          </div>
+          <div class="slide-subtitle">
+            Pilares de la seguridad de la información
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card" style="border-top: 4px solid var(--accent-aws)">
+              <h3 style="color: var(--accent-aws)">Confidencialidad</h3>
+              <p><strong>"Solo personas autorizadas acceden."</strong></p>
+              <p>
+                Garantizar que la información privada no sea vista por terceros.
+                Ex: Cifrado en Amazon S3.
+              </p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--accent-blue)">
+              <h3 style="color: var(--accent-blue)">Integridad</h3>
+              <p><strong>"La información no se altera sin permiso."</strong></p>
+              <p>
+                Garantizar que los datos permanezcan exactos y no sean
+                modificados. Ex: Versionado en S3.
+              </p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--accent-green)">
+              <h3 style="color: var(--accent-green)">Disponibilidad</h3>
+              <p><strong>"Sistemas listos cuando se necesitan."</strong></p>
+              <p>
+                Garantizar acceso constante a la infraestructura. Ex: Multi-AZ
+                en RDS y Auto Scaling.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 5: Ejemplo práctico CIA -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">💡 Ejemplo práctico: Amenazas reales</div>
+          <div class="slide-subtitle">
+            Escenario: Una empresa almacena información de clientes en AWS
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h4>❌ Filtración de Datos</h4>
+              <p>
+                Un usuario no autorizado accede a datos bancarios guardados en
+                un bucket público.
+              </p>
+              <p>
+                <span class="badge badge-aws">Falla de Confidencialidad</span>
+              </p>
+            </div>
+            <div class="card">
+              <h4>❌ Alteración no Autorizada</h4>
+              <p>
+                Un script malicioso modifica los saldos de los clientes en la
+                base de datos.
+              </p>
+              <p><span class="badge badge-client">Falla de Integridad</span></p>
+            </div>
+            <div class="card">
+              <h4>❌ Caída por Ataque DDoS</h4>
+              <p>
+                Un ataque de denegación de servicio bloquea el acceso a la
+                aplicación web.
+              </p>
+              <p>
+                <span class="badge badge-aws">Falla de Disponibilidad</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 6: Defensa en Capas -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            🧅 Seguridad en Capas (Defense in Depth)
+          </div>
+          <div class="slide-subtitle">
+            La seguridad no depende de un solo mecanismo
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 1.5rem">
+            <p style="font-size: 1.2rem; margin-bottom: 1rem">
+              Si una capa falla, la siguiente debe detener la amenaza:
+            </p>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 0.4rem;
+                max-width: 650px;
+                margin: 0 auto;
+              "
+            >
+              <div
+                style="
+                  background: rgba(255, 153, 0, 0.2);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  font-weight: bold;
+                "
+              >
+                1. Identidad & MFA
+              </div>
+              <div
+                style="
+                  background: rgba(56, 189, 248, 0.2);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  font-weight: bold;
+                "
+              >
+                2. Permisos y Políticas (IAM)
+              </div>
+              <div
+                style="
+                  background: rgba(168, 85, 247, 0.2);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  font-weight: bold;
+                "
+              >
+                3. Perímetro de Red (Security Groups / NACL / WAF)
+              </div>
+              <div
+                style="
+                  background: rgba(34, 197, 94, 0.2);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  font-weight: bold;
+                "
+              >
+                4. Protección de Aplicaciones
+              </div>
+              <div
+                style="
+                  background: rgba(239, 68, 68, 0.2);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  font-weight: bold;
+                "
+              >
+                5. Cifrado de Datos (At Rest / In Transit)
+              </div>
+              <div
+                style="
+                  background: rgba(148, 163, 184, 0.2);
+                  padding: 0.5rem;
+                  border-radius: 6px;
+                  font-weight: bold;
+                "
+              >
+                6. Monitoreo, Auditoría y Respuesta
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 7: Ciclo Conceptual de Seguridad -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔄 El Ciclo Conceptual de Seguridad</div>
+          <div class="slide-subtitle">
+            Un marco estructurado para organizar las prácticas de seguridad
+          </div>
+        </div>
+        <div class="slide-body">
+          <p style="font-size: 0.95rem; color: var(--accent-aws)">
+            * Nota: Este ciclo es un modelo conceptual pedagógico para esta
+            clase, no una nomenclatura oficial única de AWS.
+          </p>
+          <div class="card-grid" style="grid-template-columns: repeat(4, 1fr)">
+            <div class="card" style="text-align: center">
+              <h3 style="color: var(--accent-aws)">1. PREVENIR</h3>
+              <p>Reducir la posibilidad de un incidente.</p>
+            </div>
+            <div class="card" style="text-align: center">
+              <h3 style="color: var(--accent-blue)">2. DETECTAR</h3>
+              <p>Identificar eventos y amenazas.</p>
+            </div>
+            <div class="card" style="text-align: center">
+              <h3 style="color: var(--accent-purple)">3. RESPONDER</h3>
+              <p>Aislar e investigar hallazgos.</p>
+            </div>
+            <div class="card" style="text-align: center">
+              <h3 style="color: var(--accent-green)">4. ANÁLISIS</h3>
+              <p>Restaurar la operación normal.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 8: PREVENIR -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🛡️ Etapa 1: PREVENIR</div>
+          <div class="slide-subtitle">
+            "¿Qué hacemos antes de que ocurra un incidente?"
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS IAM & MFA</h3>
+              <p>Control estricto de accesos y credenciales.</p>
+            </div>
+            <div class="card">
+              <h3>Least Privilege</h3>
+              <p>Permisos mínimos requeridos para cada tarea.</p>
+            </div>
+            <div class="card">
+              <h3>Security Groups & NACLs</h3>
+              <p>Firewalls perimetrales a nivel de recurso y subred.</p>
+            </div>
+            <div class="card">
+              <h3>AWS WAF & Shield</h3>
+              <p>Filtro de exploits web y protección DDoS.</p>
+            </div>
+            <div class="card">
+              <h3>AWS KMS</h3>
+              <p>Cifrado de datos en reposo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 9: DETECTAR -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔍 Etapa 2: DETECTAR</div>
+          <div class="slide-subtitle">
+            "Identificar actividades, vulnerabilidades y configuraciones"
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS CloudTrail</h3>
+              <p>Registro y auditoría de llamadas API.</p>
+            </div>
+            <div class="card">
+              <h3>Amazon GuardDuty</h3>
+              <p>Detección inteligente de amenazas con ML.</p>
+            </div>
+            <div class="card">
+              <h3>Amazon Inspector</h3>
+              <p>Evaluación de vulnerabilidades de software.</p>
+            </div>
+            <div class="card">
+              <h3>AWS Config</h3>
+              <p>Auditoría de configuraciones de recursos y reglas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 10: RESPONDER -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🚨 Etapa 3: RESPONDER</div>
+          <div class="slide-subtitle">
+            "Aislar, investigar y corregir la amenaza"
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="padding: 1.5rem">
+            <p
+              style="
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: var(--accent-aws);
+              "
+            >
+              Flujo de Respuesta:
+            </p>
+            <p style="font-size: 1.4rem; margin: 1rem 0">
+              Detectar ➔ Investigar ➔ Contener ➔ Actuar
+            </p>
+            <ul>
+              <li>
+                <strong>Revocar accesos:</strong> Deshabilitar credenciales IAM
+                comprometidas.
+              </li>
+              <li>
+                <strong>Aislar recursos:</strong> Cambiar Security Group de una
+                EC2 para desconectarla de la red.
+              </li>
+              <li>
+                <strong>Investigar:</strong> Usar
+                <strong>Amazon Detective</strong> para analizar la causa raíz.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 11: RECUPERAR -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🌱 Etapa 4: ANÁLISIS</div>
+          <div class="slide-subtitle">
+            "Restaurar la operación y aprender del incidente"
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS Backup</h3>
+              <p>Restauración de copias de seguridad de datos sanos.</p>
+            </div>
+            <div class="card">
+              <h3>Resiliencia</h3>
+              <p>
+                Reconstrucción de infraestructura mediante código
+                (Infrastructure as Code).
+              </p>
+            </div>
+            <div class="card">
+              <h3>Lecciones Aprendidas</h3>
+              <p>
+                Ajustar reglas de prevención para evitar la repetición del
+                incidente.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 12: Modelo Responsabilidad Compartida -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🤝 Modelo de Responsabilidad Compartida</div>
+          <div class="slide-subtitle">AWS + Cliente = Seguridad Completa</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <h2 style="font-size: 2rem; margin-bottom: 1rem">
+              En AWS, la seguridad es una responsabilidad compartida.
+            </h2>
+            <p style="font-size: 1.25rem">
+              La frontera exacta de responsabilidad depende del servicio
+              utilizado.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 13: Security OF the Cloud -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🏢 AWS: Security OF the Cloud</div>
+          <div class="slide-subtitle">Seguridad DE la nube</div>
+        </div>
+        <div class="slide-body">
+          <p>
+            AWS es responsable de proteger la infraestructura física e
+            infraestructura base:
+          </p>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Centros de Datos</h3>
+              <p>
+                Seguridad física, guardias, control de acceso e instalaciones.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Hardware</h3>
+              <p>Servidores físicos, racks y unidades de almacenamiento.</p>
+            </div>
+            <div class="card">
+              <h3>Infraestructura Global</h3>
+              <p>Regiones, Availability Zones (AZ) y Edge Locations.</p>
+            </div>
+            <div class="card">
+              <h3>Virtualización Base</h3>
+              <p>Hipervisores y redes físicas subyacentes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 14: Security IN the Cloud -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">👤 Cliente: Security IN the Cloud</div>
+          <div class="slide-subtitle">Seguridad EN la nube</div>
+        </div>
+        <div class="slide-body">
+          <p>
+            El cliente es responsable de todo lo que coloca y configura en la
+            nube:
+          </p>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Datos del Cliente</h3>
+              <p>Cifrado y clasificación de la información.</p>
+            </div>
+            <div class="card">
+              <h3>Gestión IAM</h3>
+              <p>Usuarios, permisos, políticas y habilitación de MFA.</p>
+            </div>
+            <div class="card">
+              <h3>Sistemas Operativos</h3>
+              <p>Parches de SO en instancias EC2 (IaaS).</p>
+            </div>
+            <div class="card">
+              <h3>Configuración de Red</h3>
+              <p>Reglas de firewall en Security Groups y NACLs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 15: Variación por Servicio -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚖️ La responsabilidad depende del servicio
+          </div>
+          <div class="slide-subtitle">Comparación de abstracción</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>IaaS (ej. Amazon EC2)</h3>
+              <p>
+                <strong>Mayor responsabilidad del cliente.</strong> El cliente
+                debe actualizar el Sistema Operativo, parches de seguridad y
+                aplicaciones.
+              </p>
+            </div>
+            <div class="card">
+              <h3>PaaS / Administrado (ej. RDS)</h3>
+              <p>
+                <strong>AWS administra el SO.</strong> AWS instala parches del
+                motor y SO. El cliente configura tablas, accesos y cifrado.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Serverless / SaaS (ej. S3)</h3>
+              <p>
+                <strong>Máxima abstracción.</strong> AWS gestiona la
+                infraestructura física y lógica. El cliente administra accesos y
+                datos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 16: Actividad Responsabilidad Compartida -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🎮 Actividad: ¿Quién es Responsable?</div>
+          <div class="slide-subtitle">
+            Clasifica las tareas según corresponda
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p style="font-size: 1.2rem" id="sr-q-text">
+              Tarea: Parchear el Sistema Operativo invitado de una instancia
+              Amazon EC2.
+            </p>
+            <div class="options-grid" style="margin-top: 1.5rem">
+              <button class="option-btn" onclick="checkSRAct(this, 'client')">
+                A) Cliente
+              </button>
+              <button class="option-btn" onclick="checkSRAct(this, 'aws')">
+                B) AWS
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-sr-act"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 17: IAM Intro -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔑 ¿Quién puede acceder? (AWS IAM)</div>
+          <div class="slide-subtitle">AWS Identity and Access Management</div>
+        </div>
+        <div class="slide-body">
+          <p>
+            IAM gestiona de forma centralizada la autenticación y autorización
+            en AWS.
+          </p>
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.3rem">Flujo de Evaluación de Acceso:</p>
+            <p
+              style="
+                font-size: 1.5rem;
+                color: var(--accent-aws);
+                margin-top: 1rem;
+              "
+            >
+              Identity ➔ Authentication ➔ Authorization ➔ Resource
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 18: AuthN vs AuthZ -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚖️ Authentication vs Authorization</div>
+          <div class="slide-subtitle">Diferencia conceptual fundamental</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card" style="border-top: 4px solid var(--accent-aws)">
+              <h3 style="color: var(--accent-aws)">
+                Authentication (Autenticación)
+              </h3>
+              <p><strong>¿Quién eres?</strong></p>
+              <p>Proceso de verificar la identidad del usuario o servicio.</p>
+              <p>
+                <em>Ejemplo:</em> Iniciar sesión con usuario, contraseña y token
+                MFA.
+              </p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--accent-blue)">
+              <h3 style="color: var(--accent-blue)">
+                Authorization (Autorización)
+              </h3>
+              <p><strong>¿Qué puedes hacer?</strong></p>
+              <p>Evaluación de permisos concedidos sobre los recursos.</p>
+              <p>
+                <em>Ejemplo:</em> Permitir que Juan ejecute
+                <code>s3:GetObject</code> en un bucket.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 19: Componentes de IAM -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🧩 Componentes Principales de IAM</div>
+          <div class="slide-subtitle">Entidades y controles de acceso</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>👤 Users</h3>
+              <p>Identidades persistentes para personas o aplicaciones.</p>
+            </div>
+            <div class="card">
+              <h3>👥 Groups</h3>
+              <p>Colección de usuarios para asignación masiva de permisos.</p>
+            </div>
+            <div class="card">
+              <h3>🎭 Roles</h3>
+              <p>
+                Identidades asumidas temporalmente por servicios o personas.
+              </p>
+            </div>
+            <div class="card">
+              <h3>📜 Policies</h3>
+              <p>Documentos JSON que definen permisos (Allow/Deny).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 20: IAM User -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">👤 IAM User</div>
+          <div class="slide-subtitle">Identidad individual permanente</div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Un <strong>IAM User</strong> representa a una persona o sistema
+              específico que interactúa de manera continua con AWS.
+            </p>
+            <ul style="margin-top: 1rem">
+              <li><strong>Acceso a Consola:</strong> Usuario y Contraseña.</li>
+              <li>
+                <strong>Acceso por CLI / SDK:</strong> Access Key ID y Secret
+                Access Key.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 21: IAM Group -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">👥 IAM Group</div>
+          <div class="slide-subtitle">
+            Administración simplificada de usuarios
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Un <strong>IAM Group</strong> agrupa múltiples usuarios para
+              otorgarles permisos idénticos simultáneamente.
+            </p>
+            <div style="text-align: center; margin-top: 1.5rem">
+              <p>
+                Grupo: <strong>Developers</strong> ➔ Política Adjunta:
+                <code>AmazonS3ReadOnlyAccess</code>
+              </p>
+              <p style="color: var(--accent-aws); margin-top: 0.5rem">
+                Todos los miembros heredan el acceso automáticamente.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 22: IAM Role -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🎭 IAM Role</div>
+          <div class="slide-subtitle">Credenciales temporales seguras</div>
+        </div>
+        <div class="slide-body">
+          <p>
+            Un <strong>IAM Role</strong> no utiliza credenciales fijas; se asume
+            temporalmente.
+          </p>
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.3rem">Patrón de Seguridad Clave:</p>
+            <p
+              style="
+                font-size: 1.5rem;
+                color: var(--accent-blue);
+                margin-top: 1rem;
+              "
+            >
+              Instancia EC2 ➔ Asume IAM Role ➔ Accede a Amazon S3 sin guardar
+              claves en disco
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 23: User vs Role -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚖️ IAM User vs IAM Role</div>
+          <div class="slide-subtitle">Comparación práctica</div>
+        </div>
+        <div class="slide-body">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>IAM User</th>
+                <th>IAM Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Credenciales</td>
+                <td>Permanentes (Password / Access Keys)</td>
+                <td>Temporales (Expiran automáticamente)</td>
+              </tr>
+              <tr>
+                <td>Uso recomendado</td>
+                <td>Personas humanas / Desarrolladores</td>
+                <td>Servicios AWS (EC2, Lambda) / Cuentas cruzadas</td>
+              </tr>
+              <tr>
+                <td>Mantenimiento</td>
+                <td>Requiere rotación manual de claves</td>
+                <td>Sin claves que gestionar o almacenar</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Slide 24: Least Privilege -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            🎯 Principio de Mínimo Privilegio (Least Privilege)
+          </div>
+          <div class="slide-subtitle">
+            Otorgar solo los permisos indispensables
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card" style="border: 1px solid var(--accent-red)">
+              <h3 style="color: var(--accent-red)">❌ Permisos Excesivos</h3>
+              <p>
+                Otorgar <code>AdministratorAccess</code> a un desarrollador que
+                solo necesita leer archivos en un bucket S3.
+              </p>
+            </div>
+            <div class="card" style="border: 1px solid var(--accent-green)">
+              <h3 style="color: var(--accent-green)">✅ Permisos Necesarios</h3>
+              <p>
+                Crear una política personalizada que conceda únicamente
+                <code>s3:GetObject</code> sobre el bucket de desarrollo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 25: MFA -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔐 Autenticación Multifactor (MFA)</div>
+          <div class="slide-subtitle">
+            Segunda capa de verificación de identidad
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.4rem; margin-bottom: 1rem">
+              Password (Algo que sabes) + Token MFA (Algo que tienes) =
+              <strong>Acceso Protegido</strong>
+            </p>
+            <p style="color: var(--accent-aws); font-weight: bold">
+              ⚠️ REGLA DE EXAMEN: Es obligatorio habilitar MFA en la cuenta Root
+              de AWS.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 26: AWS Organizations -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🏢 AWS Organizations</div>
+          <div class="slide-subtitle">
+            Gestión centralizada de múltiples cuentas de AWS
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Management Account</h3>
+              <p>Cuenta administradora central que consolida la facturación.</p>
+            </div>
+            <div class="card">
+              <h3>Member Accounts</h3>
+              <p>Cuentas individuales agrupadas por funciones de negocio.</p>
+            </div>
+            <div class="card">
+              <h3>Organizational Units (OUs)</h3>
+              <p>Estructura jerárquica para agrupar cuentas (ej. Prod, Dev).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 27: Service Control Policies (SCP) -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🛡️ Service Control Policies (SCP)</div>
+          <div class="slide-subtitle">
+            Frontera de permisos máximos a nivel de cuenta
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-aws)">
+            <h3>⚠️ REGLA DE EXAMEN CRÍTICA:</h3>
+            <p style="font-size: 1.25rem; margin-top: 0.5rem">
+              Una SCP <strong>NO concede permisos por sí misma</strong>. Una SCP
+              establece el
+              <strong>límite máximo de permisos posibles</strong> para las
+              cuentas miembro de una organización.
+            </p>
+            <p style="margin-top: 1rem">
+              Permisos Efectivos = Permisos otorgados por IAM
+              <strong>LIMITADOS POR</strong> la SCP de la cuenta.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 28: IAM Identity Center -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🌐 AWS IAM Identity Center</div>
+          <div class="slide-subtitle">
+            Acceso Single Sign-On (SSO) centralizado
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Permite administrar el acceso SSO centralizado a múltiples cuentas
+              de AWS y aplicaciones empresariales (ej. Microsoft 365,
+              Salesforce) utilizando un único conjunto de credenciales.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 29: Escenario Multicuenta -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            💡 Escenario de Examen: Gobierno Multicuenta
+          </div>
+          <div class="slide-subtitle">Evaluación de acceso centralizado</div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Una organización con 50 cuentas AWS
+              desea restringir de forma absoluta que ninguna cuenta pueda
+              eliminar registros de CloudTrail, incluso si el usuario es
+              administrador de esa cuenta local.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkGovScenario(this, false)"
+              >
+                A) Eliminar permisos en cada política IAM local
+              </button>
+              <button class="option-btn" onclick="checkGovScenario(this, true)">
+                B) Aplicar una Service Control Policy (SCP) en AWS Organizations
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-gov"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 30: Protección de Datos -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">📦 Protección de Datos y Cifrado</div>
+          <div class="slide-subtitle">Estados principales de los datos</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>🔒 Data at Rest (En Reposo)</h3>
+              <p>
+                Datos almacenados en discos EBS, buckets S3 o bases de datos
+                RDS.
+              </p>
+            </div>
+            <div class="card">
+              <h3>🚀 Data in Transit (En Tránsito)</h3>
+              <p>
+                Datos viajando a través de la red entre usuarios y servidores.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 31: Encryption at Rest -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔒 Encryption at Rest (En Reposo)</div>
+          <div class="slide-subtitle">
+            Protección de almacenamiento de información
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.3rem">
+              Datos en Texto Plano ➔
+              <strong>[ Clave Criptográfica KMS ]</strong> ➔ Datos Cifrados
+              Ilegibles en Disco
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 32: Encryption in Transit -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🚀 Encryption in Transit (En Tránsito)</div>
+          <div class="slide-subtitle">Protección de la comunicación en red</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.3rem">
+              Cliente / Navegador ➔
+              <strong>[ Canal Seguro TLS / HTTPS ]</strong> ➔ Servicio AWS
+            </p>
+            <p style="margin-top: 1rem">
+              Evita la lectura o manipulación de datos en tránsito por terceros
+              en la red.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 33: AWS KMS -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔑 AWS Key Management Service (KMS)</div>
+          <div class="slide-subtitle">
+            Gestión centralizada de claves criptográficas
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Servicio administrado que permite crear, controlar y gestionar las
+              claves criptográficas para cifrar datos en reposo.
+            </p>
+            <p style="margin-top: 1rem">
+              <strong>Integración nativa con:</strong> S3, EBS, RDS, DynamoDB y
+              Secrets Manager.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 34: Comparación Cifrado -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚖️ Comparación: Cifrado de Datos</div>
+          <div class="slide-subtitle">
+            Resumen conceptual de almacenamiento vs transmisión
+          </div>
+        </div>
+        <div class="slide-body">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Estado</th>
+                <th>¿Dónde aplica?</th>
+                <th>Tecnología principal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Data at Rest</td>
+                <td>Volúmenes EBS, Buckets S3, Bases RDS</td>
+                <td>AWS KMS / Algoritmo AES-256</td>
+              </tr>
+              <tr>
+                <td>Data in Transit</td>
+                <td>Red pública / Conexiones entre servicios</td>
+                <td>TLS / HTTPS / Certificados ACM</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Slide 35: Security Groups -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🧱 Security Groups</div>
+          <div class="slide-subtitle">Firewall virtual a nivel de recurso</div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <h3>Características Clave para Examen:</h3>
+            <ul style="margin-top: 0.5rem">
+              <li>
+                Asociado directamente a la <strong>Instancia (ej. EC2)</strong>.
+              </li>
+              <li>
+                Es <strong>Stateful</strong> (con estado): El tráfico de
+                respuesta sale automáticamente.
+              </li>
+              <li>
+                Solo permite reglas de <strong>ALLOW (Permitir)</strong>. No
+                existen reglas Deny.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 36: Network ACL -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🚧 Network ACL (NACL)</div>
+          <div class="slide-subtitle">
+            Firewall perimetral a nivel de subred
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <h3>Características Clave para Examen:</h3>
+            <ul style="margin-top: 0.5rem">
+              <li>Asociado a nivel de <strong>Subred (Subnet)</strong>.</li>
+              <li>
+                Es <strong>Stateless</strong> (sin estado): Requiere reglas
+                explícitas de entrada y salida.
+              </li>
+              <li>
+                Soporta reglas de <strong>ALLOW y DENEGAR (Deny)</strong>.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 37: SG vs NACL -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚖️ Security Group vs Network ACL</div>
+          <div class="slide-subtitle">Tabla comparativa de examen</div>
+        </div>
+        <div class="slide-body">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>Security Group</th>
+                <th>Network ACL (NACL)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Nivel de aplicación</td>
+                <td>Recurso / Instancia (EC2)</td>
+                <td>Subred (Subnet)</td>
+              </tr>
+              <tr>
+                <td>Estado (State)</td>
+                <td>Stateful (con estado)</td>
+                <td>Stateless (sin estado)</td>
+              </tr>
+              <tr>
+                <td>Tipos de Reglas</td>
+                <td>Solo ALLOW</td>
+                <td>ALLOW y DENY</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Slide 38: AWS WAF -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🌐 AWS WAF (Web Application Firewall)</div>
+          <div class="slide-subtitle">
+            Protección en la Capa de Aplicación (Capa 7)
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>Protege aplicaciones web filtrando el tráfico HTTP/HTTPS.</p>
+            <p style="margin-top: 1rem"><strong>Ataques que mitiga:</strong></p>
+            <ul>
+              <li>SQL Injection (SQLi)</li>
+              <li>Cross-Site Scripting (XSS)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 39: AWS Shield -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🛡️ AWS Shield</div>
+          <div class="slide-subtitle">Protección contra ataques DDoS</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Shield Standard</h3>
+              <p>
+                Gratuito y activado por defecto para todas las cuentas en Capa
+                3/4.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Shield Advanced</h3>
+              <p>
+                Protección avanzada de pago con soporte 24/7 y respuesta a DDoS
+                masivos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 40: WAF vs Shield -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚖️ AWS WAF vs AWS Shield</div>
+          <div class="slide-subtitle">Diferenciación de protección de red</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS WAF</h3>
+              <p>
+                Protege contra ataques de aplicaciones web en Capa 7 (SQLi,
+                XSS).
+              </p>
+            </div>
+            <div class="card">
+              <h3>AWS Shield</h3>
+              <p>
+                Protege contra ataques de denegación de servicio distribuido
+                (DDoS) en Capa 3/4.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 41: Actividad Red -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🎮 Actividad de Seguridad de Red</div>
+          <div class="slide-subtitle">Identifica la herramienta adecuada</div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Se requiere bloquear explícitamente
+              una dirección IP maliciosa conocida para que no pueda entrar a
+              ninguna instancia de una subred.
+            </p>
+            <div class="options-grid">
+              <button class="option-btn" onclick="checkNetAct(this, false)">
+                A) Security Group
+              </button>
+              <button class="option-btn" onclick="checkNetAct(this, true)">
+                B) Network ACL (NACL)
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-net"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 42: Configuración & Cumplimiento Intro -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚙️ ¿Está correctamente configurado?</div>
+          <div class="slide-subtitle">
+            Evaluación continua y gestión de reglas de cumplimiento
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p style="font-size: 1.2rem">
+              La seguridad no consiste únicamente en detener ataques activos.
+            </p>
+            <p style="margin-top: 1rem">
+              Se requiere evaluar configuraciones, registrar cambios en el
+              tiempo y verificar si los recursos cumplen con las reglas internas
+              de la empresa.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 43: AWS Config -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">📜 AWS Config</div>
+          <div class="slide-subtitle">
+            Auditoría y evaluación de configuraciones de recursos
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-aws)">
+            <h3>Palabras clave de examen:</h3>
+            <p
+              style="
+                font-size: 1.2rem;
+                color: var(--accent-aws);
+                font-weight: bold;
+                margin-top: 0.5rem;
+              "
+            >
+              Resource Configuration / Configuration History / Compliance Rules
+              / Compliant vs Noncompliant
+            </p>
+            <p style="margin-top: 1rem">
+              Registra los cambios de configuración de los recursos de AWS y los
+              evalúa de forma continua frente a reglas predefinidas.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 44: Config vs CloudTrail -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚖️ AWS Config vs AWS CloudTrail</div>
+          <div class="slide-subtitle">Diferencia crítica en auditoría</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS Config</h3>
+              <p><strong>¿Cómo está configurado el recurso?</strong></p>
+              <p>
+                Evalúa el estado del recurso y sus cambios (ej. si un bucket S3
+                pasó a ser público).
+              </p>
+            </div>
+            <div class="card">
+              <h3>AWS CloudTrail</h3>
+              <p><strong>¿Qué actividad / llamada API ocurrió?</strong></p>
+              <p>
+                Registra la acción del usuario (ej. quién ejecutó la API para
+                hacer el bucket público).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 45: Config en el Ciclo -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔄 AWS Config en el Ciclo de Seguridad</div>
+          <div class="slide-subtitle">Uso en Prevenir y Detectar</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.2rem">
+              Configuración Incorrecta ➔ <strong>AWS Config Rule</strong> ➔
+              Estado: <code>NONCOMPLIANT</code> ➔ Alerta y Corrección
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 46: Detección y Monitoreo Intro -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">👁️ ¿Cómo sabemos qué está ocurriendo?</div>
+          <div class="slide-subtitle">Detección, Monitoreo y Auditoría</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.4rem">
+              Monitor ➔ Log ➔ Audit ➔ Detect ➔ Investigate
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 47: CloudTrail -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">📜 AWS CloudTrail</div>
+          <div class="slide-subtitle">
+            Auditoría de actividad y llamadas API
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-aws)">
+            <h3>Palabras clave de examen:</h3>
+            <p
+              style="
+                font-size: 1.2rem;
+                color: var(--accent-aws);
+                font-weight: bold;
+                margin-top: 0.5rem;
+              "
+            >
+              API Activity / User Activity / Audit Log / Account History
+            </p>
+            <p style="margin-top: 1rem">
+              Registra las acciones realizadas por usuarios, roles o servicios
+              en la cuenta. Responde a: <strong>¿Quién hizo qué?</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 48: CloudWatch -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">📊 Amazon CloudWatch</div>
+          <div class="slide-subtitle">Monitoreo de rendimiento y métricas</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-blue)">
+            <h3>Palabras clave de examen:</h3>
+            <p
+              style="
+                font-size: 1.2rem;
+                color: var(--accent-blue);
+                font-weight: bold;
+                margin-top: 0.5rem;
+              "
+            >
+              Metrics / Logs / Alarms / Observability
+            </p>
+            <p style="margin-top: 1rem">
+              Recopila métricas operativas (uso de CPU, red) y configura alarmas
+              para alertas de rendimiento.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 49: GuardDuty -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🛡️ Amazon GuardDuty</div>
+          <div class="slide-subtitle">Detección inteligente de amenazas</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-purple)">
+            <h3>Palabras clave de examen:</h3>
+            <p
+              style="
+                font-size: 1.2rem;
+                color: var(--accent-purple);
+                font-weight: bold;
+                margin-top: 0.5rem;
+              "
+            >
+              Threat Detection / Machine Learning / Suspicious Activity
+            </p>
+            <p style="margin-top: 1rem">
+              Analiza continuamente registros de red y CloudTrail para
+              identificar comportamientos maliciosos o anómalos.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 50: Inspector -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔍 Amazon Inspector</div>
+          <div class="slide-subtitle">
+            Evaluación de vulnerabilidades de software
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-green)">
+            <h3>Palabras clave de examen:</h3>
+            <p
+              style="
+                font-size: 1.2rem;
+                color: var(--accent-green);
+                font-weight: bold;
+                margin-top: 0.5rem;
+              "
+            >
+              Vulnerability Assessment / EC2 Scans / Software Flaws
+            </p>
+            <p style="margin-top: 1rem">
+              Escanea automáticamente cargas de trabajo EC2 y contenedores en
+              busca de vulnerabilidades de software conocidas.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 51: Security Hub -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🎯 AWS Security Hub</div>
+          <div class="slide-subtitle">
+            Centralización de hallazgos de seguridad
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Consolida los hallazgos de GuardDuty, Inspector, Macie y AWS
+              Config en un único panel centralizado para gestionar el
+              cumplimiento.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 52: Detective -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔎 Amazon Detective</div>
+          <div class="slide-subtitle">Investigación de posibles incidentes</div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Analiza e investiga las causas raíz de eventos de seguridad
+              utilizando gráficos de visualización de datos de la cuenta.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 53: Comparación Monitoreo y Auditoría -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚖️ Matriz Comparativa: Monitoreo & Auditoría
+          </div>
+          <div class="slide-subtitle">
+            ¿Qué pregunta responde cada servicio?
+          </div>
+        </div>
+        <div class="slide-body">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Pregunta Principal</th>
+                <th>Palabra Clave</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CloudTrail</td>
+                <td>¿Qué actividad/API ocurrió?</td>
+                <td>API Activity / Audit</td>
+              </tr>
+              <tr>
+                <td>CloudWatch</td>
+                <td>¿Cómo se comporta el rendimiento?</td>
+                <td>Metrics / Alarms</td>
+              </tr>
+              <tr>
+                <td>GuardDuty</td>
+                <td>¿Existe actividad sospechosa / amenaza?</td>
+                <td>Threat Detection / ML</td>
+              </tr>
+              <tr>
+                <td>Inspector</td>
+                <td>¿Existen vulnerabilidades en software?</td>
+                <td>Vulnerability Scan</td>
+              </tr>
+              <tr>
+                <td>AWS Config</td>
+                <td>¿Cómo está configurado el recurso?</td>
+                <td>Compliance / Rules</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Slide 54: Trusted Advisor Intro -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">💡 ¿Estamos siguiendo buenas prácticas?</div>
+          <div class="slide-subtitle">
+            Evaluación automatizada de la arquitectura
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Incluso con sistemas operativos, se pueden cometer errores de
+              configuración que generen costos innecesarios o riesgos de
+              seguridad.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 55: AWS Trusted Advisor -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">💡 AWS Trusted Advisor</div>
+          <div class="slide-subtitle">
+            Recomendaciones para la optimización del entorno
+          </div>
+        </div>
+        <div class="slide-body">
+          <p>Proporciona recomendaciones en 5 categorías principales:</p>
+          <div class="card-grid">
+            <div class="card"><h3>1. Cost Optimization</h3></div>
+            <div class="card"><h3>2. Performance</h3></div>
+            <div class="card"><h3>3. Security</h3></div>
+            <div class="card"><h3>4. Fault Tolerance</h3></div>
+            <div class="card"><h3>5. Service Limits</h3></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 56: Trusted Advisor y Seguridad -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🛡️ Trusted Advisor en Seguridad</div>
+          <div class="slide-subtitle">
+            Verificación de recomendaciones clave
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Efectúa verificaciones automáticas de seguridad básicas (ej.
+              buckets S3 públicos, MFA deshabilitado en cuenta Root, Security
+              Groups permisivos).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 57: Config vs Trusted Advisor -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚖️ AWS Config vs AWS Trusted Advisor</div>
+          <div class="slide-subtitle">Diferenciación de uso</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS Config</h3>
+              <p>
+                Evaluación de configuraciones detalladas frente a reglas y
+                registros de cambios en recursos.
+              </p>
+            </div>
+            <div class="card">
+              <h3>AWS Trusted Advisor</h3>
+              <p>
+                Recomendaciones generales de buenas prácticas en 5 pilares
+                (Costos, Seguridad, Rendimiento, etc.).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 58: Compliance -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">📋 Cumplimiento y Gobierno (Compliance)</div>
+          <div class="slide-subtitle">
+            Verificación de estándares internacionales
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Asegura que la infraestructura de AWS cumpla con normativas
+              regulatorias globales (SOC, PCI-DSS, HIPAA, ISO).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 59: AWS Artifact -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">📄 AWS Artifact</div>
+          <div class="slide-subtitle">
+            Portal bajo demanda para reportes de auditoría
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-aws)">
+            <h3>Palabras clave de examen:</h3>
+            <p
+              style="
+                font-size: 1.2rem;
+                color: var(--accent-aws);
+                font-weight: bold;
+                margin-top: 0.5rem;
+              "
+            >
+              Compliance Reports / SOC Reports / PCI Compliance / Audit
+              Documents
+            </p>
+            <p style="margin-top: 1rem">
+              Portal para descargar los informes oficiales de auditoría y
+              acuerdos de cumplimiento de AWS.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 60: Mapa de Gobierno -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🗺️ Mapa de Gobierno y Cumplimiento</div>
+          <div class="slide-subtitle">
+            Integración de herramientas de control
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS Organizations</h3>
+              <p>Estructura multicuenta y SCPs.</p>
+            </div>
+            <div class="card">
+              <h3>AWS Config</h3>
+              <p>Reglas de cumplimiento de recursos.</p>
+            </div>
+            <div class="card">
+              <h3>AWS Trusted Advisor</h3>
+              <p>Recomendaciones de optimización.</p>
+            </div>
+            <div class="card">
+              <h3>AWS Artifact</h3>
+              <p>Reportes de cumplimiento de auditoría.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 61: Amazon Macie -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔍 Amazon Macie</div>
+          <div class="slide-subtitle">
+            Descubrimiento y protección de datos sensibles
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="border-left: 4px solid var(--accent-blue)">
+            <h3>Palabras clave de examen:</h3>
+            <p
+              style="
+                font-size: 1.2rem;
+                color: var(--accent-blue);
+                font-weight: bold;
+                margin-top: 0.5rem;
+              "
+            >
+              Sensitive Data / PII Discovery / Amazon S3 Protection
+            </p>
+            <p style="margin-top: 1rem">
+              Utiliza Machine Learning para descubrir y clasificar
+              automáticamente información de identificación personal (PII) en
+              S3.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 62: ACM -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔒 AWS Certificate Manager (ACM)</div>
+          <div class="slide-subtitle">Gestión de certificados SSL/TLS</div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              Aprovisiona, gestiona y despliega certificados digitales SSL/TLS
+              para habilitar conexiones HTTPS seguras.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 63: Mapa Completo -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            🗺️ Mapa Completo de Servicios de Seguridad
+          </div>
+          <div class="slide-subtitle">Ecosistema integral de AWS</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h4>Identidad</h4>
+              <div class="tag-container">
+                <span class="tag">IAM</span
+                ><span class="tag">Identity Center</span>
+              </div>
+            </div>
+            <div class="card">
+              <h4>Gobierno</h4>
+              <div class="tag-container">
+                <span class="tag">Organizations</span
+                ><span class="tag">SCP</span>
+              </div>
+            </div>
+            <div class="card">
+              <h4>Protección</h4>
+              <div class="tag-container">
+                <span class="tag">KMS</span><span class="tag">WAF</span
+                ><span class="tag">Shield</span><span class="tag">Macie</span>
+              </div>
+            </div>
+            <div class="card">
+              <h4>Config / Detección</h4>
+              <div class="tag-container">
+                <span class="tag">Config</span><span class="tag">GuardDuty</span
+                ><span class="tag">Inspector</span>
+              </div>
+            </div>
+            <div class="card">
+              <h4>Monitoreo / Auditoría</h4>
+              <div class="tag-container">
+                <span class="tag">CloudTrail</span
+                ><span class="tag">CloudWatch</span>
+              </div>
+            </div>
+            <div class="card">
+              <h4>Central / Compliance</h4>
+              <div class="tag-container">
+                <span class="tag">Security Hub</span
+                ><span class="tag">Trusted Advisor</span
+                ><span class="tag">Artifact</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slides 64-72: Comparaciones Directas -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚡ Comparación 1: Autenticación vs Autorización
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Autenticación</h3>
+              <p>¿Quién eres? (Verificación de identidad).</p>
+            </div>
+            <div class="card">
+              <h3>Autorización</h3>
+              <p>¿Qué puedes hacer? (Permisos IAM).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚡ Comparación 2: IAM User vs IAM Role</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>IAM User</h3>
+              <p>Identidad permanente para personas físicas.</p>
+            </div>
+            <div class="card">
+              <h3>IAM Role</h3>
+              <p>
+                Identidad con credenciales temporales para servicios o accesos
+                cruzados.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚡ Comparación 3: Security Group vs Network ACL
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Security Group</h3>
+              <p>Nivel de instancia / Stateful / Solo reglas ALLOW.</p>
+            </div>
+            <div class="card">
+              <h3>Network ACL</h3>
+              <p>Nivel de subred / Stateless / Reglas ALLOW y DENY.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">⚡ Comparación 4: AWS WAF vs AWS Shield</div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS WAF</h3>
+              <p>Protección contra exploits web en Capa 7 (SQLi, XSS).</p>
+            </div>
+            <div class="card">
+              <h3>AWS Shield</h3>
+              <p>Protección contra ataques DDoS masivos en Capa 3/4.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚡ Comparación 5: CloudTrail vs CloudWatch
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS CloudTrail</h3>
+              <p>
+                Registro de eventos y llamadas a la API ("¿Quién lo hizo?").
+              </p>
+            </div>
+            <div class="card">
+              <h3>Amazon CloudWatch</h3>
+              <p>Monitoreo de métricas y rendimiento ("¿Cómo funciona?").</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚡ Comparación 6: CloudTrail vs AWS Config
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS CloudTrail</h3>
+              <p>Registro de actividad de API realizada por usuarios.</p>
+            </div>
+            <div class="card">
+              <h3>AWS Config</h3>
+              <p>
+                Registro de historial de configuración de recursos y reglas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚡ Comparación 7: AWS Config vs Trusted Advisor
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS Config</h3>
+              <p>
+                Evaluación detallada de cumplimiento sobre recursos específicos.
+              </p>
+            </div>
+            <div class="card">
+              <h3>AWS Trusted Advisor</h3>
+              <p>Recomendaciones globales de buenas prácticas en 5 pilares.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚡ Comparación 8: GuardDuty vs Inspector
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Amazon GuardDuty</h3>
+              <p>Detección inteligente de amenazas activas mediante ML.</p>
+            </div>
+            <div class="card">
+              <h3>Amazon Inspector</h3>
+              <p>
+                Escaneo de vulnerabilidades de software conocidas en cargas de
+                trabajo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            ⚡ Comparación 9: Security Hub vs Detective
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>AWS Security Hub</h3>
+              <p>
+                Panel centralizado que reúne todos los hallazgos de seguridad.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Amazon Detective</h3>
+              <p>
+                Herramienta para investigar las causas raíz de los incidentes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 73: Retorno al ciclo -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔄 Todo vuelve al ciclo de seguridad</div>
+          <div class="slide-subtitle">Conexión conceptual de herramientas</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <p style="font-size: 1.5rem; color: var(--accent-aws)">
+              PREVENIR ➔ DETECTAR ➔ RESPONDER ➔ RECUPERAR
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slides 74-77: Mapeo por etapa -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🛡️ Mapeo: Prevenir</div>
+        </div>
+        <div class="slide-body">
+          <div class="tag-container" style="gap: 1rem">
+            <span class="tag">AWS IAM</span><span class="tag">MFA</span
+            ><span class="tag">Least Privilege</span>
+            <span class="tag">Security Groups</span
+            ><span class="tag">Network ACL</span
+            ><span class="tag">AWS WAF</span> <span class="tag">AWS KMS</span
+            ><span class="tag">AWS Config</span
+            ><span class="tag">Trusted Advisor</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🔍 Mapeo: Detectar</div>
+        </div>
+        <div class="slide-body">
+          <div class="tag-container" style="gap: 1rem">
+            <span class="tag">AWS CloudTrail</span
+            ><span class="tag">Amazon GuardDuty</span>
+            <span class="tag">Amazon Inspector</span
+            ><span class="tag">AWS Security Hub</span
+            ><span class="tag">AWS Config</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🚨 Mapeo: Investigar y Responder</div>
+        </div>
+        <div class="slide-body">
+          <div class="tag-container" style="gap: 1rem">
+            <span class="tag">Amazon Detective</span
+            ><span class="tag">AWS CloudTrail</span
+            ><span class="tag">AWS Security Hub</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🌱 Mapeo: Recuperar</div>
+        </div>
+        <div class="slide-body">
+          <div class="tag-container" style="gap: 1rem">
+            <span class="tag">AWS Backup</span
+            ><span class="tag">Amazon S3 Versioning</span
+            ><span class="tag">Resiliente IaC</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 78: Modelo Mental de Arquitectura -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            🌐 Modelo Mental de Arquitectura de Seguridad
+          </div>
+          <div class="slide-subtitle">Flujo integrado</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 1.5rem">
+            <p>
+              Responsabilidad Compartida ➔ Identidad (IAM) ➔ Protección
+              (WAF/KMS) ➔ Configuración (Config) ➔ Detección (GuardDuty/Trail) ➔
+              Respuesta & Recuperación
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slides 79-86: Casos Prácticos (8 casos) -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📋 Caso Práctico 1: Detección de Amenazas
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Una empresa requiere analizar llamadas
+              API inusuales y posibles credenciales comprometidas utilizando
+              Machine Learning.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c1')"
+              >
+                A) Amazon Inspector
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c1')"
+              >
+                B) Amazon GuardDuty
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c1')"
+              >
+                C) AWS WAF
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c1')"
+              >
+                D) AWS Artifact
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c1">
+              <strong>¡Correcto!</strong> Amazon GuardDuty utiliza ML para
+              detectar amenazas. Palabra clave: <em>Threat Detection / ML</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📋 Caso Práctico 2: Auditoría e Informes
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Un auditor de seguridad necesita
+              descargar los reportes de cumplimiento SOC 2 de la infraestructura
+              de AWS.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c2')"
+              >
+                A) AWS Security Hub
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c2')"
+              >
+                B) AWS Artifact
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c2')"
+              >
+                C) AWS KMS
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c2')"
+              >
+                D) AWS Config
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c2">
+              <strong>¡Correcto!</strong> AWS Artifact es el portal para
+              reportes de cumplimiento normativo. Palabra clave:
+              <em>Compliance Reports</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📋 Caso Práctico 3: Asignación de Permisos
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Una aplicación que corre en una
+              instancia EC2 necesita escribir archivos en Amazon S3 de forma
+              segura.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c3')"
+              >
+                A) Guardar Access Keys fijas en la instancia
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c3')"
+              >
+                B) Asignar un IAM Role a la instancia EC2
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c3')"
+              >
+                C) Usar la cuenta Root de AWS
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c3')"
+              >
+                D) Crear un grupo IAM con acceso total
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c3">
+              <strong>¡Correcto!</strong> IAM Roles otorgan credenciales
+              temporales a servicios de AWS. Palabra clave:
+              <em>Temporary Credentials / IAM Role</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">📋 Caso Práctico 4: Ataques DDoS</div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Se requiere proteger la aplicación web
+              contra ataques masivos de denegación de servicio (DDoS) en la capa
+              de red.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c4')"
+              >
+                A) AWS Shield
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c4')"
+              >
+                B) AWS WAF
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c4')"
+              >
+                C) Amazon Inspector
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c4')"
+              >
+                D) Security Group
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c4">
+              <strong>¡Correcto!</strong> AWS Shield mitiga ataques DDoS.
+              Palabra clave: <em>DDoS Protection</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📋 Caso Práctico 5: Evaluación de Vulnerabilidades
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Una empresa necesita escanear sus
+              instancias EC2 para identificar paquetes de software con
+              vulnerabilidades conocidas.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c5')"
+              >
+                A) Amazon Inspector
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c5')"
+              >
+                B) Amazon GuardDuty
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c5')"
+              >
+                C) AWS CloudTrail
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c5')"
+              >
+                D) AWS Config
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c5">
+              <strong>¡Correcto!</strong> Amazon Inspector realiza análisis de
+              vulnerabilidades en cargas de trabajo. Palabra clave:
+              <em>Vulnerability Assessment</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📋 Caso Práctico 6: Evaluación de Reglas de Configuración
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Se desea evaluar continuamente si los
+              volúmenes EBS creados en la cuenta tienen activado el cifrado
+              frente a una regla establecida.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c6')"
+              >
+                A) AWS Config
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c6')"
+              >
+                B) AWS Trusted Advisor
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c6')"
+              >
+                C) AWS CloudTrail
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c6')"
+              >
+                D) Amazon GuardDuty
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c6">
+              <strong>¡Correcto!</strong> AWS Config evalúa si los recursos
+              cumplen con las reglas de configuración. Palabra clave:
+              <em>Configuration Rules / Compliance</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📋 Caso Práctico 7: Recomendaciones Generales
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Se requiere un análisis general del
+              entorno para obtener recomendaciones sobre límites de servicio,
+              costos y seguridad básica.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c7')"
+              >
+                A) AWS Trusted Advisor
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c7')"
+              >
+                B) AWS Config
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c7')"
+              >
+                C) AWS Artifact
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c7')"
+              >
+                D) AWS Security Hub
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c7">
+              <strong>¡Correcto!</strong> AWS Trusted Advisor otorga
+              recomendaciones sobre buenas prácticas en 5 pilares. Palabra
+              clave: <em>Recommendations</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            📋 Caso Práctico 8: Registro de Actividad de Usuarios
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p>
+              <strong>Escenario:</strong> Se necesita determinar cuál usuario
+              eliminó un bucket S3 específico a las 3:00 AM.
+            </p>
+            <div class="options-grid">
+              <button
+                class="option-btn"
+                onclick="checkCase(this, true, 'fb-c8')"
+              >
+                A) AWS CloudTrail
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c8')"
+              >
+                B) Amazon CloudWatch
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c8')"
+              >
+                C) AWS Config
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkCase(this, false, 'fb-c8')"
+              >
+                D) Amazon GuardDuty
+              </button>
+            </div>
+            <div class="feedback-panel" id="fb-c8">
+              <strong>¡Correcto!</strong> AWS CloudTrail audita e identifica la
+              actividad y llamadas a la API. Palabra clave:
+              <em>API Activity / Audit</em>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slides 87-101: Quiz Engine (15 preguntas) -->
+      <div class="slide" id="quiz-slide-template">
+        <div class="slide-header">
+          <div class="slide-title">📝 Quiz Final de Evaluación</div>
+          <div class="slide-subtitle" id="quiz-progress-text">
+            Pregunta 1 de 15
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card">
+            <p
+              style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem"
+              id="quiz-q-text"
+            >
+              Texto de la pregunta...
+            </p>
+            <div class="options-grid" id="quiz-opts-container"></div>
+            <div class="feedback-panel" id="quiz-fb-panel"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 102: Resultados Quiz -->
+      <div class="slide" id="slide-results">
+        <div class="slide-header">
+          <div class="slide-title">📊 Resultados del Quiz Final</div>
+          <div class="slide-subtitle">Resumen de rendimiento</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 2rem">
+            <h2
+              style="font-size: 2.5rem; color: var(--accent-aws)"
+              id="res-score"
+            >
+              0 / 15
+            </h2>
+            <p style="font-size: 1.5rem; margin-top: 0.5rem" id="res-percent">
+              0%
+            </p>
+            <div
+              id="res-feedback"
+              style="margin-top: 1.5rem; text-align: left"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 103: Cheat Sheet Palabras Clave -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">
+            🔑 Palabras Clave del Examen (Cheat Sheet)
+          </div>
+          <div class="slide-subtitle">
+            Asociación rápida para preguntas de examen
+          </div>
+        </div>
+        <div class="slide-body">
+          <div class="card-grid">
+            <div class="card">
+              <p>
+                <strong>Shared Responsibility:</strong> AWS (OF) vs Cliente (IN)
+              </p>
+              <p>
+                <strong>Least Privilege:</strong> Permisos mínimos estrictos
+              </p>
+              <p><strong>Temporary Credentials:</strong> IAM Role</p>
+              <p>
+                <strong>Max Permissions Boundary:</strong> Service Control
+                Policy (SCP)
+              </p>
+              <p><strong>DDoS Protection:</strong> AWS Shield</p>
+              <p><strong>Web App Exploits (SQLi/XSS):</strong> AWS WAF</p>
+            </div>
+            <div class="card">
+              <p><strong>API Activity Audit:</strong> AWS CloudTrail</p>
+              <p><strong>Resource Configuration History:</strong> AWS Config</p>
+              <p><strong>Threat Detection (ML):</strong> Amazon GuardDuty</p>
+              <p><strong>Vulnerability Scan:</strong> Amazon Inspector</p>
+              <p>
+                <strong>Best Practice Recommendations:</strong> AWS Trusted
+                Advisor
+              </p>
+              <p><strong>Compliance Reports:</strong> AWS Artifact</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 104: Resumen Final -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-title">🏆 AWS SECURITY — CLOUD PRACTITIONER</div>
+          <div class="slide-subtitle">Resumen conceptual de preparación</div>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="text-align: center; padding: 1.5rem">
+            <p
+              style="
+                font-size: 1.1rem;
+                font-weight: bold;
+                color: var(--accent-aws);
+              "
+            >
+              FLUJO DE TRABAJO DE SEGURIDAD EN LA NUBE:
+            </p>
+            <p style="font-size: 1.1rem; margin: 1rem 0">
+              PROTEGER ➔ CONTROLAR ACCESO ➔ CIFRAR ➔ CONFIGURAR CORRECTAMENTE ➔
+              DETECTAR ➔ AUDITAR ➔ INVESTIGAR ➔ RESPONDER ➔ RECUPERAR
+            </p>
+            <div
+              style="
+                border-top: 1px solid var(--border-color);
+                padding-top: 1rem;
+                margin-top: 1rem;
+              "
+            >
+              <p
+                style="
+                  font-size: 1.2rem;
+                  font-style: italic;
+                  color: var(--text-main);
+                "
+              >
+                "Para el examen, no memorices solamente el nombre del
+                servicio.<br />Comprende qué problema resuelve y qué palabra
+                clave lo identifica."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="nav-btn-group">
+        <button class="btn-nav" id="btnPrev" onclick="prevSlide()">
+          ← Anterior
+        </button>
+        <button class="btn-nav" id="btnNext" onclick="nextSlide()">
+          Siguiente →
+        </button>
+      </div>
+      <div class="slide-counter" id="slideCounter">Slide 1 / 104</div>
+    </footer>
+
+    <script>
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+
+      function updatePresentation() {
+        slides.forEach((s, i) =>
+          s.classList.toggle("active", i === currentSlide),
+        );
+        document.getElementById("slideCounter").textContent =
+          `Slide ${currentSlide + 1} / ${totalSlides}`;
+        document.getElementById("progressBar").style.width =
+          `${((currentSlide + 1) / totalSlides) * 100}%`;
+
+        document.getElementById("btnPrev").disabled = currentSlide === 0;
+        document.getElementById("btnNext").disabled =
+          currentSlide === totalSlides - 1;
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updatePresentation();
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updatePresentation();
+        }
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+
+      function toggleTheme() {
+        const isLight = document.body.getAttribute("data-theme") === "light";
+        if (isLight) {
+          document.body.removeAttribute("data-theme");
+          document.getElementById("btnTheme").textContent = "🌙 Modo Oscuro";
+        } else {
+          document.body.setAttribute("data-theme", "light");
+          document.getElementById("btnTheme").textContent = "☀️ Modo Claro";
+        }
+      }
+
+      function togglePresentationMode() {
+        document.body.classList.toggle("presentation-mode");
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      }
+
+      function checkSRAct(btn, choice) {
+        const fb = document.getElementById("fb-sr-act");
+        fb.classList.add("visible");
+        if (choice === "client") {
+          btn.classList.add("correct");
+          fb.className = "feedback-panel visible success";
+          fb.innerHTML =
+            "<strong>¡Correcto!</strong> En instancias EC2 (IaaS), la gestión y actualización del Sistema Operativo es responsabilidad del cliente.";
+        } else {
+          btn.classList.add("incorrect");
+          fb.className = "feedback-panel visible error";
+          fb.innerHTML =
+            "<strong>Incorrecto.</strong> AWS gestiona el hardware subyacente. El cliente debe parchear el Sistema Operativo invitado de EC2.";
+        }
+      }
+
+      function checkGovScenario(btn, isCorrect) {
+        const fb = document.getElementById("fb-gov");
+        fb.classList.add("visible");
+        if (isCorrect) {
+          btn.classList.add("correct");
+          fb.className = "feedback-panel visible success";
+          fb.innerHTML =
+            "<strong>¡Correcto!</strong> Las Service Control Policies (SCP) de AWS Organizations establecen límites máximos preventivos a nivel de cuenta.";
+        } else {
+          btn.classList.add("incorrect");
+          fb.className = "feedback-panel visible error";
+          fb.innerHTML =
+            "<strong>Incorrecto.</strong> Un usuario con permisos de administrador en una cuenta local podría revertir cambios IAM locales. Se requiere una SCP.";
+        }
+      }
+
+      function checkNetAct(btn, isCorrect) {
+        const fb = document.getElementById("fb-net");
+        fb.classList.add("visible");
+        if (isCorrect) {
+          btn.classList.add("correct");
+          fb.className = "feedback-panel visible success";
+          fb.innerHTML =
+            "<strong>¡Correcto!</strong> Las Network ACLs funcionan a nivel de subred y permiten reglas explícitas de DENEGAR (Deny).";
+        } else {
+          btn.classList.add("incorrect");
+          fb.className = "feedback-panel visible error";
+          fb.innerHTML =
+            "<strong>Incorrecto.</strong> Los Security Groups solo admiten reglas de ALLOW. Debes usar una Network ACL para reglas DENY.";
+        }
+      }
+
+      function checkCase(btn, isCorrect, fbId) {
+        const fb = document.getElementById(fbId);
+        fb.classList.add("visible");
+        if (isCorrect) {
+          btn.classList.add("correct");
+          fb.classList.add("success");
+        } else {
+          btn.classList.add("incorrect");
+          fb.classList.add("error");
+        }
+      }
+
+      const quizQuestions = [
+        {
+          q: "1. ¿Quién es responsable de la seguridad física de los centros de datos en AWS?",
+          opts: ["Cliente", "AWS", "Compartido", "Proveedor externo"],
+          ans: 1,
+          topic: "Shared Responsibility",
+        },
+        {
+          q: "2. ¿Qué entidad otorga credenciales temporales a una instancia EC2?",
+          opts: ["IAM User", "IAM Role", "IAM Group", "Root Key"],
+          ans: 1,
+          topic: "IAM Roles",
+        },
+        {
+          q: "3. Para cumplir con el Principio de Mínimo Privilegio, ¿qué acción debe realizarse?",
+          opts: [
+            "Otorgar AdministratorAccess a desarrolladores",
+            "Conceder únicamente los permisos necesarios para la tarea",
+            "Desactivar la autenticación MFA",
+            "Usar siempre el usuario Root",
+          ],
+          ans: 1,
+          topic: "Least Privilege",
+        },
+        {
+          q: "4. ¿Qué servicio audita y registra las llamadas a la API realizada en la cuenta?",
+          opts: [
+            "Amazon CloudWatch",
+            "AWS CloudTrail",
+            "AWS Config",
+            "Amazon GuardDuty",
+          ],
+          ans: 1,
+          topic: "CloudTrail",
+        },
+        {
+          q: "5. ¿Qué servicio proporciona protección contra ataques DDoS masivos?",
+          opts: ["AWS WAF", "AWS Shield", "Amazon Inspector", "AWS KMS"],
+          ans: 1,
+          topic: "Shield",
+        },
+        {
+          q: "6. ¿Cuál es una característica de los Security Groups?",
+          opts: [
+            "Aplica a nivel de Subred",
+            "Es Stateless",
+            "Es Stateful y solo permite reglas ALLOW",
+            "Soporta reglas DENY explícitas",
+          ],
+          ans: 2,
+          topic: "Security Groups",
+        },
+        {
+          q: "7. ¿Qué política establece la frontera de permisos máximos en AWS Organizations?",
+          opts: [
+            "IAM Policy",
+            "Service Control Policy (SCP)",
+            "Network ACL",
+            "Bucket Policy",
+          ],
+          ans: 1,
+          topic: "SCP",
+        },
+        {
+          q: "8. ¿Qué servicio administra claves criptográficas para el cifrado en reposo?",
+          opts: [
+            "AWS KMS",
+            "AWS Secrets Manager",
+            "AWS Certificate Manager",
+            "AWS Artifact",
+          ],
+          ans: 0,
+          topic: "AWS KMS",
+        },
+        {
+          q: "9. Servicio que utiliza Machine Learning para la detección inteligente de amenazas:",
+          opts: [
+            "Amazon Inspector",
+            "Amazon GuardDuty",
+            "AWS Security Hub",
+            "AWS Config",
+          ],
+          ans: 1,
+          topic: "GuardDuty",
+        },
+        {
+          q: "10. Portal bajo demanda para descargar informes de auditoría y cumplimiento (SOC, PCI):",
+          opts: [
+            "AWS Security Hub",
+            "AWS Artifact",
+            "AWS Trusted Advisor",
+            "AWS Config",
+          ],
+          ans: 1,
+          topic: "Artifact",
+        },
+        {
+          q: "11. Servicio que evalúa el historial de configuraciones de recursos frente a reglas:",
+          opts: [
+            "AWS Config",
+            "AWS CloudTrail",
+            "Amazon CloudWatch",
+            "Amazon GuardDuty",
+          ],
+          ans: 0,
+          topic: "AWS Config",
+        },
+        {
+          q: "12. Servicio que proporciona recomendaciones en 5 pilares (Costos, Seguridad, Rendimiento, etc.):",
+          opts: [
+            "AWS Config",
+            "AWS Trusted Advisor",
+            "AWS Artifact",
+            "Amazon Inspector",
+          ],
+          ans: 1,
+          topic: "Trusted Advisor",
+        },
+        {
+          q: "13. Descubre y clasifica datos sensibles de PII en buckets de Amazon S3 con ML:",
+          opts: [
+            "Amazon Macie",
+            "Amazon Inspector",
+            "AWS WAF",
+            "Amazon GuardDuty",
+          ],
+          ans: 0,
+          topic: "Macie",
+        },
+        {
+          q: "14. Monitorea métricas operativas (CPU, memoria) y genera alarmas:",
+          opts: [
+            "AWS CloudTrail",
+            "Amazon CloudWatch",
+            "AWS Config",
+            "Amazon Detective",
+          ],
+          ans: 1,
+          topic: "CloudWatch",
+        },
+        {
+          q: "15. Escanea vulnerabilidades de software en instancias EC2 y contenedores:",
+          opts: [
+            "Amazon GuardDuty",
+            "Amazon Inspector",
+            "Amazon Macie",
+            "AWS WAF",
+          ],
+          ans: 1,
+          topic: "Inspector",
+        },
+      ];
+
+      let currentQuizIdx = 0;
+      let quizAnswers = {};
+
+      function renderQuizSlide() {
+        const q = quizQuestions[currentQuizIdx];
+        document.getElementById("quiz-progress-text").textContent =
+          `Pregunta ${currentQuizIdx + 1} de ${quizQuestions.length}`;
+        document.getElementById("quiz-q-text").textContent = q.q;
+
+        const optsContainer = document.getElementById("quiz-opts-container");
+        optsContainer.innerHTML = "";
+
+        q.opts.forEach((opt, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          btn.textContent = opt;
+          if (quizAnswers[currentQuizIdx] === idx)
+            btn.classList.add("selected");
+          btn.onclick = () => selectQuizAnswer(idx);
+          optsContainer.appendChild(btn);
+        });
+      }
+
+      function selectQuizAnswer(idx) {
+        quizAnswers[currentQuizIdx] = idx;
+        renderQuizSlide();
+
+        if (Object.keys(quizAnswers).length === quizQuestions.length) {
+          calculateQuizResults();
+        }
+      }
+
+      function calculateQuizResults() {
+        let score = 0;
+        const reviewTopics = new Set();
+
+        quizQuestions.forEach((q, i) => {
+          if (quizAnswers[i] === q.ans) {
+            score++;
+          } else {
+            reviewTopics.add(q.topic);
+          }
+        });
+
+        const percent = Math.round((score / quizQuestions.length) * 100);
+        document.getElementById("res-score").textContent =
+          `${score} / ${quizQuestions.length}`;
+        document.getElementById("res-percent").textContent = `${percent}%`;
+
+        const fbDiv = document.getElementById("res-feedback");
+        if (percent >= 75) {
+          fbDiv.innerHTML = `<p style="color: var(--accent-green); font-weight: bold;">¡Excelente trabajo! Posees un gran dominio conceptual para el examen AWS Cloud Practitioner.</p>`;
+        } else {
+          fbDiv.innerHTML = `<p style="color: var(--accent-red); font-weight: bold;">Te recomendamos repasar los siguientes temas antes del examen:</p><ul>${Array.from(
+            reviewTopics,
+          )
+            .map((t) => `<li>${t}</li>`)
+            .join("")}</ul>`;
+        }
+      }
+
+      window.onload = () => {
+        renderQuizSlide();
+        updatePresentation();
+      };
+    </script>
+  </body>
+</html>

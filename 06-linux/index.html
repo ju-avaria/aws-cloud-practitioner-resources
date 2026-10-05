@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux para AWS Cloud Practitioner</title>
+  <style>
+    /* VARIABLES DE DISEÑO & IDENTIDAD AWS */
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --aws-orange: #ff9900;
+      --aws-squid: #232f3e;
+      --aws-blue: #0073bb;
+      --aws-light-blue: #527fff;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-code: "Courier New", Courier, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* BARRA DE PROGRESO SUPERIOR */
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--aws-orange), var(--aws-light-blue));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* CONTENEDOR PRINCIPAL DE SLIDES */
+    .slides-container {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 60px);
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      transform: translateX(30px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    /* ESTILOS DE NAVEGACIÓN INFERIOR */
+    .nav-bar {
+      height: 60px;
+      background-color: var(--aws-squid);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+      z-index: 90;
+    }
+
+    .nav-btn {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1.2rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background-color: var(--aws-orange);
+      color: var(--aws-squid);
+      border-color: var(--aws-orange);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .slide-indicator {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* COMPONENTES TIPOGRÁFICOS Y TARJETAS */
+    h1 {
+      font-size: 2.8rem;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    h1 span.highlight {
+      color: var(--aws-orange);
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: var(--aws-orange);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    p.subtitle {
+      font-size: 1.3rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      text-align: center;
+      max-width: 800px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1100px;
+      margin: 1rem 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--aws-orange);
+      background: var(--bg-card-hover);
+    }
+
+    .card h3 {
+      font-size: 1.2rem;
+      color: var(--aws-orange);
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* BOTÓN INTERACTIVO REVELAR */
+    .reveal-btn {
+      background: linear-gradient(135deg, var(--aws-orange), #ff8800);
+      color: var(--aws-squid);
+      border: none;
+      padding: 0.8rem 1.8rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 1.5rem 0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .reveal-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
+    }
+
+    .reveal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--aws-orange);
+      border-radius: 10px;
+      padding: 1.5rem;
+      max-width: 800px;
+      text-align: center;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* DIAGRAMAS Y FLUJOS */
+    .flow-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .flow-node {
+      background: var(--bg-card);
+      border: 2px solid var(--aws-blue);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--text-main);
+      text-align: center;
+      min-width: 140px;
+    }
+
+    .flow-node.active-node {
+      border-color: var(--aws-orange);
+      background: var(--aws-squid);
+    }
+
+    .flow-arrow {
+      color: var(--aws-orange);
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    /* SIMULADOR DE TERMINAL */
+    .terminal-window {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 850px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .terminal-header {
+      background: #1e293b;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-left: auto;
+      font-family: var(--font-code);
+    }
+
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: var(--font-code);
+      font-size: 1rem;
+      color: #38bdf8;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      line-height: 1.5;
+    }
+
+    .terminal-prompt {
+      color: var(--accent-green);
+      margin-right: 0.5rem;
+    }
+
+    .cmd-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .cmd-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--aws-blue);
+      color: var(--text-main);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      font-family: var(--font-code);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .cmd-btn:hover {
+      background: var(--aws-blue);
+      color: #fff;
+    }
+
+    /* ESTILOS DE CUESTIONARIO / MINI EXAMEN */
+    .quiz-container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .quiz-question {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: var(--text-main);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .quiz-option {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      border-color: var(--aws-orange);
+      background: var(--bg-card-hover);
+    }
+
+    .quiz-option.correct {
+      border-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .quiz-option.incorrect {
+      border-color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .quiz-explanation {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 6px;
+      background: #0f172a;
+      border-left: 4px solid var(--aws-orange);
+      display: none;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* CHECKLIST SLIDE 34 */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      width: 100%;
+      max-width: 700px;
+      text-align: left;
+    }
+
+    .check-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.8rem 1.2rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+    }
+
+    .check-item input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--aws-orange);
+    }
+
+    /* ANIMACIONES GENERALES */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .slide {
+        padding: 1.5rem 1.5rem;
+      }
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.5rem; }
+      p.subtitle { font-size: 1rem; }
+      .flow-container { gap: 0.5rem; }
+      .flow-node { min-width: 100px; font-size: 0.9rem; padding: 0.6rem 0.8rem; }
+      .nav-bar { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- SLIDES -->
+  <div class="slides-container" id="slidesContainer">
+
+    <!-- SLIDE 1: PORTADA -->
+    <div class="slide active">
+      <h1>Linux en <span class="highlight">AWS</span></h1>
+      <p class="subtitle">AWS Cloud Practitioner</p>
+      <div style="margin: 2rem 0; font-size: 1.2rem; color: var(--aws-orange); font-style: italic;">
+        "Comprender Linux para comprender mejor Cloud Computing."
+      </div>
+      <div class="flow-container">
+        <div class="flow-node active-node">Linux</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node">Servidores</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node">Cloud</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node active-node">AWS</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: OBJETIVOS -->
+    <div class="slide">
+      <h2>¿Qué aprenderemos?</h2>
+      <div class="card-grid">
+        <div class="card"><h3>Linux y Cloud</h3><p>Importancia fundamental de Linux en entornos en la nube.</p></div>
+        <div class="card"><h3>Linux en AWS</h3><p>Relación entre Linux, Amazon EC2 y Amazon Linux.</p></div>
+        <div class="card"><h3>CLI y Comandos</h3><p>Terminal, Shell, archivos y comandos básicos.</p></div>
+        <div class="card"><h3>Administración</h3><p>Permisos, procesos, servicios y gestores de paquetes.</p></div>
+        <div class="card"><h3>Acceso y Redes</h3><p>Conexión por SSH y Security Groups.</p></div>
+        <div class="card"><h3>Casos y Examen</h3><p>Casos prácticos y simulador estilo Cloud Practitioner.</p></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: PREGUNTA INICIAL -->
+    <div class="slide">
+      <h2>Pregunta Inicial</h2>
+      <p class="subtitle" style="font-size: 1.5rem; color: #fff;">
+        ¿Por qué estamos estudiando Linux en una clase de AWS Cloud Practitioner?
+      </p>
+      <button class="reveal-btn" onclick="toggleReveal('reveal3')">Revelar respuesta</button>
+      <div class="reveal-box" id="reveal3">
+        Linux está ampliamente presente en servidores y entornos cloud[cite: 1, 2]. Comprender sus fundamentos ayuda a interpretar escenarios relacionados con AWS (como instancias EC2, configuración de aplicaciones, acceso SSH y responsabilidad compartida)[cite: 1, 2].
+      </div>
+    </div>
+
+    <!-- SLIDE 4: ¿QUÉ ES LINUX? -->
+    <div class="slide">
+      <h2>¿Qué es Linux?</h2>
+      <div class="flow-container">
+        <div class="flow-node">Linux</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Sistema Operativo</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Servidor</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Aplicación</div>
+      </div>
+      <div class="card-grid">
+        <div class="card"><h3>Open Source</h3><p>Código abierto, colaborativo y de libre modificación.</p></div>
+        <div class="card"><h3>Flexible</h3><p>Altamente personalizable y eficiente en uso de recursos.</p></div>
+        <div class="card"><h3>Servidores</h3><p>Estándar global para servidores de producción.</p></div>
+        <div class="card"><h3>Cloud</h3><p>Base fundamental de la mayoría de servicios cloud.</p></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: IMPORTANCIA DE LINUX EN CLOUD -->
+    <div class="slide">
+      <h2>La Importancia de Linux en Cloud</h2>
+      <div class="flow-container" style="flex-direction: column;">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <div class="flow-node active-node">LINUX</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">SERVIDORES</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">APLICACIONES</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node active-node">CLOUD</div>
+        </div>
+      </div>
+      <p class="subtitle">
+        Linux domina la infraestructura cloud por su estabilidad, rendimiento, seguridad y capacidad de automatización remota[cite: 1, 2, 4]. Es esencial para servidores web, backend, contenedores y microservicios[cite: 1, 2, 4].
+      </p>
+    </div>
+
+    <!-- SLIDE 6: ¿POR QUÉ LINUX ES IMPORTANTE EN AWS? -->
+    <div class="slide">
+      <h2>¿Por qué Linux es importante en AWS?</h2>
+      <div class="flow-container">
+        <div class="flow-node">AWS</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Computación</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">EC2</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Linux</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Aplicación</div>
+      </div>
+      <p class="subtitle">
+        AWS es la plataforma de servicios[cite: 1, 2]. EC2 proporciona el cómputo virtual[cite: 1, 2]. Linux es el sistema operativo invitado que ejecuta la aplicación[cite: 1, 2].
+      </p>
+      <button class="reveal-btn" onclick="toggleReveal('reveal6')">Ver ejemplo</button>
+      <div class="reveal-box" id="reveal6">
+        Ejemplo: Al desplegar una web en AWS, creas un servidor virtual (EC2), eliges Linux como sistema operativo e instalas Apache/Nginx para servidor web[cite: 1, 2].
+      </div>
+    </div>
+
+    <!-- SLIDE 7: LINUX + EC2 -->
+    <div class="slide">
+      <h2>Linux + Amazon EC2</h2>
+      <div style="border: 2px dashed var(--aws-orange); border-radius: 12px; padding: 2rem; background: var(--aws-squid); text-align: center; max-width: 600px;">
+        <h3 style="color: var(--aws-orange); margin-bottom: 1rem;">Amazon EC2 Instance</h3>
+        <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 0.8rem; border: 1px solid var(--aws-blue);">
+          <strong>Amazon Linux (Sistema Operativo)</strong>
+        </div>
+        <div style="color: var(--aws-orange);">↓</div>
+        <div style="background: var(--bg-card); padding: 0.8rem; border-radius: 8px; margin: 0.8rem 0;">
+          Apache / Nginx (Servidor Web)
+        </div>
+        <div style="color: var(--aws-orange);">↓</div>
+        <div style="background: var(--bg-card); padding: 0.8rem; border-radius: 8px;">
+          Aplicación Web (Código)
+        </div>
+      </div>
+      <p class="subtitle" style="margin-top: 1.5rem;">
+        <strong>Destacado:</strong> EC2 ≠ Linux. EC2 es el servicio de infraestructura; Linux es el sistema operativo que seleccionas mediante una AMI[cite: 1, 2].
+      </p>
+    </div>
+
+    <!-- SLIDE 8: AMAZON LINUX -->
+    <div class="slide">
+      <h2>Amazon Linux</h2>
+      <div class="flow-container">
+        <div class="flow-node">Linux</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Distribuciones</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node">Amazon Linux (AL2023)</div>
+      </div>
+      <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="card">
+          <h3>Distribución Oficial AWS</h3>
+          <p>Proporcionada y mantenida directamente por AWS sin costo de licencia adicional.</p>
+        </div>
+        <div class="card">
+          <h3>Optimizado para Cloud</h3>
+          <p>Integración nativa con herramientas de AWS, alto rendimiento y seguridad reforzada.</p></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: DISTRIBUCIONES LINUX -->
+    <div class="slide">
+      <h2>Distribuciones Linux en AWS</h2>
+      <div class="card-grid">
+        <div class="card" onclick="showDistro('Amazon Linux: Orientada a AWS, usa dnf/yum. Muy eficiente.')">
+          <h3>Amazon Linux</h3>
+          <p>Optimizado para AWS. Gestor: <code>dnf / yum</code></p>
+        </div>
+        <div class="card" onclick="showDistro('Ubuntu: Muy popular en desarrolladores, usa gestor apt.')">
+          <h3>Ubuntu</h3>
+          <p>Amigable y popular. Gestor: <code>apt</code></p>
+        </div>
+        <div class="card" onclick="showDistro('RHEL: Red Hat Enterprise Linux, enfocado en entorno corporativo.')">
+          <h3>RHEL</h3>
+          <p>Empresarial. Gestor: <code>dnf / yum</code></p>
+        </div>
+        <div class="card" onclick="showDistro('SUSE: Utilizado frecuentemente para cargas de trabajo SAP en AWS.')">
+          <h3>SUSE</h3>
+          <p>Especializado. Gestor: <code>zypper</code></p>
+        </div>
+      </div>
+      <div class="reveal-box" id="distroBox" style="display: block; min-height: 60px; margin-top: 1.5rem;">
+        Haz clic en una distribución para ver detalles.
+      </div>
+    </div>
+
+    <!-- SLIDE 10: TERMINAL -->
+    <div class="slide">
+      <h2>La Terminal</h2>
+      <div class="flow-container">
+        <div class="flow-node">Usuario</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node">Terminal</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Shell</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Linux Kernel</div>
+      </div>
+      <p class="subtitle">
+        La terminal es el medio por el cual nos comunicamos de forma remota y mediante texto con un servidor en la nube sin interfaz gráfica (Headless)[cite: 1, 2, 4].
+      </p>
+    </div>
+
+    <!-- SLIDE 11: TERMINAL vs SHELL vs CLI -->
+    <div class="slide">
+      <h2>Terminal vs Shell vs CLI</h2>
+      <div class="card-grid">
+        <div class="card" onclick="showConcept('Terminal: La ventana de la aplicación que recibe la entrada de texto y muestra la salida.')">
+          <h3>TERMINAL</h3>
+          <p>La interfaz gráfica/ventana donde escribimos texto.</p>
+        </div>
+        <div class="card" onclick="showConcept('Shell: El programa intérprete (ej. bash) que procesa y ejecuta las órdenes ingresadas.')">
+          <h3>SHELL</h3>
+          <p>El programa interno que interpreta las órdenes (ej. Bash).</p>
+        </div>
+        <div class="card" onclick="showConcept('CLI: Command Line Interface. El concepto general de administrar software mediante comandos.')">
+          <h3>CLI</h3>
+          <p>Interfaz basada en comandos (Command Line Interface).</p>
+        </div>
+      </div>
+      <div class="reveal-box" id="conceptBox" style="display: block; min-height: 60px; margin-top: 1.5rem;">
+        Haz clic en una tarjeta para comparar sus funciones.
+      </div>
+    </div>
+
+    <!-- SLIDE 12: ¿POR QUÉ CLI EN CLOUD? -->
+    <div class="slide">
+      <h2>¿Por qué CLI en Cloud?</h2>
+      <div class="flow-container">
+        <div class="flow-node">Administrador</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node">CLI / Scripts</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Servidor Remoto</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Aplicación</div>
+      </div>
+      <div class="card-grid">
+        <div class="card"><h3>Administración Remota</h3><p>Permite gestionar servidores situados en Data Centers de cualquier parte del mundo.</p></div>
+        <div class="card"><h3>Sin GUI (Ligero)</h3><p>Al no cargar interfaz gráfica, se ahorran valiosos recursos de CPU y memoria RAM.</p></div>
+        <div class="card"><h3>Automatización</h3><p>Permite crear scripts para repetir tareas en miles de instancias automáticamente.</p></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: COMANDOS FUNDAMENTALES -->
+    <div class="slide">
+      <h2>Comandos Fundamentales</h2>
+      <p class="subtitle">Haz clic en un comando para probar la simulación:</p>
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-title">bash - ec2-user@aws-instance</span>
+        </div>
+        <div class="terminal-body" id="term13">
+          <div><span class="terminal-prompt">[ec2-user@aws ~]$</span> <span id="term13-cmd">pwd</span></div>
+          <div id="term13-out" style="color: var(--text-main); margin-top: 0.5rem;">/home/ec2-user</div>
+        </div>
+      </div>
+      <div class="cmd-buttons">
+        <button class="cmd-btn" onclick="runCmd13('pwd', '/home/ec2-user', 'pwd: Print Working Directory. Muestra la ruta de la carpeta actual.')">pwd</button>
+        <button class="cmd-btn" onclick="runCmd13('ls -l', 'drwxr-xr-x 2 ec2-user ec2-user 4096 Sep 28 app\n-rw-r--r-- 1 ec2-user ec2-user  150 Sep 28 index.html', 'ls: Muestra los archivos y carpetas del directorio actual.')">ls</button>
+        <button class="cmd-btn" onclick="runCmd13('cd app', '[ec2-user@aws app]$', 'cd: Change Directory. Cambia de carpeta en el sistema de archivos.')">cd</button>
+        <button class="cmd-btn" onclick="runCmd13('mkdir config', 'Directorio \'config\' creado con éxito.', 'mkdir: Make Directory. Crea una nueva carpeta.')">mkdir</button>
+        <button class="cmd-btn" onclick="runCmd13('touch server.log', 'Archivo \'server.log\' creado.', 'touch: Crea un archivo vacío o actualiza la fecha de modificación.')">touch</button>
+      </div>
+      <div id="term13-desc" style="color: var(--aws-orange); margin-top: 1rem; font-size: 0.95rem;"></div>
+    </div>
+
+    <!-- SLIDE 14: ARCHIVOS -->
+    <div class="slide">
+      <h2>Manipulación de Archivos</h2>
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-title">server-files-sim</span>
+        </div>
+        <div class="terminal-body" id="term14">
+          <div><span class="terminal-prompt">server/</span></div>
+          <div>├── index.html</div>
+          <div>├── config/</div>
+          <div>└── logs/</div>
+        </div>
+      </div>
+      <div class="cmd-buttons">
+        <button class="cmd-btn" onclick="runCmd14('cp index.html index_bak.html', 'Copia de seguridad index_bak.html creada.')">cp (Copiar)</button>
+        <button class="cmd-btn" onclick="runCmd14('mv index.html /var/www/html/', 'Archivo movido a la carpeta web.')">mv (Mover/Renombrar)</button>
+        <button class="cmd-btn" onclick="runCmd14('rm logs/app.log', 'Archivo de log eliminado.')">rm (Eliminar)</button>
+        <button class="cmd-btn" onclick="runCmd14('cat index.html', '&lt;h1&gt;Hola desde AWS EC2&lt;/h1&gt;')">cat (Ver contenido)</button>
+        <button class="cmd-btn" onclick="runCmd14('less /var/log/messages', 'Abre el archivo permitiendo navegación paginada.')">less (Ver por páginas)</button>
+      </div>
+      <div id="term14-desc" style="color: var(--aws-orange); margin-top: 1rem; font-size: 0.95rem;"></div>
+    </div>
+
+    <!-- SLIDE 15: BUSCAR INFORMACIÓN -->
+    <div class="slide">
+      <h2>Búsqueda de Información</h2>
+      <div class="card-grid">
+        <div class="card" onclick="showSearchCmd('grep ERROR /var/log/httpd/error_log', 'Filtra y muestra solo las líneas que contienen la palabra ERROR en los logs.')">
+          <h3>grep</h3>
+          <p>Busca patrones de texto dentro de archivos.</p>
+        </div>
+        <div class="card" onclick="showSearchCmd('find /var/www/ -name *.html', 'Busca en el directorio web todos los archivos que terminen en .html.')">
+          <h3>find</h3>
+          <p>Busca archivos y directorios en el sistema por nombre o tamaño.</p>
+        </div>
+        <div class="card" onclick="showSearchCmd('echo \"Hello AWS\" > test.txt', 'Imprime texto en la consola o lo redirige a un archivo.')">
+          <h3>echo</h3>
+          <p>Muestra un mensaje o escribe texto en pantalla/archivo.</p>
+        </div>
+      </div>
+      <div class="reveal-box" id="searchCmdBox" style="display: block; min-height: 80px; margin-top: 1.5rem; font-family: var(--font-code);">
+        Selecciona un comando para ver un ejemplo práctico de servidor.
+      </div>
+    </div>
+
+    <!-- SLIDE 16: SISTEMA DE ARCHIVOS -->
+    <div class="slide">
+      <h2>Estructura del Sistema de Archivos</h2>
+      <p class="subtitle">Haz clic en un directorio de la jerarquía raíz ( / ):</p>
+      <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+        <div class="card" onclick="showFS('/')" ><h3>/</h3><p>Raíz (Root)</p></div>
+        <div class="card" onclick="showFS('/home')"><h3>/home</h3><p>Usuarios</p></div>
+        <div class="card" onclick="showFS('/etc')"><h3>/etc</h3><p>Configuración</p></div>
+        <div class="card" onclick="showFS('/var')"><h3>/var</h3><p>Logs y Datos</p></div>
+        <div class="card" onclick="showFS('/tmp')"><h3>/tmp</h3><p>Temporales</p></div>
+        <div class="card" onclick="showFS('/usr')"><h3>/usr</h3><p>Programas</p></div>
+        <div class="card" onclick="showFS('/opt')"><h3>/opt</h3><p>Opcionales</p></div>
+      </div>
+      <div class="reveal-box" id="fsBox" style="display: block; min-height: 80px; margin-top: 1.5rem;">
+        Haz clic en cualquier directorio para inspeccionar su propósito en la nube.
+      </div>
+    </div>
+
+    <!-- SLIDE 17: USUARIOS Y PERMISOS -->
+    <div class="slide">
+      <h2>Usuarios y Permisos</h2>
+      <p class="subtitle">El modelo de permisos POSIX define tres clases de usuarios:</p>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Propietario (u)</h3>
+          <p>El usuario dueño del archivo.</p>
+        </div>
+        <div class="card">
+          <h3>Grupo (g)</h3>
+          <p>Grupo de usuarios con acceso asignado.</p>
+        </div>
+        <div class="card">
+          <h3>Otros (o)</h3>
+          <p>Todos los demás usuarios del sistema.</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 2rem; margin-top: 1.5rem; background: var(--bg-card); padding: 1rem 2rem; border-radius: 8px; border: 1px solid var(--aws-blue);">
+        <div><strong style="color: var(--aws-orange);">r</strong> = Read (Lectura)</div>
+        <div><strong style="color: var(--aws-orange);">w</strong> = Write (Escritura)</div>
+        <div><strong style="color: var(--aws-orange);">x</strong> = Execute (Ejecución)</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 18: INTERPRETAR PERMISOS -->
+    <div class="slide">
+      <h2>¿Cómo interpretamos los permisos?</h2>
+      <div style="font-family: var(--font-code); font-size: 2.2rem; background: #000; padding: 1rem 2rem; border-radius: 8px; border: 1px solid var(--aws-orange); margin: 1.5rem 0; letter-spacing: 2px;">
+        -<span style="color: #38bdf8;" title="Propietario">rwx</span><span style="color: #f59e0b;" title="Grupo">r-x</span><span style="color: #ef4444;" title="Otros">r--</span>
+      </div>
+      <div class="card-grid">
+        <div class="card" style="border-top: 3px solid #38bdf8;">
+          <h3>Usuario (u)</h3>
+          <p><code>rwx</code>: Lectura, Escritura y Ejecución permitidas.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid #f59e0b;">
+          <h3>Grupo (g)</h3>
+          <p><code>r-x</code>: Lectura y Ejecución permitidas (sin escritura).</p>
+        </div>
+        <div class="card" style="border-top: 3px solid #ef4444;">
+          <h3>Otros (o)</h3>
+          <p><code>r--</code>: Solo Lectura permitida.</p>
+        </div>
+      </div>
+      <p style="margin-top: 1rem; color: var(--text-muted);">
+        Comandos conceptuales clave: <code>chmod</code> (cambia permisos) y <code>chown</code> (cambia propietario)[cite: 1, 2, 4].
+      </p>
+    </div>
+
+    <!-- SLIDE 19: PROCESOS -->
+    <div class="slide">
+      <h2>Procesos en Linux</h2>
+      <div class="flow-container">
+        <div class="flow-node">Aplicación</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node">Proceso (PID)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Recursos Linux</div>
+      </div>
+      <p class="subtitle">Un proceso es una instancia de un programa en ejecución dentro del sistema operativo[cite: 1, 2, 4].</p>
+      <div class="card-grid">
+        <div class="card">
+          <h3><code>ps aux</code></h3>
+          <p>Muestra una lista estática de los procesos actuales.</p>
+        </div>
+        <div class="card">
+          <h3><code>top</code> / <code>htop</code></h3>
+          <p>Muestra en tiempo real el uso de CPU y RAM por proceso.</p>
+        </div>
+        <div class="card">
+          <h3><code>kill [PID]</code></h3>
+          <p>Envía una señal para finalizar un proceso en ejecución.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 20: SERVICIOS -->
+    <div class="slide">
+      <h2>Servicios (Servidores Web)</h2>
+      <div class="flow-container">
+        <div class="flow-node">EC2</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Linux</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node">Servicio (systemd)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Apache (httpd)</div>
+      </div>
+      <p class="subtitle">Un servicio es un proceso de fondo (demonio) que se ejecuta continuamente para responder peticiones (ej. servidor web)[cite: 1, 2, 4].</p>
+      <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--aws-orange); font-family: var(--font-code);">
+        sudo systemctl start httpd &nbsp;&nbsp;&nbsp;&nbsp; # Iniciar servicio<br>
+        sudo systemctl enable httpd &nbsp;&nbsp;&nbsp; # Iniciar automáticamente al arrancar
+      </div>
+    </div>
+
+    <!-- SLIDE 21: GESTORES DE PAQUETES -->
+    <div class="slide">
+      <h2>Gestores de Paquetes</h2>
+      <p class="subtitle">Herramientas automatizadas para instalar, actualizar y eliminar software en Linux[cite: 1, 2, 4]:</p>
+      <div class="card-grid">
+        <div class="card" style="border-left: 4px solid var(--aws-orange);">
+          <h3>Amazon Linux / RHEL / Fedora</h3>
+          <p>Utilizan el gestor:</p>
+          <p style="font-size: 1.2rem; color: var(--aws-orange); margin-top: 0.5rem;"><code>dnf</code> / <code>yum</code></p>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--aws-light-blue);">
+          <h3>Ubuntu / Debian</h3>
+          <p>Utilizan el gestor:</p>
+          <p style="font-size: 1.2rem; color: var(--aws-light-blue); margin-top: 0.5rem;"><code>apt</code></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 22: INSTALAR SOFTWARE -->
+    <div class="slide">
+      <h2>Instalación de Software en EC2</h2>
+      <div class="flow-container">
+        <div class="flow-node">EC2</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Linux</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node">Package Manager</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Apache Web Server</div>
+      </div>
+      <div style="width: 100%; max-width: 700px; background: #000; padding: 1.2rem; border-radius: 8px; border: 1px solid var(--border-color); font-family: var(--font-code); margin-top: 1rem;">
+        <div style="color: var(--aws-orange); margin-bottom: 0.5rem;"># En Amazon Linux 2023:</div>
+        <div><span class="terminal-prompt">$</span> sudo dnf install -y httpd</div>
+        <div style="color: var(--aws-light-blue); margin: 1rem 0 0.5rem 0;"># En Ubuntu Server:</div>
+        <div><span class="terminal-prompt">$</span> sudo apt update && sudo apt install -y apache2</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 23: SSH -->
+    <div class="slide">
+      <h2>¿Cómo accedemos remotamente? (SSH)</h2>
+      <div class="flow-container">
+        <div class="flow-node">Administrador (Local)</div>
+        <div class="flow-arrow">── SSH (Puerto 22) ──►</div>
+        <div class="flow-node active-node">EC2 (Linux)</div>
+      </div>
+      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--aws-orange); max-width: 750px; width: 100%;">
+        <p style="margin-bottom: 1rem;"><strong>SSH (Secure Shell):</strong> Protocolo cifrado de administración remota a través del <strong>Puerto TCP 22</strong>[cite: 1, 2, 4].</p>
+        <div style="background: #000; padding: 0.8rem; border-radius: 6px; font-family: var(--font-code); color: var(--accent-green);">
+          ssh -i mi-clave.pem ec2-user@198.51.100.1
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.8rem;">
+          Usa autenticación mediante par de claves criptográficas (archivo <code>.pem</code>) en lugar de contraseñas[cite: 1, 2, 4].
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 24: SSH + SECURITY GROUP -->
+    <div class="slide">
+      <h2>SSH + Security Group</h2>
+      <div class="flow-container">
+        <div class="flow-node">Usuario</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">SSH (Port 22)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node" style="border-color: var(--aws-orange);">Security Group</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">EC2 Linux</div>
+      </div>
+      <p class="subtitle" style="color: #fff;">
+        "Intento conectarme por SSH pero la conexión no responde (Timeout). ¿Qué debería revisar primero?"
+      </p>
+      <button class="reveal-btn" onclick="toggleReveal('reveal24')">Ver razonamiento Cloud Practitioner</button>
+      <div class="reveal-box" id="reveal24">
+        Debes revisar las <strong>Inbound Rules (Reglas de Entrada) del Security Group</strong> asociado a la instancia EC2 para confirmar que el tráfico en el <strong>Puerto 22 (SSH)</strong> está permitido desde tu dirección IP[cite: 1, 2].
+      </div>
+    </div>
+
+    <!-- SLIDE 25: CASO PRÁCTICO: ARQUITECTURA WEB -->
+    <div class="slide">
+      <h2>Caso Práctico: Publicar una Web</h2>
+      <div class="flow-container" style="flex-direction: column;">
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: center;">
+          <div class="flow-node">Instancia EC2</div> →
+          <div class="flow-node">Amazon Linux</div> →
+          <div class="flow-node">Conexión SSH</div> →
+          <div class="flow-node">Instalar Apache</div>
+        </div>
+        <div style="font-size: 1.5rem; color: var(--aws-orange); margin: 0.5rem 0;">↓</div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: center;">
+          <div class="flow-node">Iniciar Servicio</div> →
+          <div class="flow-node">Security Group (HTTP 80)</div> →
+          <div class="flow-node active-node">Navegador Web</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 26: CASO PRÁCTICO PASO A PASO -->
+    <div class="slide">
+      <h2>Despliegue Paso a Paso</h2>
+      <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="card" onclick="showStep('01: Crear EC2 en la Consola AWS (Concepto AWS: Compute).')"><h3>01 Crear EC2</h3><p>AWS</p></div>
+        <div class="card" onclick="showStep('02: Seleccionar AMI de Amazon Linux 2023 (Concepto AWS/Linux).')"><h3>02 Elegir AMI</h3><p>AWS / Linux</p></div>
+        <div class="card" onclick="showStep('03: Iniciar la instancia en la VPC (Concepto AWS: Infraestructura).')"><h3>03 Iniciar</h3><p>AWS</p></div>
+        <div class="card" onclick="showStep('04: Conectarse por SSH usando la clave .pem y puerto 22 (Concepto Linux/Seguridad).')"><h3>04 Conectar SSH</h3><p>Linux / SSH</p></div>
+        <div class="card" onclick="showStep('05: Instalar el servidor Apache con dnf install httpd (Concepto Linux: Gestor de Paquetes).')"><h3>05 Instalar Apache</h3><p>Linux</p></div>
+        <div class="card" onclick="showStep('06: Iniciar el servicio con systemctl start httpd (Concepto Linux: Procesos/Servicios).')"><h3>06 Iniciar Servicio</h3><p>Linux</p></div>
+        <div class="card" onclick="showStep('07: Permitir tráfico HTTP puerto 80 en el Security Group (Concepto AWS: Seguridad de Red).')"><h3>07 Permitir HTTP</h3><p>AWS SG</p></div>
+        <div class="card" onclick="showStep('08: Probar la IP pública en el navegador desde Internet (Aplicación final).')"><h3>08 Navegador</h3><p>Web</p></div>
+      </div>
+      <div class="reveal-box" id="stepBox" style="display: block; min-height: 60px; margin-top: 1rem;">
+        Haz clic en cada paso para ver la relación entre Linux y AWS.
+      </div>
+    </div>
+
+    <!-- SLIDE 27: RESPONSABILIDAD COMPARTIDA -->
+    <div class="slide">
+      <h2>Modelo de Responsabilidad Compartida</h2>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card" style="border-top: 4px solid var(--aws-orange); text-align: left;">
+          <h3 style="color: var(--aws-orange);">Responsabilidad de AWS</h3>
+          <p><strong>Seguridad DE la Nube:</strong></p>
+          <ul style="margin-left: 1.2rem; margin-top: 0.5rem; color: var(--text-muted); line-height: 1.6;">
+            <li>Hardware e infraestructura física.</li>
+            <li>Centros de datos y red global.</li>
+            <li>Software del hipervisor (Nitro/KVM).</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--aws-light-blue); text-align: left;">
+          <h3 style="color: var(--aws-light-blue);">Responsabilidad del Cliente</h3>
+          <p><strong>Seguridad EN la Nube (en EC2):</strong></p>
+          <ul style="margin-left: 1.2rem; margin-top: 0.5rem; color: var(--text-muted); line-height: 1.6;">
+            <li>Sistema Operativo invitado (actualizaciones/parches).</li>
+            <li>Configuración de Firewall (Security Group).</li>
+            <li>Aplicaciones e instalación de código.</li>
+            <li>Datos e identidades (IAM).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 28: LINUX NO ES AWS (NO CONFUNDIR) -->
+    <div class="slide">
+      <h2>Conceptos que no debemos confundir</h2>
+      <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="card" onclick="showDiff('Linux es el sistema operativo. AWS es el proveedor de nube global.')">
+          <h3>Linux ≠ AWS</h3>
+        </div>
+        <div class="card" onclick="showDiff('Linux es el SO. EC2 es el servicio que provee el servidor virtual.')">
+          <h3>Linux ≠ EC2</h3>
+        </div>
+        <div class="card" onclick="showDiff('Amazon Linux es un SO. AWS CLI es la herramienta para mandar comandos a AWS.')">
+          <h3>Amazon Linux ≠ AWS CLI</h3>
+        </div>
+        <div class="card" onclick="showDiff('SSH es el protocolo de acceso al SO. Security Group es el firewall virtual en AWS.')">
+          <h3>SSH ≠ Security Group</h3>
+        </div>
+      </div>
+      <div class="reveal-box" id="diffBox" style="display: block; min-height: 60px; margin-top: 1.5rem;">
+        Haz clic en cualquier tarjeta para ver la diferencia conceptual clara.
+      </div>
+    </div>
+
+    <!-- SLIDE 29: ¿QUÉ NECESITO SABER PARA CLOUD PRACTITIONER? -->
+    <div class="slide">
+      <h2>Nivel de Conocimiento Requerido</h2>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card" style="border-top: 4px solid var(--accent-green); text-align: left;">
+          <h3 style="color: var(--accent-green);">DEBO COMPRENDER</h3>
+          <ul style="margin-left: 1.2rem; color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">
+            <li>Qué es Linux y Amazon Linux.</li>
+            <li>Relación entre EC2 y el SO.</li>
+            <li>Diferencia entre SSH y Security Groups.</li>
+            <li>Comandos básicos y gestores de paquetes.</li>
+            <li>Concepto básico de procesos, servicios y permisos.</li>
+            <li>Modelo de Responsabilidad Compartida.</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--accent-red); text-align: left;">
+          <h3 style="color: var(--accent-red);">NO NECESITO DOMINAR</h3>
+          <ul style="margin-left: 1.2rem; color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">
+            <li>Scripting avanzado en Bash.</li>
+            <li>Ajustes finos del Kernel (Kernel tuning).</li>
+            <li>Configuración avanzada de systemd.</li>
+            <li>Administración compleja de redes Linux.</li>
+            <li>Troubleshooting avanzado del sistema operativo.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 30: CASOS DE RAZONAMIENTO -->
+    <div class="slide">
+      <h2>Casos de Razonamiento Práctico</h2>
+      <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+        <div class="card" onclick="showReasoning('Caso 1: Utiliza el comando find o grep para buscar archivos de configuración en /etc/[cite: 1, 2].')">
+          <h3>Caso 1</h3>
+          <p>No encuentras un archivo de configuración en el servidor.</p>
+        </div>
+        <div class="card" onclick="showReasoning('Caso 2: Utiliza el protocolo SSH mediante la clave privada .pem en el puerto 22[cite: 1, 2].')">
+          <h3>Caso 2</h3>
+          <p>Necesitas acceder remotamente a una instancia Linux.</p>
+        </div>
+        <div class="card" onclick="showReasoning('Caso 3: Usas un Gestor de Paquetes (dnf/yum o apt) para instalar software como Apache[cite: 1, 2].')">
+          <h3>Caso 3</h3>
+          <p>Necesitas instalar el servidor web Apache.</p>
+        </div>
+        <div class="card" onclick="showReasoning('Caso 4: Revisa las reglas de entrada del Security Group para permitir el tráfico HTTP en el puerto 80[cite: 1, 2].')">
+          <h3>Caso 4</h3>
+          <p>El tráfico HTTP no llega a la instancia EC2.</p>
+        </div>
+      </div>
+      <div class="reveal-box" id="reasoningBox" style="display: block; min-height: 70px; margin-top: 1.5rem;">
+        Selecciona un caso para ver la solución y razonamiento.
+      </div>
+    </div>
+
+    <!-- SLIDE 31: MINI EXAMEN - PREGUNTA 1 -->
+    <div class="slide">
+      <h2>Mini Examen Cloud Practitioner (1/4)</h2>
+      <div class="quiz-container">
+        <div class="quiz-question">
+          1. Un cliente ejecuta una aplicación web en una instancia Amazon EC2 con Amazon Linux 2023. Según el Modelo de Responsabilidad Compartida de AWS, ¿cuál es una responsabilidad del cliente?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(1, false, this)">A) Mantener el hardware físico del servidor en el Data Center.</button>
+          <button class="quiz-option" onclick="answerQuiz(1, false, this)">B) Parchear el firmware de la infraestructura del hipervisor.</button>
+          <button class="quiz-option" onclick="answerQuiz(1, true, this)">C) Aplicar parches de seguridad e instalar actualizaciones en el Sistema Operativo Linux.</button>
+          <button class="quiz-option" onclick="answerQuiz(1, false, this)">D) Reemplazar las tarjetas de red defectuosas en los bastidores físicamente.</button>
+        </div>
+        <div class="quiz-explanation" id="quiz-exp-1">
+          <strong>Respuesta Correcta: C.</strong> En Amazon EC2, el cliente es responsable de gestionar y parchear el sistema operativo invitado, las aplicaciones y la configuración del firewall (Security Group)[cite: 1, 2]. AWS se encarga de la infraestructura física e hipervisor[cite: 1, 2].
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 32: MINI EXAMEN - PREGUNTA 2 -->
+    <div class="slide">
+      <h2>Mini Examen Cloud Practitioner (2/4)</h2>
+      <div class="quiz-container">
+        <div class="quiz-question">
+          2. ¿Qué componente de AWS funciona como un firewall virtual para controlar el tráfico entrante a una instancia Linux en el Puerto 22 (SSH)?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(2, false, this)">A) AWS Key Pair</button>
+          <button class="quiz-option" onclick="answerQuiz(2, true, this)">B) Security Group</button>
+          <button class="quiz-option" onclick="answerQuiz(2, false, this)">C) Amazon Machine Image (AMI)</button>
+          <button class="quiz-option" onclick="answerQuiz(2, false, this)">D) Amazon Elastic Block Store (EBS)</button>
+        </div>
+        <div class="quiz-explanation" id="quiz-exp-2">
+          <strong>Respuesta Correcta: B.</strong> Un Security Group actúa como un firewall virtual para las instancias EC2, controlando el tráfico permitido de entrada y salida[cite: 1, 2].
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 33: MINI EXAMEN - PREGUNTA 3 -->
+    <div class="slide">
+      <h2>Mini Examen Cloud Practitioner (3/4)</h2>
+      <div class="quiz-container">
+        <div class="quiz-question">
+          3. ¿Qué es Amazon Linux 2023 en el contexto de AWS?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(3, false, this)">A) Un servicio de cómputo serverless que reemplaza a EC2.</button>
+          <button class="quiz-option" onclick="answerQuiz(3, true, this)">B) Una distribución Linux proporcionada por AWS optimizada para cargas de trabajo cloud.</button>
+          <button class="quiz-option" onclick="answerQuiz(3, false, this)">C) La interfaz de línea de comandos oficial para administrar recursos AWS.</button>
+          <button class="quiz-option" onclick="answerQuiz(3, false, this)">D) Un protocolo seguro para conectar la terminal local con la consola de AWS.</button>
+        </div>
+        <div class="quiz-explanation" id="quiz-exp-3">
+          <strong>Respuesta Correcta: B.</strong> Amazon Linux es una distribución Linux mantenida directamente por AWS, optimizada para la nube y proporcionada como una AMI[cite: 1, 2].
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 34: CHECKLIST FINAL -->
+    <div class="slide">
+      <h2>Checklist de Comprensión</h2>
+      <p class="subtitle">Verifica los conceptos que ya dominas para el examen:</p>
+      <div class="checklist">
+        <label class="check-item"><input type="checkbox"> Puedo explicar qué es Linux y su importancia en Cloud Computing.</label>
+        <label class="check-item"><input type="checkbox"> Comprendo la diferencia entre Amazon EC2 (Servicio) y Linux (SO).</label>
+        <label class="check-item"><input type="checkbox"> Sé qué es Amazon Linux y el concepto de Distribución Linux.</label>
+        <label class="check-item"><input type="checkbox"> Reconozco el propósito de Terminal, Shell y CLI.</label>
+        <label class="check-item"><input type="checkbox"> Identifico comandos básicos (pwd, ls, cd, mkdir, grep, systemctl).</label>
+        <label class="check-item"><input type="checkbox"> Comprendo la función de SSH (Puerto 22) y su relación con Security Groups.</label>
+        <label class="check-item"><input type="checkbox"> Comprendo el Modelo de Responsabilidad Compartida aplicado a EC2.</label>
+      </div>
+    </div>
+
+    <!-- SLIDE 35: RESUMEN FINAL -->
+    <div class="slide">
+      <h2>Síntesis y Resumen Final</h2>
+      <div class="flow-container">
+        <div class="flow-node">LINUX (SO)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">AMAZON LINUX (AMI)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active-node">EC2 (Cómputo)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">SSH / SG (Acceso)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">APLICACIÓN</div>
+      </div>
+      <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="card"><h3>Linux</h3><p>Sistema operativo base.</p></div>
+        <div class="card"><h3>Amazon Linux</h3><p>Distribución de AWS.</p></div>
+        <div class="card"><h3>EC2</h3><p>Servicio de cómputo.</p></div>
+        <div class="card"><h3>SSH</h3><p>Acceso remoto (Puerto 22).</p></div>
+        <div class="card"><h3>Security Group</h3><p>Control del tráfico de red.</p></div>
+      </div>
+      <div style="margin-top: 1.5rem; font-size: 1.2rem; color: var(--aws-orange); text-align: center; font-weight: bold;">
+        "Comprender Linux nos ayuda a comprender qué ocurre dentro de muchos escenarios de computación cloud."
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAVEGACIÓN INFERIOR -->
+  <div class="nav-bar">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+    <div class="slide-indicator" id="slideIndicator">1 / 35</div>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+  </div>
+
+  <script>
+    /* LÓGICA DE CONTROL DE SLIDES Y NAVEGACIÓN */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+    const slideIndicator = document.getElementById('slideIndicator');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateSlide() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        }
+      });
+
+      // Actualizar indicador
+      slideIndicator.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+      // Actualizar barra de progreso
+      const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Habilitar / deshabilitar botones
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function changeSlide(direction) {
+      currentSlide += direction;
+      if (currentSlide < 0) currentSlide = 0;
+      if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+      updateSlide();
+    }
+
+    // NAVEGACIÓN POR TECLADO
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        if (currentSlide < totalSlides - 1) changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (currentSlide > 0) changeSlide(-1);
+      }
+    });
+
+    // REVELAR RESPUESTAS Y CAJAS
+    function toggleReveal(id) {
+      const box = document.getElementById(id);
+      if (box.style.display === 'block') {
+        box.style.display = 'none';
+      } else {
+        box.style.display = 'block';
+      }
+    }
+
+    // INTERACCIONES ESPECÍFICAS
+    function showDistro(text) {
+      document.getElementById('distroBox').innerText = text;
+    }
+
+    function showConcept(text) {
+      document.getElementById('conceptBox').innerText = text;
+    }
+
+    function runCmd13(cmd, out, desc) {
+      document.getElementById('term13-cmd').innerText = cmd;
+      document.getElementById('term13-out').innerText = out;
+      document.getElementById('term13-desc').innerText = desc;
+    }
+
+    function runCmd14(cmd, result) {
+      document.getElementById('term14-desc').innerText = `$ ${cmd}\n--> ${result}`;
+    }
+
+    function showSearchCmd(cmd, desc) {
+      document.getElementById('searchCmdBox').innerHTML = `<code>$ ${cmd}</code><br><br>${desc}`;
+    }
+
+    function showFS(dir) {
+      const info = {
+        '/': 'Raíz: El directorio superior que contiene todo el sistema de archivos.',
+        '/home': '/home: Contiene los directorios personales de los usuarios (ej. /home/ec2-user).',
+        '/etc': '/etc: Contiene los archivos de configuración del sistema y de aplicaciones (ej. /etc/httpd/).',
+        '/var': '/var: Archivos variables, logs de sistema (/var/log) y páginas web (/var/www/html).',
+        '/tmp': '/tmp: Archivos temporales eliminados al reiniciar.',
+        '/usr': '/usr: Aplicaciones y utilidades de usuario.',
+        '/opt': '/opt: Archivos y software adicional opcional.'
+      };
+      document.getElementById('fsBox').innerText = info[dir] || '';
+    }
+
+    function showStep(text) {
+      document.getElementById('stepBox').innerText = text;
+    }
+
+    function showDiff(text) {
+      document.getElementById('diffBox').innerText = text;
+    }
+
+    function showReasoning(text) {
+      document.getElementById('reasoningBox').innerText = text;
+    }
+
+    // RESPUESTAS DEL QUIZ
+    function answerQuiz(qNum, isCorrect, btnElement) {
+      const parent = btnElement.parentElement;
+      const options = parent.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.classList.remove('correct', 'incorrect');
+      });
+
+      if (isCorrect) {
+        btnElement.classList.add('correct');
+      } else {
+        btnElement.classList.add('incorrect');
+      }
+
+      document.getElementById(`quiz-exp-${qNum}`).style.display = 'block';
+    }
+
+    // INICIALIZAR
+    updateSlide();
+  </script>
+</body>
+</html>

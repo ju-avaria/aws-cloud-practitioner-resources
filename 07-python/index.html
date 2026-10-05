@@ -1,0 +1,1589 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Python para AWS Cloud Practitioner</title>
+    <style>
+      /* ==================================================
+           ESTILOS GENERALES Y VARIABLES DE TEMA (AWS DARK)
+           ================================================== */
+      :root {
+        --bg-dark: #0f172a;
+        --bg-card: #1e293b;
+        --bg-card-hover: #334155;
+        --aws-orange: #ff9900;
+        --aws-squid: #232f3e;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --code-bg: #090d16;
+        --accent-blue: #38bdf8;
+        --accent-green: #4ade80;
+        --accent-red: #f87171;
+        --border-color: #334155;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        user-select: none;
+      }
+
+      html,
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        min-height: 100dvh;
+        width: 100vw;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      /* Container de Slides Responsivo */
+      .presentation-container {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(0.75rem, 2vw, 1.5rem);
+      }
+
+      .slide {
+        display: none;
+        width: 100%;
+        min-height: clamp(400px, 75dvh, 720px);
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: clamp(1.25rem, 3vw, 2.5rem);
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.5),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        flex-direction: column;
+        justify-content: space-between;
+        opacity: 0;
+        transition:
+          opacity 0.3s ease-in-out,
+          transform 0.3s ease-in-out;
+        transform: translateY(10px);
+        overflow-y: auto;
+      }
+
+      .slide.active {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Tipografía Responsiva */
+      .slide-header {
+        margin-bottom: clamp(1rem, 2vw, 1.5rem);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        color: var(--text-main);
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      h1 span {
+        color: var(--aws-orange);
+      }
+
+      h2 {
+        font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+        color: var(--aws-orange);
+        font-weight: 600;
+        line-height: 1.3;
+      }
+
+      .subtitle {
+        font-size: clamp(0.95rem, 2vw, 1.2rem);
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      p,
+      li {
+        font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+        line-height: 1.6;
+        color: var(--text-main);
+      }
+
+      .tag {
+        background-color: var(--aws-squid);
+        color: var(--aws-orange);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+        font-weight: 600;
+        border: 1px solid var(--aws-orange);
+        white-space: nowrap;
+      }
+
+      /* Layouts Fluidos y Grids */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(clamp(260px, 45%, 1fr), 1fr)
+        );
+        gap: clamp(1rem, 2vw, 1.5rem);
+        align-items: start;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(clamp(200px, 30%, 1fr), 1fr)
+        );
+        gap: clamp(0.75rem, 1.5vw, 1.25rem);
+      }
+
+      .card {
+        background-color: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: clamp(1rem, 2vw, 1.25rem);
+        transition: all 0.2s ease;
+      }
+
+      /* Bloques de Código Responsivos */
+      pre {
+        background-color: var(--code-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: "Courier New", Courier, monospace;
+        color: #e2e8f0;
+        font-size: clamp(0.8rem, 1.6vw, 1rem);
+        line-height: 1.5;
+        overflow-x: auto;
+        max-width: 100%;
+      }
+
+      .code-keyword {
+        color: #f472b6;
+        font-weight: bold;
+      }
+      .code-string {
+        color: #38bdf8;
+      }
+      .code-function {
+        color: #4ade80;
+      }
+      .code-comment {
+        color: #64748b;
+        font-style: italic;
+      }
+      .code-number {
+        color: #fbbf24;
+      }
+
+      /* Diagramas Fluidos */
+      .diagram-flow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(0.5rem, 1.5vw, 1rem);
+        margin: 1rem 0;
+        flex-wrap: wrap;
+      }
+
+      .diagram-step {
+        background-color: var(--aws-squid);
+        border: 2px solid var(--aws-orange);
+        padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.25rem);
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+        font-size: clamp(0.85rem, 1.8vw, 1rem);
+        min-width: 100px;
+      }
+
+      .diagram-arrow {
+        color: var(--aws-orange);
+        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+        font-weight: bold;
+      }
+
+      /* Botones e Interacciones Responsivas (Touch-friendly 44px+) */
+      .btn {
+        background-color: var(--aws-orange);
+        color: #000;
+        border: none;
+        padding: 0.75rem 1.25rem;
+        min-height: 44px;
+        border-radius: 6px;
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn:hover {
+        background-color: #e68a00;
+      }
+      .btn-secondary {
+        background-color: var(--bg-card-hover);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+      }
+      .btn-secondary:hover {
+        background-color: var(--border-color);
+      }
+
+      .reveal-box {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: rgba(56, 189, 248, 0.1);
+        border-left: 4px solid var(--accent-blue);
+        border-radius: 0 8px 8px 0;
+        display: none;
+      }
+
+      .quiz-option {
+        background-color: var(--bg-card-hover);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        text-align: left;
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
+        color: var(--text-main);
+      }
+
+      .quiz-option:hover {
+        border-color: var(--aws-orange);
+        background-color: rgba(255, 153, 0, 0.1);
+      }
+
+      .quiz-option.correct {
+        border-color: var(--accent-green);
+        background-color: rgba(74, 222, 128, 0.15);
+      }
+
+      .quiz-option.incorrect {
+        border-color: var(--accent-red);
+        background-color: rgba(248, 113, 113, 0.15);
+      }
+
+      /* Navegación e Barra Inferior */
+      .controls-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto clamp(0.5rem, 1.5vw, 1rem) auto;
+        padding: 0 clamp(0.75rem, 2vw, 1.5rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .progress-bar-bg {
+        width: 100%;
+        height: 6px;
+        background-color: var(--bg-card);
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        background-color: var(--aws-orange);
+        transition: width 0.3s ease;
+      }
+
+      .nav-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .slide-counter {
+        font-size: clamp(0.85rem, 1.6vw, 0.95rem);
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      /* Consola Simulada */
+      .terminal {
+        background-color: #000;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-family: monospace;
+        color: #00ff00;
+        margin-top: 0.75rem;
+        min-height: 48px;
+        font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+      }
+
+      .terminal-title {
+        color: #666;
+        font-size: 0.75rem;
+        margin-bottom: 0.4rem;
+        border-bottom: 1px solid #222;
+        padding-bottom: 0.25rem;
+      }
+
+      /* Utilidades */
+      .highlight {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .mt-10 {
+        margin-top: 0.75rem;
+      }
+      .mt-20 {
+        margin-top: 1.25rem;
+      }
+
+      /* Media Queries para Optimización Móvil y Orientación Vertical */
+      @media (max-width: 600px) or (orientation: portrait) {
+        .diagram-flow {
+          flex-direction: column;
+          gap: 0.4rem;
+        }
+        .diagram-arrow {
+          transform: rotate(90deg);
+        }
+        .nav-controls .btn-text {
+          display: none; /* Oculta texto en botones muy estrechos */
+        }
+        .slide {
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- CONTENEDOR PRINCIPAL DE SLIDES -->
+    <div class="presentation-container">
+      <!-- ==================================================
+             SLIDE 1 — PORTADA
+             ================================================== -->
+      <div class="slide active" id="slide-1">
+        <div
+          style="
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+          "
+          class="text-center"
+        >
+          <div class="tag" style="margin-bottom: 1rem">
+            AWS CLOUD PRACTITIONER
+          </div>
+          <h1>Python en <span>AWS</span></h1>
+          <p class="subtitle" style="margin-bottom: 1.5rem">
+            De la programación a la automatización Cloud
+          </p>
+
+          <div class="diagram-flow">
+            <div class="diagram-step">🐍 Python</div>
+            <div class="diagram-arrow">+</div>
+            <div class="diagram-step">☁️ AWS Cloud</div>
+            <div class="diagram-arrow">=</div>
+            <div class="diagram-step" style="border-color: var(--accent-green)">
+              ⚡ Automatización
+            </div>
+          </div>
+
+          <div
+            class="card mt-20"
+            style="
+              max-width: 650px;
+              border-left: 4px solid var(--aws-orange);
+              background-color: var(--aws-squid);
+            "
+          >
+            <p style="font-style: italic">
+              "Python no es el objetivo. Es una herramienta para trabajar con
+              Cloud."
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 2 — ¿POR QUÉ PYTHON EN CLOUD?
+             ================================================== -->
+      <div class="slide" id="slide-2">
+        <div class="slide-header">
+          <div>
+            <h2>¿Por qué Python en Cloud?</h2>
+            <p class="subtitle">Eliminando el trabajo repetitivo</p>
+          </div>
+          <span class="tag">Concepto Clave</span>
+        </div>
+
+        <div class="diagram-flow">
+          <div class="diagram-step">Python</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">Automatización</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">Servicios AWS</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step" style="border-color: var(--accent-green)">
+            Menos tareas manuales
+          </div>
+        </div>
+
+        <div class="grid-2 mt-10">
+          <div class="card">
+            <p class="highlight" style="margin-bottom: 0.5rem">
+              Casos de uso comunes:
+            </p>
+            <ul style="padding-left: 1.25rem">
+              <li>Automatizar creación de recursos.</li>
+              <li>Procesar datos masivos.</li>
+              <li>Crear funciones serverless.</li>
+              <li>Administrar servicios en la nube.</li>
+              <li>Construir aplicaciones eficientes.</li>
+            </ul>
+          </div>
+
+          <div class="card" style="border-top: 3px solid var(--accent-blue)">
+            <p style="font-weight: bold; margin-bottom: 0.5rem">
+              ❓ Pregunta interactiva:
+            </p>
+            <p style="font-size: 0.95rem; margin-bottom: 0.75rem">
+              ¿Qué tarea sería mejor automatizar?
+            </p>
+
+            <button class="quiz-option" onclick="checkS2(this, false)">
+              <span>A) Crear 1 servidor manualmente cada mes</span>
+            </button>
+            <button class="quiz-option" onclick="checkS2(this, true)">
+              <span>B) Apagar 50 servidores de prueba todas las noches</span>
+            </button>
+            <button class="quiz-option" onclick="checkS2(this, false)">
+              <span>C) Cambiar el nombre a un bucket una sola vez</span>
+            </button>
+            <div id="s2-feedback" class="reveal-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 3 — ¿QUÉ ES PYTHON?
+             ================================================== -->
+      <div class="slide" id="slide-3">
+        <div class="slide-header">
+          <div>
+            <h2>¿Qué es Python?</h2>
+            <p class="subtitle">Simplicidad y potencia en código</p>
+          </div>
+          <span class="tag">Sintaxis Básica</span>
+        </div>
+
+        <p style="margin-bottom: 1rem">
+          <span class="highlight">Python</span> es un lenguaje de programación
+          conocido por su sintaxis simple, muy similar al idioma inglés,
+          ampliamente utilizado en Cloud, Data Science e Inteligencia
+          Artificial.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <p
+              style="
+                font-size: 0.9rem;
+                color: var(--text-muted);
+                margin-bottom: 0.25rem;
+              "
+            >
+              Ejemplo básico:
+            </p>
+            <pre><span class="code-function">print</span>(<span class="code-string">"Hola AWS"</span>)</pre>
+
+            <div class="terminal">
+              <div class="terminal-title">SALIDA SIMULADA</div>
+              <div>> Hola AWS</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <p style="font-weight: bold; margin-bottom: 0.75rem">
+              Análisis Visual:
+            </p>
+            <div
+              style="
+                margin-bottom: 0.75rem;
+                padding: 0.5rem;
+                background: rgba(74, 222, 128, 0.1);
+                border-radius: 4px;
+              "
+            >
+              <code class="code-function">print()</code> &rarr;
+              <span style="font-size: 0.9rem"
+                >Función (Instrucción para mostrar contenido)</span
+              >
+            </div>
+            <div
+              style="
+                padding: 0.5rem;
+                background: rgba(56, 189, 248, 0.1);
+                border-radius: 4px;
+              "
+            >
+              <code class="code-string">"Hola AWS"</code> &rarr;
+              <span style="font-size: 0.9rem"
+                >Texto / String (Cadena de caracteres)</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 4 — PYTHON Y AWS
+             ================================================== -->
+      <div class="slide" id="slide-4">
+        <div class="slide-header">
+          <div>
+            <h2>Python y AWS</h2>
+            <p class="subtitle">¿Cómo se comunican entre sí?</p>
+          </div>
+          <span class="tag">Arquitectura</span>
+        </div>
+
+        <div class="diagram-flow">
+          <div class="diagram-step">👤 Usuario</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">🐍 Python</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step" style="border-color: var(--aws-orange)">
+            🛠️ AWS SDK / Boto3
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">☁️ Servicios AWS</div>
+        </div>
+
+        <p
+          class="text-center"
+          style="margin: 1.25rem 0; color: var(--text-muted)"
+        >
+          Python se comunica con las APIs programáticas de AWS a través del Kit
+          de Desarrollo de Software (SDK).
+        </p>
+
+        <div
+          class="card text-center"
+          style="
+            background-color: var(--aws-squid);
+            border: 2px dashed var(--aws-orange);
+            padding: 1.25rem;
+          "
+        >
+          <h3 style="color: var(--aws-orange); margin-bottom: 0.5rem">
+            Python &ne; AWS
+          </h3>
+          <p>
+            Python es la <strong>herramienta</strong> de desarrollo. AWS es la
+            <strong>infraestructura Cloud</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 5 — CONCEPTOS MÍNIMOS DE PYTHON
+             ================================================== -->
+      <div class="slide" id="slide-5">
+        <div class="slide-header">
+          <div>
+            <h2>Conceptos Mínimos de Python</h2>
+            <p class="subtitle">
+              Lo indispensable para entender código en Cloud
+            </p>
+          </div>
+          <span class="tag">Fundamentos</span>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <p class="highlight">📦 Variables</p>
+            <p style="font-size: 0.85rem">Guardan datos en memoria.</p>
+          </div>
+          <div class="card">
+            <p class="highlight">🔤 Tipos de Datos</p>
+            <p style="font-size: 0.85rem">Strings, Numbers, Booleans.</p>
+          </div>
+          <div class="card">
+            <p class="highlight">📋 Listas</p>
+            <p style="font-size: 0.85rem">Colecciones ordenadas de datos.</p>
+          </div>
+          <div class="card">
+            <p class="highlight">🔀 Condicionales</p>
+            <p style="font-size: 0.85rem">Toma de decisiones (IF).</p>
+          </div>
+          <div class="card">
+            <p class="highlight">🔄 Bucles</p>
+            <p style="font-size: 0.85rem">Repetición de acciones (FOR).</p>
+          </div>
+          <div class="card">
+            <p class="highlight">⚙️ Funciones</p>
+            <p style="font-size: 0.85rem">Bloques de código reutilizables.</p>
+          </div>
+        </div>
+
+        <p
+          class="text-center mt-10"
+          style="color: var(--text-muted); font-size: 0.85rem"
+        >
+          * En el examen Cloud Practitioner solo necesitarás reconocer el
+          propósito conceptual de estas estructuras.
+        </p>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 6 — VARIABLES
+             ================================================== -->
+      <div class="slide" id="slide-6">
+        <div class="slide-header">
+          <div>
+            <h2>Variables</h2>
+            <p class="subtitle">Contenedores para almacenar información</p>
+          </div>
+          <span class="tag">Código</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <p
+              style="
+                font-size: 0.9rem;
+                color: var(--text-muted);
+                margin-bottom: 0.25rem;
+              "
+            >
+              Ejemplo:
+            </p>
+            <pre>bucket = <span class="code-string">"mi-bucket"</span>
+region = <span class="code-string">"us-east-1"</span>
+instances = <span class="code-number">3</span></pre>
+            <p class="mt-10" style="font-size: 0.95rem">
+              Una <strong>variable</strong> guarda información bajo un nombre
+              asignado para reutilizarla.
+            </p>
+          </div>
+
+          <div class="card text-center">
+            <p style="font-weight: bold; margin-bottom: 0.75rem">🔍 Desafío:</p>
+            <p style="margin-bottom: 1rem">
+              ¿Qué valor exacto contiene la variable <code>region</code>?
+            </p>
+            <button
+              class="btn"
+              onclick="
+                document.getElementById('s6-reveal').style.display = 'block'
+              "
+            >
+              Revelar Respuesta
+            </button>
+
+            <div id="s6-reveal" class="reveal-box text-center">
+              <p
+                style="
+                  font-size: 1.1rem;
+                  font-weight: bold;
+                  color: var(--accent-blue);
+                "
+              >
+                "us-east-1"
+              </p>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  margin-top: 0.25rem;
+                "
+              >
+                Un tipo de dato String (texto) que indica la región AWS.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 7 — CONDICIONALES
+             ================================================== -->
+      <div class="slide" id="slide-7">
+        <div class="slide-header">
+          <div>
+            <h2>Condicionales (IF)</h2>
+            <p class="subtitle">Tomando decisiones automáticas</p>
+          </div>
+          <span class="tag">Control de Flujo</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <pre>instances = <span class="code-number">3</span>
+
+<span class="code-keyword">if</span> instances > <span class="code-number">0</span>:
+    <span class="code-function">print</span>(<span class="code-string">"Hay instancias activas"</span>)</pre>
+
+            <div class="diagram-flow" style="margin-top: 1rem">
+              <div class="diagram-step" style="padding: 0.4rem 0.8rem">
+                IF (instances > 0)
+              </div>
+              <div class="diagram-arrow">&rarr;</div>
+              <div
+                class="diagram-step"
+                style="
+                  border-color: var(--accent-green);
+                  padding: 0.4rem 0.8rem;
+                "
+              >
+                Ejecutar Acción
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="border-left: 4px solid var(--aws-orange)">
+            <h3 style="color: var(--aws-orange); margin-bottom: 0.5rem">
+              Relación con Cloud:
+            </h3>
+            <p style="font-size: 1rem">
+              "<strong>SI</strong> una instancia EC2 está inactiva &rarr;
+              <strong>ENTONCES</strong> envía una alerta o apágala para reducir
+              costos."
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 8 — BUCLES
+             ================================================== -->
+      <div class="slide" id="slide-8">
+        <div class="slide-header">
+          <div>
+            <h2>Bucles (FOR)</h2>
+            <p class="subtitle">Procesamiento repetitivo de recursos</p>
+          </div>
+          <span class="tag">Automatización</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <pre>servers = [<span class="code-string">"web-01"</span>, <span class="code-string">"web-02"</span>, <span class="code-string">"web-03"</span>]
+
+<span class="code-keyword">for</span> server <span class="code-keyword">in</span> servers:
+    <span class="code-function">print</span>(server)</pre>
+
+            <button class="btn btn-secondary mt-10" onclick="runS8Sim()">
+              ▶ Ejecutar Simulación
+            </button>
+
+            <div class="terminal">
+              <div class="terminal-title">SALIDA SIMULADA</div>
+              <div id="s8-terminal"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="color: var(--accent-green); margin-bottom: 0.5rem">
+              Caso Cloud:
+            </h3>
+            <p style="margin-bottom: 0.5rem">
+              Un bucle permite procesar <strong>múltiples recursos</strong> en
+              una sola instrucción.
+            </p>
+            <p style="font-size: 0.9rem; color: var(--text-muted)">
+              Ejemplo: Iterar sobre una lista de 100 buckets S3 para verificar
+              sus políticas de seguridad.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 9 — FUNCIONES
+             ================================================== -->
+      <div class="slide" id="slide-9">
+        <div class="slide-header">
+          <div>
+            <h2>Funciones</h2>
+            <p class="subtitle">Bloques de código reutilizables</p>
+          </div>
+          <span class="tag">Estructura</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <pre><span class="code-comment"># Definir la función</span>
+<span class="code-keyword">def</span> <span class="code-function">saludar</span>(nombre):
+    <span class="code-function">print</span>(<span class="code-string">"Hola"</span>, nombre)
+
+<span class="code-comment"># Llamar a la función</span>
+<span class="code-function">saludar</span>(<span class="code-string">"AWS"</span>)</pre>
+
+            <div class="terminal">
+              <div class="terminal-title">SALIDA SIMULADA</div>
+              <div>> Hola AWS</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <p class="highlight" style="margin-bottom: 0.5rem">
+              ¿Para qué sirven?
+            </p>
+            <p>
+              Permiten empaquetar una secuencia de instrucciones para ejecutarla
+              múltiples veces sin duplicar código.
+            </p>
+            <p
+              class="mt-10"
+              style="font-size: 0.85rem; color: var(--text-muted)"
+            >
+              Es la estructura principal utilizada para escribir código en
+              <strong>AWS Lambda</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 10 — AWS CLI vs PYTHON
+             ================================================== -->
+      <div class="slide" id="slide-10">
+        <div class="slide-header">
+          <div>
+            <h2>AWS CLI vs Python</h2>
+            <p class="subtitle">
+              Comandos individuales vs Lógica de programación
+            </p>
+          </div>
+          <span class="tag">Comparativa</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="border-top: 4px solid var(--accent-blue)">
+            <h3 style="color: var(--accent-blue); margin-bottom: 0.5rem">
+              🖥️ AWS CLI
+            </h3>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
+              Comandos ejecutados directamente en la terminal.
+            </p>
+            <pre style="font-size: 0.85rem">aws s3 ls</pre>
+            <p
+              style="
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                margin-top: 0.5rem;
+              "
+            >
+              Ideal para: Tareas rápidas y operaciones directas.
+            </p>
+          </div>
+
+          <div class="card" style="border-top: 4px solid var(--aws-orange)">
+            <h3 style="color: var(--aws-orange); margin-bottom: 0.5rem">
+              🐍 Python (Boto3)
+            </h3>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
+              Código estructurado con condicionales y automatización.
+            </p>
+            <pre
+              style="font-size: 0.85rem"
+            ><span class="code-keyword">import</span> boto3
+s3 = boto3.<span class="code-function">client</span>(<span class="code-string">"s3"</span>)
+response = s3.<span class="code-function">list_buckets</span>()</pre>
+            <p
+              style="
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                margin-top: 0.5rem;
+              "
+            >
+              Ideal para: Flujos complejos y lógica de negocio.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 11 — ¿QUÉ ES BOTO3?
+             ================================================== -->
+      <div class="slide" id="slide-11">
+        <div class="slide-header">
+          <div>
+            <h2>¿Qué es Boto3?</h2>
+            <p class="subtitle">El SDK de AWS oficial para Python</p>
+          </div>
+          <span class="tag">AWS SDK</span>
+        </div>
+
+        <p class="text-center" style="margin-bottom: 1.25rem">
+          "<strong>Boto3</strong> es la librería que permite a un script de
+          Python interactuar directamente con los servicios de AWS."
+        </p>
+
+        <div class="diagram-flow">
+          <div class="diagram-step">🐍 Python</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div
+            class="diagram-step"
+            style="background-color: var(--aws-orange); color: #000"
+          >
+            📦 Boto3
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">🌐 AWS APIs</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">☁️ S3 / EC2 / DynamoDB</div>
+        </div>
+
+        <div
+          class="card mt-10 text-center"
+          style="
+            background-color: rgba(255, 153, 0, 0.05);
+            border-color: var(--aws-orange);
+          "
+        >
+          <p>
+            Permite crear, administrar y consultar recursos AWS de forma
+            programática.
+          </p>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 12 — EJEMPLO BOTO3
+             ================================================== -->
+      <div class="slide" id="slide-12">
+        <div class="slide-header">
+          <div>
+            <h2>Ejemplo Boto3</h2>
+            <p class="subtitle">Consultando infraestructura mediante código</p>
+          </div>
+          <span class="tag">Lectura de Código</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <pre><span class="code-keyword">import</span> boto3
+
+s3 = boto3.<span class="code-function">client</span>(<span class="code-string">"s3"</span>)
+response = s3.<span class="code-function">list_buckets</span>()
+
+<span class="code-keyword">for</span> bucket <span class="code-keyword">in</span> response[<span class="code-string">"Buckets"</span>]:
+    <span class="code-function">print</span>(bucket[<span class="code-string">"Name"</span>])</pre>
+          </div>
+
+          <div class="card">
+            <p style="font-weight: bold; margin-bottom: 0.5rem">
+              🔍 Explicación interactiva:
+            </p>
+            <p style="margin-bottom: 1rem; font-size: 0.9rem">
+              Haz clic abajo para entender qué realiza este programa:
+            </p>
+
+            <button
+              class="btn"
+              onclick="
+                document.getElementById('s12-reveal').style.display = 'block'
+              "
+            >
+              ¿Qué hace este código?
+            </button>
+
+            <div id="s12-reveal" class="reveal-box">
+              <p
+                style="
+                  font-size: 0.9rem;
+                  font-weight: bold;
+                  color: var(--accent-green);
+                "
+              >
+                ✔ Importa Boto3, conecta con el servicio Amazon S3, obtiene la
+                lista de buckets registrados en la cuenta de AWS y muestra sus
+                nombres uno por uno.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 13 — PYTHON + AWS LAMBDA
+             ================================================== -->
+      <div class="slide" id="slide-13">
+        <div class="slide-header">
+          <div>
+            <h2>Python + AWS Lambda</h2>
+            <p class="subtitle">Ejecución de código Serverless</p>
+          </div>
+          <span class="tag">Serverless</span>
+        </div>
+
+        <div class="diagram-flow">
+          <div class="diagram-step">⚡ Evento</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">⚙️ AWS Lambda</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step">🐍 Código Python</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step" style="border-color: var(--accent-green)">
+            🎯 Acción
+          </div>
+        </div>
+
+        <div
+          class="card mt-10"
+          style="border-left: 4px solid var(--aws-orange)"
+        >
+          <p style="font-weight: bold; margin-bottom: 0.25rem">
+            Flujo Serverless:
+          </p>
+          <p style="font-size: 0.95rem">
+            Un archivo llega a <strong>Amazon S3</strong> &rarr; Se dispara un
+            evento &rarr; <strong>AWS Lambda</strong> ejecuta un script de
+            <strong>Python</strong> que procesa el archivo automáticamente.
+          </p>
+        </div>
+
+        <p
+          class="text-center mt-10"
+          style="color: var(--text-muted); font-size: 0.85rem"
+        >
+          <strong>Concepto de examen:</strong> AWS Lambda permite ejecutar
+          código sin aprovisionar ni administrar servidores.
+        </p>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 14 — CASO DE USO
+             ================================================== -->
+      <div class="slide" id="slide-14">
+        <div class="slide-header">
+          <div>
+            <h2>Caso de Uso</h2>
+            <p class="subtitle">Procesamiento automatizado en S3</p>
+          </div>
+          <span class="tag">Caso Práctico</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div
+              class="card"
+              style="
+                margin-bottom: 0.75rem;
+                border-left: 4px solid var(--accent-red);
+              "
+            >
+              <p style="font-weight: bold; color: var(--accent-red)">
+                Problema Manual:
+              </p>
+              <p style="font-size: 0.85rem">
+                Una empresa recibe archivos en S3 diariamente. Un empleado debe
+                descargarlos y procesarlos manualmente.
+              </p>
+            </div>
+
+            <div
+              class="card"
+              style="border-left: 4px solid var(--accent-green)"
+            >
+              <p style="font-weight: bold; color: var(--accent-green)">
+                Solución Automatizada:
+              </p>
+              <p style="font-size: 0.85rem">
+                S3 &rarr; Evento &rarr; Lambda &rarr; Python &rarr;
+                Procesamiento instantáneo sin intervención humana.
+              </p>
+            </div>
+          </div>
+
+          <div class="card">
+            <p style="font-weight: bold; margin-bottom: 0.5rem">❓ Pregunta:</p>
+            <p style="font-size: 0.9rem; margin-bottom: 0.75rem">
+              ¿Qué ventaja principal aporta esta solución?
+            </p>
+
+            <button class="quiz-option" onclick="checkS14(this, false)">
+              <span>A) Aumenta las tareas manuales</span>
+            </button>
+            <button class="quiz-option" onclick="checkS14(this, true)">
+              <span>B) Automatización y reducción de errores</span>
+            </button>
+            <button class="quiz-option" onclick="checkS14(this, false)">
+              <span>C) Requiere administrar más servidores EC2</span>
+            </button>
+
+            <div id="s14-feedback" class="reveal-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 15 — PYTHON + CLOUD
+             ================================================== -->
+      <div class="slide" id="slide-15">
+        <div class="slide-header">
+          <div>
+            <h2>Python + Cloud</h2>
+            <p class="subtitle">Integración con el ecosistema AWS</p>
+          </div>
+          <span class="tag">APIs</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="background: var(--code-bg)">
+            <p
+              style="
+                font-family: monospace;
+                color: var(--aws-orange);
+                margin-bottom: 0.5rem;
+              "
+            >
+              Python / Boto3
+            </p>
+            <p
+              style="
+                font-family: monospace;
+                font-size: 0.85rem;
+                line-height: 1.8;
+              "
+            >
+              ├── 🪣 Amazon S3<br />
+              ├── 🖥️ Amazon EC2<br />
+              ├── ⚡ AWS Lambda<br />
+              ├── 🗄️ Amazon DynamoDB<br />
+              ├── 📊 Amazon CloudWatch<br />
+              └── ⚙️ Automatización
+            </p>
+          </div>
+
+          <div>
+            <p style="margin-bottom: 1rem">
+              Python permite interactuar con casi cualquier
+              <strong>API de AWS</strong>.
+            </p>
+            <p style="font-size: 0.9rem; color: var(--text-muted)">
+              Permite a los administradores e ingenieros de la nube automatizar
+              auditorías de seguridad, backups, apagados programados y
+              despliegues de infraestructura.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 16 — MINI DESAFÍO
+             ================================================== -->
+      <div class="slide" id="slide-16">
+        <div class="slide-header">
+          <div>
+            <h2>Mini Desafío</h2>
+            <p class="subtitle">Evaluación de lectura de código básico</p>
+          </div>
+          <span class="tag">Desafío</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <p
+              style="
+                font-size: 0.85rem;
+                color: var(--text-muted);
+                margin-bottom: 0.25rem;
+              "
+            >
+              Observa el siguiente código:
+            </p>
+            <pre>bucket = <span class="code-string">"datos"</span>
+region = <span class="code-string">"us-east-1"</span>
+
+<span class="code-keyword">if</span> region == <span class="code-string">"us-east-1"</span>:
+    <span class="code-function">print</span>(<span class="code-string">"Región principal"</span>)</pre>
+          </div>
+
+          <div>
+            <p style="font-weight: bold; margin-bottom: 0.5rem">❓ Pregunta:</p>
+            <p style="font-size: 0.9rem; margin-bottom: 0.75rem">
+              ¿Qué mensaje imprimirá este programa?
+            </p>
+
+            <button class="quiz-option" onclick="checkS16(this, false)">
+              <span>A) Error</span>
+            </button>
+            <button class="quiz-option" onclick="checkS16(this, true)">
+              <span>B) Región principal</span>
+            </button>
+            <button class="quiz-option" onclick="checkS16(this, false)">
+              <span>C) datos</span>
+            </button>
+
+            <div id="s16-feedback" class="reveal-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 17 — ¿QUÉ DEBO RECORDAR?
+             ================================================== -->
+      <div class="slide" id="slide-17">
+        <div class="slide-header">
+          <div>
+            <h2>¿Qué debo recordar?</h2>
+            <p class="subtitle">Resumen clave para AWS Cloud Practitioner</p>
+          </div>
+          <span class="tag">Síntesis</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <p class="highlight">🐍 Python</p>
+            <p style="font-size: 0.85rem">
+              Lenguaje de programación de sintaxis simple.
+            </p>
+          </div>
+          <div class="card">
+            <p class="highlight">📦 Boto3</p>
+            <p style="font-size: 0.85rem">SDK oficial de AWS para Python.</p>
+          </div>
+          <div class="card">
+            <p class="highlight">💻 AWS CLI</p>
+            <p style="font-size: 0.85rem">
+              Herramienta de línea de comandos para AWS.
+            </p>
+          </div>
+          <div class="card">
+            <p class="highlight">⚡ AWS Lambda</p>
+            <p style="font-size: 0.85rem">
+              Ejecuta código serverless sin administrar servidores.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="card mt-10 text-center"
+          style="
+            border-color: var(--accent-green);
+            background-color: rgba(74, 222, 128, 0.05);
+          "
+        >
+          <p style="font-weight: bold; color: var(--accent-green)">
+            🤖 Automatización
+          </p>
+          <p style="font-size: 0.85rem">
+            El beneficio principal de usar Python en Cloud es la reducción de
+            tareas manuales repetitivas.
+          </p>
+        </div>
+      </div>
+
+      <!-- ==================================================
+             SLIDE 18 — CIERRE
+             ================================================== -->
+      <div class="slide" id="slide-18">
+        <div class="slide-header">
+          <div>
+            <h2>Cierre y Siguientes Pasos</h2>
+            <p class="subtitle">Conclusión de la sesión</p>
+          </div>
+          <span class="tag">Cierre</span>
+        </div>
+
+        <div class="text-center" style="margin-bottom: 1rem">
+          <p style="font-size: 1.15rem; font-weight: bold">
+            "No necesitas ser un desarrollador experto en Python para comenzar a
+            trabajar en la nube."
+          </p>
+        </div>
+
+        <div class="diagram-flow">
+          <div class="diagram-step" style="font-size: 0.8rem">
+            Python Básico
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step" style="font-size: 0.8rem">
+            Automatización
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step" style="font-size: 0.8rem">Boto3 (SDK)</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-step" style="font-size: 0.8rem">AWS Lambda</div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div
+            class="diagram-step"
+            style="font-size: 0.8rem; border-color: var(--accent-green)"
+          >
+            Aplicaciones Cloud
+          </div>
+        </div>
+
+        <div
+          class="card text-center mt-10"
+          style="
+            border-color: var(--aws-orange);
+            background: var(--aws-squid);
+            padding: 1rem;
+          "
+        >
+          <p
+            style="
+              font-weight: bold;
+              color: var(--aws-orange);
+              margin-bottom: 0.5rem;
+            "
+          >
+            💬 Pregunta de reflexión:
+          </p>
+          <p style="font-size: 1rem">
+            "¿Qué tarea repetitiva de Cloud intentarías automatizar con Python?"
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLES DE NAVEGACIÓN Y BARRA DE PROGRESO -->
+    <div class="controls-container">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+      <div class="nav-controls">
+        <button
+          class="btn btn-secondary"
+          id="btn-prev"
+          onclick="prevSlide()"
+          aria-label="Slide Anterior"
+        >
+          ← <span class="btn-text">Anterior</span>
+        </button>
+        <span class="slide-counter" id="slide-counter">1 / 18</span>
+        <button
+          class="btn"
+          id="btn-next"
+          onclick="nextSlide()"
+          aria-label="Slide Siguiente"
+        >
+          <span class="btn-text">Siguiente</span> →
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================================================
+         LÓGICA JAVASCRIPT (VANILLA)
+         ================================================== -->
+    <script>
+      // ESTADO GLOBAL
+      let currentSlide = 1;
+      const totalSlides = 18;
+
+      // INICIALIZACIÓN
+      document.addEventListener("DOMContentLoaded", () => {
+        updateSlideView();
+
+        // Navegación por teclado (←, →, Home, End)
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft") {
+            prevSlide();
+          } else if (e.key === "ArrowRight") {
+            nextSlide();
+          } else if (e.key === "Home") {
+            currentSlide = 1;
+            updateSlideView();
+          } else if (e.key === "End") {
+            currentSlide = totalSlides;
+            updateSlideView();
+          }
+        });
+
+        // Soporte para gestos Táctiles (Swipe Left / Right)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const container = document.querySelector(".presentation-container");
+
+        container.addEventListener(
+          "touchstart",
+          (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+          },
+          { passive: true },
+        );
+
+        container.addEventListener(
+          "touchend",
+          (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+          },
+          { passive: true },
+        );
+
+        function handleSwipe() {
+          const threshold = 50;
+          if (touchEndX < touchStartX - threshold) {
+            nextSlide();
+          } else if (touchEndX > touchStartX + threshold) {
+            prevSlide();
+          }
+        }
+      });
+
+      // ACTUALIZAR VISTA DE SLIDES
+      function updateSlideView() {
+        document.querySelectorAll(".slide").forEach((slide) => {
+          slide.classList.remove("active");
+        });
+
+        const activeSlide = document.getElementById(`slide-${currentSlide}`);
+        if (activeSlide) {
+          activeSlide.classList.add("active");
+          activeSlide.scrollTop = 0; // Reinicia scroll interno si existe
+        }
+
+        // Actualizar Contador
+        document.getElementById("slide-counter").innerText =
+          `${currentSlide} / ${totalSlides}`;
+
+        // Actualizar Barra de Progreso
+        const percentage = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+        document.getElementById("progress-bar").style.width = `${percentage}%`;
+
+        // Habilitar/Deshabilitar Botones
+        const btnPrev = document.getElementById("btn-prev");
+        const btnNext = document.getElementById("btn-next");
+
+        btnPrev.disabled = currentSlide === 1;
+        btnNext.disabled = currentSlide === totalSlides;
+
+        btnPrev.style.opacity = currentSlide === 1 ? "0.5" : "1";
+        btnNext.style.opacity = currentSlide === totalSlides ? "0.5" : "1";
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides) {
+          currentSlide++;
+          updateSlideView();
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 1) {
+          currentSlide--;
+          updateSlideView();
+        }
+      }
+
+      // FUNCIONES DE EVALUACIÓN E INTERACCIÓN
+
+      // Slide 2 Quiz
+      function checkS2(btn, isCorrect) {
+        const feedback = document.getElementById("s2-feedback");
+        feedback.style.display = "block";
+
+        btn.parentElement.querySelectorAll(".quiz-option").forEach((b) => {
+          b.classList.remove("correct", "incorrect");
+        });
+
+        if (isCorrect) {
+          btn.classList.add("correct");
+          feedback.innerHTML =
+            "<p style='color: var(--accent-green); font-weight: bold;'>¡Correcto!</p><p style='font-size: 0.85rem;'>Apagar 50 servidores de prueba todas las noches requiere automatización repetitiva para evitar costos innecesarios.</p>";
+        } else {
+          btn.classList.add("incorrect");
+          feedback.innerHTML =
+            "<p style='color: var(--accent-red); font-weight: bold;'>Incorrecto.</p><p style='font-size: 0.85rem;'>Las tareas de única vez o infrecuentes no justifican el desarrollo de un script de automatización.</p>";
+        }
+      }
+
+      // Slide 8 Simulación
+      function runS8Sim() {
+        const terminal = document.getElementById("s8-terminal");
+        terminal.innerHTML = "";
+        const servers = ["web-01", "web-02", "web-03"];
+
+        servers.forEach((server, index) => {
+          setTimeout(() => {
+            terminal.innerHTML += `> Procesando servidor: ${server}<br>`;
+          }, index * 350);
+        });
+      }
+
+      // Slide 14 Quiz
+      function checkS14(btn, isCorrect) {
+        const feedback = document.getElementById("s14-feedback");
+        feedback.style.display = "block";
+
+        btn.parentElement.querySelectorAll(".quiz-option").forEach((b) => {
+          b.classList.remove("correct", "incorrect");
+        });
+
+        if (isCorrect) {
+          btn.classList.add("correct");
+          feedback.innerHTML =
+            "<p style='color: var(--accent-green); font-weight: bold;'>¡Correcto!</p><p style='font-size: 0.85rem;'>La solución S3 + Lambda + Python procesa datos automáticamente 24/7 sin intervención manual.</p>";
+        } else {
+          btn.classList.add("incorrect");
+          feedback.innerHTML =
+            "<p style='color: var(--accent-red); font-weight: bold;'>Incorrecto.</p><p style='font-size: 0.85rem;'>El enfoque serverless automatiza el proceso y reduce la sobrecarga operativa de administrar servidores.</p>";
+        }
+      }
+
+      // Slide 16 Quiz
+      function checkS16(btn, isCorrect) {
+        const feedback = document.getElementById("s16-feedback");
+        feedback.style.display = "block";
+
+        btn.parentElement.querySelectorAll(".quiz-option").forEach((b) => {
+          b.classList.remove("correct", "incorrect");
+        });
+
+        if (isCorrect) {
+          btn.classList.add("correct");
+          feedback.innerHTML =
+            "<p style='color: var(--accent-green); font-weight: bold;'>¡Correcto!</p><p style='font-size: 0.85rem;'>Dado que `region` es 'us-east-1', la condición IF evalúa como verdadera e imprime 'Región principal'.</p>";
+        } else {
+          btn.classList.add("incorrect");
+          feedback.innerHTML =
+            "<p style='color: var(--accent-red); font-weight: bold;'>Incorrecto.</p><p style='font-size: 0.85rem;'>Analiza la condición `if region == 'us-east-1'`: como la variable coincide, el bloque ejecuta la función print correspondiente.</p>";
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1429 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conexión Remota a Amazon EC2 con SSH — AWS Cloud Practitioner</title>
+    <style>
+      :root {
+        --bg-dark: #0f172a;
+        --bg-card: #1e293b;
+        --bg-card-hover: #334155;
+        --border-color: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-orange-hover: #e68a00;
+        --accent-blue: #38bdf8;
+        --accent-green: #22c55e;
+        --accent-red: #ef4444;
+        --accent-purple: #a855f7;
+        --font-code: "Courier New", Courier, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+
+      html,
+      body {
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        overflow: hidden;
+      }
+
+      .presentation-container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      /* SLIDE VIEWPORT */
+      .slide-viewport {
+        flex: 1;
+        width: 100vw;
+        height: calc(100vh - 65px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: calc(100vh - 65px);
+        padding: clamp(1rem, 3vw, 2.5rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(30px);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+      }
+
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+      }
+
+      /* SLIDE HEADER */
+      .slide-header {
+        margin-bottom: clamp(0.5rem, 1.5vh, 1.5rem);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-shrink: 0;
+      }
+
+      .slide-title-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .slide-title {
+        font-size: clamp(1.4rem, 2.2vw, 2.2rem);
+        color: var(--aws-orange);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      .slide-subtitle {
+        font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+        color: var(--text-muted);
+        margin-top: 0.2rem;
+      }
+
+      .slide-tag {
+        background: rgba(255, 153, 0, 0.15);
+        color: var(--aws-orange);
+        border: 1px solid var(--aws-orange);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      /* SLIDE BODY */
+      .slide-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: clamp(0.75rem, 1.5vh, 1.5rem);
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      /* GRIDS & CARDS */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: clamp(0.75rem, 1.5vw, 1.5rem);
+        width: 100%;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: clamp(0.5rem, 1vw, 1.25rem);
+        width: 100%;
+      }
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: clamp(0.5rem, 1vw, 1rem);
+        width: 100%;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: clamp(0.85rem, 1.5vw, 1.25rem);
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+
+      .card:hover {
+        border-color: var(--accent-blue);
+        background: var(--bg-card-hover);
+      }
+
+      .card-title {
+        font-weight: bold;
+        font-size: clamp(1rem, 1.2vw, 1.25rem);
+        color: var(--accent-blue);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* TERMINAL & DIAGRAMS */
+      .terminal-box {
+        background-color: #090d16;
+        color: var(--accent-blue);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: clamp(0.75rem, 1.2vw, 1.25rem);
+        font-family: var(--font-code);
+        font-size: clamp(0.8rem, 1vw, 1rem);
+        line-height: 1.5;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .prompt {
+        color: var(--accent-green);
+        font-weight: bold;
+      }
+      .cmd {
+        color: #f8fafc;
+        font-weight: bold;
+      }
+      .highlight {
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      /* INTERACTIVE ELEMENTS */
+      .step-node {
+        opacity: 0.25;
+        transform: scale(0.96);
+        transition: all 0.3s ease;
+      }
+      .step-node.visible {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .option-btn {
+        background: var(--bg-dark);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        font-size: clamp(0.85rem, 1vw, 0.95rem);
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+        width: 100%;
+      }
+
+      .option-btn:hover {
+        border-color: var(--aws-orange);
+        background: var(--bg-card-hover);
+      }
+
+      .option-btn.correct {
+        border-color: var(--accent-green) !important;
+        background: rgba(34, 197, 94, 0.15) !important;
+      }
+
+      .option-btn.incorrect {
+        border-color: var(--accent-red) !important;
+        background: rgba(239, 68, 68, 0.15) !important;
+      }
+
+      .explanation-box {
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        border-radius: 6px;
+        background: rgba(56, 189, 248, 0.1);
+        border-left: 4px solid var(--accent-blue);
+        font-size: 0.85rem;
+        display: none;
+      }
+
+      /* TABLE STYLES */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.5rem 0;
+        font-size: clamp(0.8rem, 0.95vw, 1rem);
+      }
+
+      th,
+      td {
+        padding: clamp(0.5rem, 1vw, 0.8rem);
+        border: 1px solid var(--border-color);
+        text-align: left;
+      }
+
+      th {
+        background-color: var(--bg-dark);
+        color: var(--aws-orange);
+        font-weight: bold;
+      }
+
+      /* BOTTOM CONTROLS & PROGRESS */
+      .control-bar {
+        height: 65px;
+        background-color: var(--bg-card);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        flex-shrink: 0;
+      }
+
+      .progress-bar-container {
+        width: 100%;
+        height: 4px;
+        background: var(--bg-dark);
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--aws-orange),
+          var(--accent-blue)
+        );
+        width: 5%;
+        transition: width 0.3s ease;
+      }
+
+      .control-content {
+        width: 100%;
+        height: calc(65px - 4px);
+        padding: 0 clamp(1rem, 3vw, 2.5rem);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .btn-nav {
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: clamp(0.8rem, 0.9vw, 0.95rem);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+      }
+
+      .btn-nav:hover:not(:disabled) {
+        background-color: var(--bg-card-hover);
+        border-color: var(--aws-orange);
+      }
+
+      .btn-nav:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .slide-indicator {
+        font-weight: 800;
+        font-size: clamp(0.85rem, 1vw, 1rem);
+        color: var(--text-muted);
+        letter-spacing: 1px;
+      }
+
+      @media (max-width: 768px) {
+        .grid-2,
+        .grid-3,
+        .grid-4 {
+          grid-template-columns: 1fr;
+        }
+        .slide-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="presentation-container">
+      <!-- SLIDES VIEWPORT -->
+      <div class="slide-viewport">
+        <!-- SLIDE 1 — PORTADA -->
+        <div class="slide active" id="slide-1">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">CONEXIÓN REMOTA A AMAZON EC2</div>
+              <div class="slide-subtitle">SSH desde Windows, Linux y macOS</div>
+            </div>
+            <span class="slide-tag">AWS Cloud Practitioner</span>
+          </div>
+          <div class="slide-body" style="text-align: center">
+            <div
+              class="terminal-box"
+              style="max-width: 600px; margin: 0 auto; text-align: left"
+            >
+              💻 COMPUTADOR (Cliente) │ │ SSH (TCP Puerto 22) ▼ ☁️ AWS CLOUD │ ▼
+              🖥️ EC2 Linux (Instancia)
+            </div>
+            <p
+              style="
+                color: var(--text-muted);
+                font-size: 1.1rem;
+                margin-top: 1.5rem;
+              "
+            >
+              Presiona <kbd class="highlight">→</kbd> o haz clic en
+              <strong>Siguiente</strong> para iniciar.
+            </p>
+          </div>
+        </div>
+
+        <!-- SLIDE 2 — OBJETIVOS -->
+        <div class="slide" id="slide-2">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">¿Qué vamos a aprender?</div>
+              <div class="slide-subtitle">Objetivos pedagógicos del módulo</div>
+            </div>
+            <span class="slide-tag">Estructura</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title">🔐 SSH</div>
+                <p>
+                  Qué es y para qué sirve el protocolo Secure Shell en
+                  servidores remotos.
+                </p>
+              </div>
+              <div class="card">
+                <div class="card-title">☁️ AWS</div>
+                <p>
+                  Qué elementos intervienen: Security Groups, Key Pairs, IP
+                  Pública y Usuarios.
+                </p>
+              </div>
+              <div class="card">
+                <div class="card-title">💻 CLIENTES</div>
+                <p>
+                  Cómo conectarse desde Windows con PuTTY y OpenSSH, Linux y
+                  macOS.
+                </p>
+              </div>
+              <div class="card">
+                <div class="card-title">🛠️ TROUBLESHOOTING</div>
+                <p>
+                  Cómo encontrar y resolver problemas básicos de conexión de red
+                  y autenticación.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 3 — ¿QUÉ ES SSH? -->
+        <div class="slide" id="slide-3">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">SSH = Secure Shell</div>
+              <div class="slide-subtitle">Fundamentos del protocolo</div>
+            </div>
+            <span class="slide-tag">Concepto</span>
+          </div>
+          <div class="slide-body">
+            <p style="font-size: 1.2rem; text-align: center">
+              <em
+                >"Protocolo que permite conectarse de forma segura a otro equipo
+                a través de una red."</em
+              >
+            </p>
+            <div
+              class="terminal-box"
+              style="text-align: center; max-width: 700px; margin: 0 auto"
+            >
+              MI COMPUTADOR (Windows / Linux / macOS) │ │ SSH (Cifrado) ▼
+              INTERNET │ ▼ AWS │ ▼ EC2 Linux
+            </div>
+            <div
+              class="card"
+              style="
+                border-left: 4px solid var(--aws-orange);
+                text-align: center;
+              "
+            >
+              <strong style="color: var(--aws-orange)"
+                >📌 Concepto Clave:</strong
+              >
+              SSH utiliza normalmente el puerto de transporte
+              <strong>TCP 22</strong> para establecer comunicaciones cifradas.
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 4 — EL VIAJE DE LA CONEXIÓN -->
+        <div class="slide" id="slide-4" data-steps="6">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">El Viaje de la Conexión</div>
+              <div class="slide-subtitle">
+                Recorrido paso a paso (Usa → o haz clic dentro)
+              </div>
+            </div>
+            <span class="slide-tag">Flujo Guiado</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-3" id="travel-flow">
+              <div class="card step-node visible" data-step="1">
+                <div class="card-title">💻 1. Mi computador</div>
+                <p>Inicia el cliente SSH (PuTTY / OpenSSH).</p>
+              </div>
+              <div class="card step-node" data-step="2">
+                <div class="card-title">🔑 2. SSH</div>
+                <p>Empaqueta la solicitud cifrada.</p>
+              </div>
+              <div class="card step-node" data-step="3">
+                <div class="card-title">🌐 3. TCP 22</div>
+                <p>Viaja por Internet apuntando al puerto 22.</p>
+              </div>
+              <div class="card step-node" data-step="4">
+                <div class="card-title">🛡️ 4. Security Group</div>
+                <p>AWS evalúa el tráfico entrante.</p>
+              </div>
+              <div class="card step-node" data-step="5">
+                <div class="card-title">🖥️ 5. EC2 & SSH Server</div>
+                <p>El servicio <code>sshd</code> recibe el paquete.</p>
+              </div>
+              <div class="card step-node" data-step="6">
+                <div class="card-title">🐧 6. Autenticación & Shell</div>
+                <p>Valida la Key Pair y abre la Linux Shell.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 5 — ¿QUÉ NECESITO? -->
+        <div class="slide" id="slide-5">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">¿Qué necesito para conectarme?</div>
+              <div class="slide-subtitle">Los 5 elementos indispensables</div>
+            </div>
+            <span class="slide-tag">Requisitos</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-3">
+              <div class="card">
+                <div class="card-title">1. EC2</div>
+                <p>Una instancia Linux en estado <code>Running</code>.</p>
+              </div>
+              <div class="card">
+                <div class="card-title">2. Dirección</div>
+                <p>Public IPv4 o Public DNS accesible.</p>
+              </div>
+              <div class="card">
+                <div class="card-title">3. Security Group</div>
+                <p>Regla Inbound permitiendo TCP 22 desde tu IP.</p>
+              </div>
+              <div class="card">
+                <div class="card-title">4. Key Pair</div>
+                <p>
+                  Clave privada correspondiente (<code>.pem</code> /
+                  <code>.ppk</code>).
+                </p>
+              </div>
+              <div class="card">
+                <div class="card-title">5. Usuario</div>
+                <p>
+                  Depende de la AMI: <br />• Amazon Linux ➔ <code>ec2-user</code
+                  ><br />• Ubuntu ➔ <code>ubuntu</code>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 6 — SECURITY GROUP -->
+        <div class="slide" id="slide-6" data-steps="1">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">
+                Security Group: ¿Puede llegar mi conexión?
+              </div>
+              <div class="slide-subtitle">
+                El firewall virtual a nivel de instancia
+              </div>
+            </div>
+            <span class="slide-tag">Redes</span>
+          </div>
+          <div class="slide-body">
+            <div
+              class="terminal-box"
+              style="text-align: center; max-width: 600px; margin: 0 auto"
+            >
+              Internet ── TCP 22 ──► [ Security Group ] ──► EC2 Inbound: TCP 22
+              Source: Mi IP
+            </div>
+            <div class="card" style="margin-top: 1rem">
+              <p style="font-weight: bold; margin-bottom: 0.5rem">
+                Pregunta Interactiva: ¿Qué controla principalmente un Security
+                Group?
+              </p>
+              <button
+                class="option-btn"
+                onclick="checkAnswer(this, false, 'sg-exp')"
+              >
+                A. El sistema operativo de la instancia
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkAnswer(this, true, 'sg-exp')"
+              >
+                B. El tráfico de red entrante y saliente
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkAnswer(this, false, 'sg-exp')"
+              >
+                C. El nombre de usuario de Linux
+              </button>
+              <button
+                class="option-btn"
+                onclick="checkAnswer(this, false, 'sg-exp')"
+              >
+                D. El contenido del disco de almacenamiento
+              </button>
+              <div id="sg-exp" class="explanation-box">
+                <strong>Explicación Correcta (B):</strong> Un Security Group
+                funciona como un firewall virtual que filtra el tráfico a nivel
+                de red/instancia antes de que alcance el sistema operativo.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 7 — KEY PAIR -->
+        <div class="slide" id="slide-7">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Key Pair: Autenticación Segura</div>
+              <div class="slide-subtitle">
+                Demostrando autorización para acceder
+              </div>
+            </div>
+            <span class="slide-tag">Seguridad</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title">☁️️ AWS (Clave Pública)</div>
+                <p>
+                  AWS instala la clave pública dentro de la instancia EC2 al
+                  crearla.
+                </p>
+              </div>
+              <div class="card">
+                <div class="card-title">💻 Mi Computador (Clave Privada)</div>
+                <p>
+                  Descargas y conservas el archivo <code>my-key.pem</code>.
+                  Funciona como tu credencial secreta.
+                </p>
+              </div>
+            </div>
+            <div
+              class="card"
+              style="
+                border-left: 4px solid var(--accent-red);
+                text-align: center;
+                margin-top: 1rem;
+              "
+            >
+              <strong style="color: var(--accent-red)">🛡️ Regla de Oro:</strong>
+              La clave privada (<code>.pem</code> / <code>.ppk</code>) NUNCA
+              debe compartirse ni subirse a repositorios públicos.
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 8 — WINDOWS + PUTTY -->
+        <div class="slide" id="slide-8">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Windows: PuTTY</div>
+              <div class="slide-subtitle">
+                Cliente SSH con interfaz gráfica (GUI)
+              </div>
+            </div>
+            <span class="slide-tag">Windows GUI</span>
+          </div>
+          <div class="slide-body">
+            <p style="text-align: center; font-size: 1.1rem">
+              PuTTY utiliza un formato de clave propietario denominado
+              <strong>.ppk</strong>.
+            </p>
+            <div
+              class="terminal-box"
+              style="text-align: center; max-width: 700px; margin: 1rem auto"
+            >
+              .pem (Clave AWS) ──► PuTTYgen (Conversor) ──► .ppk ──► PuTTY ──►
+              EC2
+            </div>
+            <div class="card">
+              <p>
+                <strong>Explicación:</strong> PuTTYgen es la herramienta
+                incluida junto con PuTTY que permite importar el archivo
+                <code>.pem</code> otorgado por AWS y convertirlo a un archivo
+                <code>.ppk</code> reconocible por PuTTY.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 9 — CONFIGURAR PUTTY -->
+        <div class="slide" id="slide-9">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Configurar PuTTY</div>
+              <div class="slide-subtitle">
+                Representación visual de la interfaz
+              </div>
+            </div>
+            <span class="slide-tag">Configuración</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title">1. Configuración de Sesión</div>
+                <div class="terminal-block">
+                  Host Name: PUBLIC_DNS (o ec2-user@PUBLIC_DNS) Port: 22
+                  Connection type: SSH
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title">2. Adjuntar Clave Privada (.ppk)</div>
+                <div class="terminal-block">
+                  Categoría Lateral: Connection ➔ SSH ➔ Auth ➔ Credentials
+                  Private key file: Select "my-key.ppk"
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 10 — WINDOWS + OPENSSH -->
+        <div class="slide" id="slide-10" data-steps="5">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Windows: PowerShell / OpenSSH</div>
+              <div class="slide-subtitle">
+                Conexión por línea de comandos nativa
+              </div>
+            </div>
+            <span class="slide-tag">Windows CLI</span>
+          </div>
+          <div class="slide-body">
+            <div class="terminal-box" style="text-align: center">
+              <span id="cmd-1" class="step-node visible">ssh</span>
+              <span id="cmd-2" class="step-node">-i</span>
+              <span id="cmd-3" class="step-node">"my-key.pem"</span>
+              <span id="cmd-4" class="step-node">ec2-user</span>@<span
+                id="cmd-5"
+                class="step-node"
+                >PUBLIC_DNS</span
+              >
+            </div>
+            <div class="grid-3" style="margin-top: 1rem">
+              <div class="card step-node visible" data-step="1">
+                <strong>ssh:</strong> Comando cliente OpenSSH.
+              </div>
+              <div class="card step-node" data-step="2">
+                <strong>-i:</strong> Indica que se especificará un archivo de
+                identidad (clave).
+              </div>
+              <div class="card step-node" data-step="3">
+                <strong>my-key.pem:</strong> Ruta a la clave privada.
+              </div>
+              <div class="card step-node" data-step="4">
+                <strong>ec2-user:</strong> Usuario del sistema Linux.
+              </div>
+              <div class="card step-node" data-step="5">
+                <strong>PUBLIC_DNS:</strong> Dirección pública de la instancia
+                EC2.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 11 — LINUX -->
+        <div class="slide" id="slide-11">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Linux: Terminal + OpenSSH</div>
+              <div class="slide-subtitle">Permisos de clave y ejecución</div>
+            </div>
+            <span class="slide-tag">Linux</span>
+          </div>
+          <div class="slide-body">
+            <div class="card">
+              <div class="card-title">
+                Paso 1: Proteger permisos de la clave
+              </div>
+              <div class="terminal-box">chmod 400 my-key.pem</div>
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: var(--text-muted);
+                  margin-top: 0.3rem;
+                "
+              >
+                OpenSSH exige estrictamente que la clave privada no sea
+                accesible por otros usuarios locales.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Paso 2: Conectarse a EC2</div>
+              <div class="terminal-box">
+                ssh -i "my-key.pem" ec2-user@PUBLIC_DNS
+              </div>
+            </div>
+            <div class="terminal-box" style="color: var(--accent-green)">
+              [ec2-user@ip-10-0-1-50 ~]$
+              <span style="color: var(--text-main)"
+                ># ¡Estamos dentro de la instancia EC2 Linux!</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 12 — macOS -->
+        <div class="slide" id="slide-12">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">macOS: Terminal + OpenSSH</div>
+              <div class="slide-subtitle">Conexión nativa en Mac</div>
+            </div>
+            <span class="slide-tag">macOS</span>
+          </div>
+          <div class="slide-body">
+            <div class="terminal-box">
+              chmod 400 my-key.pem ssh -i "my-key.pem" ec2-user@PUBLIC_DNS
+            </div>
+            <div class="terminal-box" style="text-align: center">
+              Mac ──► Terminal ──► OpenSSH ──► Internet ──► AWS ──► EC2
+            </div>
+            <p style="text-align: center; color: var(--text-muted)">
+              El flujo en macOS es conceptual y prácticamente idéntico al de
+              Linux.
+            </p>
+          </div>
+        </div>
+
+        <!-- SLIDE 13 — COMPARACIÓN -->
+        <div class="slide" id="slide-13">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Comparación de Herramientas</div>
+              <div class="slide-subtitle">
+                Diferencias de cliente vs Concepto común
+              </div>
+            </div>
+            <span class="slide-tag">Resumen</span>
+          </div>
+          <div class="slide-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sistema</th>
+                  <th>Cliente</th>
+                  <th>Formato de Clave</th>
+                  <th>Sintaxis / Uso</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Windows</td>
+                  <td>PuTTY</td>
+                  <td><code>.ppk</code></td>
+                  <td>Interfaz Gráfica</td>
+                </tr>
+                <tr>
+                  <td>Windows</td>
+                  <td>OpenSSH</td>
+                  <td><code>.pem</code></td>
+                  <td><code>ssh -i "key.pem" user@host</code></td>
+                </tr>
+                <tr>
+                  <td>Linux</td>
+                  <td>OpenSSH</td>
+                  <td><code>.pem</code> (chmod 400)</td>
+                  <td><code>ssh -i "key.pem" user@host</code></td>
+                </tr>
+                <tr>
+                  <td>macOS</td>
+                  <td>OpenSSH</td>
+                  <td><code>.pem</code> (chmod 400)</td>
+                  <td><code>ssh -i "key.pem" user@host</code></td>
+                </tr>
+              </tbody>
+            </table>
+            <div
+              class="card"
+              style="
+                text-align: center;
+                border-left: 4px solid var(--aws-orange);
+              "
+            >
+              <strong style="color: var(--aws-orange); font-size: 1.1rem"
+                >Mensaje Principal: La herramienta cambia. El concepto SSH
+                no.</strong
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 14 — ¿QUÉ PASA DESPUÉS DE CONECTARME? -->
+        <div class="slide" id="slide-14">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">¿Qué pasa después de conectarme?</div>
+              <div class="slide-subtitle">
+                Acceso directo al sistema operativo Linux
+              </div>
+            </div>
+            <span class="slide-tag">Sistema Operativo</span>
+          </div>
+          <div class="slide-body">
+            <div class="terminal-box" style="text-align: center">
+              SSH ──► SSH Server (sshd) ──► Autenticación ──► Usuario Linux ──►
+              Shell ──► Comandos
+            </div>
+            <div class="card">
+              <p style="margin-bottom: 0.5rem">
+                Ejemplos de comandos básicos al acceder:
+              </p>
+              <div class="terminal-box">
+                [ec2-user@ip-10-0-1-50 ~]$
+                <span class="cmd">pwd</span> /home/ec2-user
+                [ec2-user@ip-10-0-1-50 ~]$ <span class="cmd">whoami</span>
+                ec2-user
+              </div>
+            </div>
+            <p style="text-align: center; color: var(--text-muted)">
+              <em
+                >SSH permite acceder y administrar remotamente el sistema
+                operativo de la instancia EC2.</em
+              >
+            </p>
+          </div>
+        </div>
+
+        <!-- SLIDE 15 — TROUBLESHOOTING -->
+        <div class="slide" id="slide-15" data-steps="2">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">
+                Troubleshooting: No puedo conectarme
+              </div>
+              <div class="slide-subtitle">
+                Ruta de diagnóstico por capas (Usa → o haz clic)
+              </div>
+            </div>
+            <span class="slide-tag">Diagnóstico</span>
+          </div>
+          <div class="slide-body">
+            <div class="card step-node visible" data-step="1">
+              <div class="card-title">1. ¿Llego a EC2? (Capa de Red)</div>
+              <p>
+                <strong>Si NO:</strong> Revisar Security Group (TCP 22), IP
+                pública, conectividad a Internet o estado de la EC2.
+              </p>
+            </div>
+            <div class="card step-node" data-step="2">
+              <div class="card-title">
+                2. ¿Me autentico? (Capa de Autenticación)
+              </div>
+              <p>
+                <strong>Si NO:</strong> Revisar nombre de usuario (ej:
+                <code>ec2-user</code> vs <code>ubuntu</code>), clave privada
+                seleccionada o permisos del archivo (<code>chmod 400</code>).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 16 — ERRORES -->
+        <div class="slide" id="slide-16">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Interpretación de Errores Básicos</div>
+              <div class="slide-subtitle">Mensajes comunes y significado</div>
+            </div>
+            <span class="slide-tag">Errores</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-2">
+              <div
+                class="card"
+                style="border-left: 4px solid var(--accent-red)"
+              >
+                <div class="card-title" style="color: var(--accent-red)">
+                  Connection timed out
+                </div>
+                <p>
+                  <strong>Revisar:</strong> Security Group, puerto TCP 22
+                  bloqueado, IP pública incorrecta.
+                </p>
+              </div>
+              <div
+                class="card"
+                style="border-left: 4px solid var(--aws-orange)"
+              >
+                <div class="card-title" style="color: var(--aws-orange)">
+                  Permission denied (publickey)
+                </div>
+                <p>
+                  <strong>Revisar:</strong> Clave privada incorrecta, usuario
+                  incorrecto, permisos de archivo laxos.
+                </p>
+              </div>
+              <div
+                class="card"
+                style="border-left: 4px solid var(--accent-purple)"
+              >
+                <div class="card-title" style="color: var(--accent-purple)">
+                  Could not resolve hostname
+                </div>
+                <p>
+                  <strong>Revisar:</strong> Hostname o DNS mal escrito, falta de
+                  resolución DNS local.
+                </p>
+              </div>
+              <div
+                class="card"
+                style="border-left: 4px solid var(--accent-blue)"
+              >
+                <div class="card-title" style="color: var(--accent-blue)">
+                  Connection refused
+                </div>
+                <p>
+                  <strong>Significado:</strong> Instancia alcanzable, pero el
+                  servicio SSH (<code>sshd</code>) no está escuchando.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 17 — SEGURIDAD -->
+        <div class="slide" id="slide-17">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">SSH + Buenas Prácticas de Seguridad</div>
+              <div class="slide-subtitle">
+                Reglas para el examen y producción
+              </div>
+            </div>
+            <span class="slide-tag">Seguridad</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-2">
+              <div class="card">
+                <p style="line-height: 1.8">
+                  🔐 <strong>Proteger .pem y .ppk:</strong> Mantener las claves
+                  privadas seguras.<br />
+                  🚫 <strong>No compartir claves privadas:</strong> Tratarlas
+                  como credenciales secretas.<br />
+                  🎯 <strong>Restringir el puerto 22:</strong> Limitar el origen
+                  en Security Group a tu IP.
+                </p>
+              </div>
+              <div class="card">
+                <p style="line-height: 1.8">
+                  ⚠️ <strong>Evitar 0.0.0.0/0:</strong> No dejar SSH abierto a
+                  todo Internet de forma permanente.<br />
+                  👤 <strong>Utilizar usuario correcto:</strong> Usar usuarios
+                  estándar de la AMI.<br />
+                  ☁️ <strong>Security Groups:</strong> Usarlos para controlar
+                  todo tráfico de red.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 18 — CLOUD PRACTITIONER -->
+        <div class="slide" id="slide-18">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">
+                AWS Cloud Practitioner: ¿Qué debes recordar?
+              </div>
+              <div class="slide-subtitle">Conceptos clave para el examen</div>
+            </div>
+            <span class="slide-tag">Examen</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-3">
+              <div class="card">
+                <strong>SSH:</strong> Acceso remoto seguro a Linux.
+              </div>
+              <div class="card">
+                <strong>TCP 22:</strong> Puerto estándar de SSH.
+              </div>
+              <div class="card">
+                <strong>Security Group:</strong> Controla tráfico a nivel de
+                red.
+              </div>
+              <div class="card">
+                <strong>Key Pair:</strong> Autenticación mediante claves.
+              </div>
+              <div class="card">
+                <strong>EC2:</strong> Instancia de computación virtual.
+              </div>
+              <div class="card">
+                <strong>IAM:</strong> Controla acceso a recursos AWS.
+              </div>
+            </div>
+            <div
+              class="card"
+              style="
+                border-left: 4px solid var(--accent-red);
+                margin-top: 0.5rem;
+              "
+            >
+              <strong>Diferencia Crítica para el Examen:</strong>
+              <br />• <strong>SSH:</strong> Otorga acceso al Sistema Operativo
+              de la instancia. <br />• <strong>IAM:</strong> Otorga permisos
+              para gestionar recursos en la API de AWS.
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 19 — CHECKPOINT INTERACTIVO -->
+        <div class="slide" id="slide-19">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Checkpoint Interactivo</div>
+              <div class="slide-subtitle">Validación de conocimientos</div>
+            </div>
+            <span class="slide-tag">Evaluación</span>
+          </div>
+          <div class="slide-body">
+            <div class="grid-3">
+              <div class="card">
+                <p><strong>1. ¿Qué puerto utiliza SSH normalmente?</strong></p>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, false, 'q1-e')"
+                >
+                  21
+                </button>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, true, 'q1-e')"
+                >
+                  22
+                </button>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, false, 'q1-e')"
+                >
+                  80
+                </button>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, false, 'q1-e')"
+                >
+                  443
+                </button>
+                <div id="q1-e" class="explanation-box">
+                  Puerto estándar TCP 22.
+                </div>
+              </div>
+              <div class="card">
+                <p><strong>2. ¿Qué controla un Security Group?</strong></p>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, false, 'q2-e')"
+                >
+                  Usuarios Linux
+                </button>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, true, 'q2-e')"
+                >
+                  Tráfico de red
+                </button>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, false, 'q2-e')"
+                >
+                  Archivos
+                </button>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, false, 'q2-e')"
+                >
+                  Procesos
+                </button>
+                <div id="q2-e" class="explanation-box">
+                  Controla el tráfico entrante/saliente de red.
+                </div>
+              </div>
+              <div class="card">
+                <p><strong>3. ¿SSH e IAM son lo mismo?</strong></p>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, false, 'q3-e')"
+                >
+                  Sí
+                </button>
+                <button
+                  class="option-btn"
+                  onclick="checkAnswer(this, true, 'q3-e')"
+                >
+                  No
+                </button>
+                <div id="q3-e" class="explanation-box">
+                  No. SSH accede al SO; IAM administra servicios AWS.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLIDE 20 — CIERRE -->
+        <div class="slide" id="slide-20">
+          <div class="slide-header">
+            <div class="slide-title-group">
+              <div class="slide-title">Resumen Final</div>
+              <div class="slide-subtitle">Conclusión pedagógica</div>
+            </div>
+            <span class="slide-tag">Cierre</span>
+          </div>
+          <div class="slide-body" style="text-align: center">
+            <h1
+              style="
+                font-size: clamp(2rem, 3.5vw, 3.5rem);
+                color: var(--aws-orange);
+                margin-bottom: 1rem;
+              "
+            >
+              LA HERRAMIENTA CAMBIA.<br />EL CONCEPTO NO.
+            </h1>
+            <div
+              class="terminal-box"
+              style="max-width: 650px; margin: 0 auto; text-align: center"
+            >
+              Windows ──► PuTTY / OpenSSH Linux ──► OpenSSH ──► SSH ──► EC2
+              macOS ──► OpenSSH
+            </div>
+            <p
+              style="
+                color: var(--text-muted);
+                font-size: 1.1rem;
+                margin-top: 1.5rem;
+                max-width: 800px;
+                margin-left: auto;
+                margin-right: auto;
+              "
+            >
+              Para conectarte necesitas comprender el destino, la red, el
+              puerto, la autenticación y el usuario.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROL BAR INFERIOR DISCRETA -->
+      <div class="control-bar">
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="control-content">
+          <button class="btn-nav" id="btnPrev">← Anterior</button>
+          <span class="slide-indicator" id="slideIndicator">1 / 20</span>
+          <button class="btn-nav" id="btnNext">Siguiente →</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentSlide = 1;
+      const totalSlides = 20;
+      let currentSubstep = 1;
+
+      function getActiveSlideEl() {
+        return document.getElementById(`slide-${currentSlide}`);
+      }
+
+      function updatePresentation() {
+        // Actualizar Visibilidad de Slides
+        document.querySelectorAll(".slide").forEach((slide, idx) => {
+          if (idx + 1 === currentSlide) {
+            slide.classList.add("active");
+          } else {
+            slide.classList.remove("active");
+          }
+        });
+
+        // Actualizar Indicador y Barra de Progreso
+        document.getElementById("slideIndicator").innerText =
+          `${currentSlide} / ${totalSlides}`;
+        const progress = (currentSlide / totalSlides) * 100;
+        document.getElementById("progressBar").style.width = `${progress}%`;
+
+        // Estado de Botones
+        document.getElementById("btnPrev").disabled = currentSlide === 1;
+        document.getElementById("btnNext").disabled =
+          currentSlide === totalSlides;
+
+        // Resetear Subpasos al cambiar de slide
+        currentSubstep = 1;
+        updateSubsteps();
+      }
+
+      function updateSubsteps() {
+        const activeSlide = getActiveSlideEl();
+        if (!activeSlide) return;
+
+        const maxSteps = parseInt(
+          activeSlide.getAttribute("data-steps") || "1",
+        );
+        const nodes = activeSlide.querySelectorAll(".step-node");
+
+        nodes.forEach((node) => {
+          const stepVal = parseInt(
+            node.getAttribute("data-step") || node.id.replace("cmd-", ""),
+          );
+          if (stepVal <= currentSubstep) {
+            node.classList.add("visible");
+          } else {
+            node.classList.remove("visible");
+          }
+        });
+      }
+
+      function handleNext() {
+        const activeSlide = getActiveSlideEl();
+        const maxSteps = parseInt(
+          activeSlide?.getAttribute("data-steps") || "1",
+        );
+
+        if (currentSubstep < maxSteps) {
+          currentSubstep++;
+          updateSubsteps();
+        } else {
+          if (currentSlide < totalSlides) {
+            currentSlide++;
+            updatePresentation();
+          }
+        }
+      }
+
+      function handlePrev() {
+        if (currentSubstep > 1) {
+          currentSubstep--;
+          updateSubsteps();
+        } else {
+          if (currentSlide > 1) {
+            currentSlide--;
+            updatePresentation();
+            // Ir al último subpaso de la slide anterior si los tiene
+            const newActive = getActiveSlideEl();
+            const maxSteps = parseInt(
+              newActive?.getAttribute("data-steps") || "1",
+            );
+            currentSubstep = maxSteps;
+            updateSubsteps();
+          }
+        }
+      }
+
+      // EVENT LISTENERS
+      document.getElementById("btnNext").addEventListener("click", (e) => {
+        e.stopPropagation();
+        handleNext();
+      });
+
+      document.getElementById("btnPrev").addEventListener("click", (e) => {
+        e.stopPropagation();
+        handlePrev();
+      });
+
+      // NAVEGACIÓN CON TECLADO
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+          e.preventDefault();
+          handleNext();
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          handlePrev();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          currentSlide = 1;
+          updatePresentation();
+        } else if (e.key === "End") {
+          e.preventDefault();
+          currentSlide = totalSlides;
+          updatePresentation();
+        }
+      });
+
+      // AVANCE AL HACER CLIC EN EL ÁREA DE LA DIAPOSITIVA
+      document
+        .querySelector(".slide-viewport")
+        .addEventListener("click", (e) => {
+          if (
+            e.target.tagName === "BUTTON" ||
+            e.target.classList.contains("option-btn")
+          )
+            return;
+          handleNext();
+        });
+
+      // QUIZ / CHECKPOINT INTERACTIVO
+      function checkAnswer(btn, isCorrect, expId) {
+        const parent = btn.parentElement;
+        parent.querySelectorAll(".option-btn").forEach((b) => {
+          b.classList.remove("correct", "incorrect");
+        });
+
+        if (isCorrect) {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("incorrect");
+        }
+
+        if (expId) {
+          const expEl = document.getElementById(expId);
+          if (expEl) expEl.style.display = "block";
+        }
+      }
+
+      // INICIALIZACIÓN
+      updatePresentation();
+    </script>
+  </body>
+</html>

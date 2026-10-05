@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linux City — AWS Cloud Practitioner</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --card-border: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #f59e0b;
+        --aws-blue: #38bdf8;
+        --aws-green: #22c55e;
+        --aws-red: #ef4444;
+        --font-family: Arial, Helvetica, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background: #111827;
+        color: var(--text-main);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* HEADER */
+      header {
+        height: 65px;
+        padding: 0 24px;
+        background: #0f172a;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        z-index: 10;
+      }
+
+      header h1 {
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      header p {
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      .progress {
+        min-width: 200px;
+      }
+
+      .progress-text {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--aws-orange);
+        transition: width 0.4s ease;
+      }
+
+      /* MAIN LAYOUT */
+      main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        height: calc(100vh - 65px);
+        overflow: hidden;
+      }
+
+      /* CITY CONTAINER */
+      .city-container {
+        position: relative;
+        padding: 20px;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 15px;
+        background:
+          linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.95)),
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.025) 40px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.025) 40px
+          );
+        overflow-y: auto;
+      }
+
+      .city-title {
+        text-align: center;
+      }
+
+      .city-title h2 {
+        font-size: 22px;
+      }
+
+      .city-title span {
+        color: var(--aws-orange);
+      }
+
+      /* CITY GRID SYSTEM (Previene solapamientos) */
+      .city-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto 1fr 1fr;
+        gap: 15px;
+        align-items: center;
+        justify-items: center;
+        position: relative;
+        max-width: 900px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* ROADS (Fondo decorativo en capas) */
+      .road-h {
+        position: absolute;
+        top: 55%;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: #1e293b;
+        border-top: 2px dashed #475569;
+        border-bottom: 2px dashed #475569;
+        z-index: 1;
+      }
+
+      .road-v {
+        position: absolute;
+        top: 15%;
+        bottom: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        background: #1e293b;
+        border-left: 2px dashed #475569;
+        border-right: 2px dashed #475569;
+        z-index: 1;
+      }
+
+      /* TOP ACCESS BADGES */
+      .top-access-bar {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        z-index: 5;
+        margin-bottom: 10px;
+      }
+
+      .aws-cloud {
+        padding: 8px 18px;
+        border-radius: 20px;
+        background: #1e293b;
+        border: 2px solid var(--aws-orange);
+        color: var(--aws-orange);
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .badge-btn {
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+        transition: all 0.2s;
+      }
+
+      .ssh {
+        background: #0f172a;
+        border: 2px solid var(--aws-blue);
+        color: var(--aws-blue);
+      }
+
+      .root {
+        background: #450a0a;
+        border: 2px solid var(--aws-red);
+        color: #fca5a5;
+      }
+
+      .badge-btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--aws-orange);
+      }
+
+      /* BUILDINGS */
+      .building {
+        width: 100%;
+        max-width: 180px;
+        min-height: 95px;
+        border: 2px solid #475569;
+        border-radius: 12px;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: #1e293b;
+        transition: all 0.2s ease;
+        z-index: 5;
+      }
+
+      .building:hover {
+        transform: translateY(-4px);
+        border-color: var(--aws-orange);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .building.active {
+        border-color: var(--aws-orange);
+        box-shadow:
+          0 0 0 3px rgba(245, 158, 11, 0.25),
+          0 10px 25px rgba(0, 0, 0, 0.5);
+        background: #24334a;
+      }
+
+      .building .icon {
+        font-size: 26px;
+        margin-bottom: 4px;
+      }
+
+      .building strong {
+        font-size: 14px;
+      }
+
+      .building small {
+        color: var(--text-muted);
+        font-size: 11px;
+        margin-top: 2px;
+      }
+
+      /* TERMINAL */
+      .terminal {
+        grid-column: 2;
+        width: 100%;
+        max-width: 220px;
+        background: #020617;
+        border: 2px solid var(--aws-green);
+        border-radius: 10px;
+        padding: 10px;
+        z-index: 6;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .terminal-header {
+        color: var(--aws-green);
+        margin-bottom: 6px;
+        font-size: 11px;
+        border-bottom: 1px solid #1e293b;
+        padding-bottom: 4px;
+      }
+
+      .terminal-line {
+        color: #e2e8f0;
+        font-family: monospace;
+        font-size: 11px;
+        margin: 3px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .prompt {
+        color: var(--aws-green);
+      }
+
+      /* SIDE PANEL */
+      .panel {
+        background: #0f172a;
+        border-left: 1px solid var(--card-border);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .panel h2 {
+        font-size: 20px;
+        margin-bottom: 6px;
+      }
+
+      .panel .concept {
+        color: var(--aws-orange);
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 14px;
+      }
+
+      .panel-description {
+        color: #cbd5e1;
+        line-height: 1.5;
+        font-size: 13px;
+        margin-bottom: 15px;
+      }
+
+      .panel h3 {
+        margin: 12px 0 6px;
+        font-size: 13px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .command {
+        background: #020617;
+        border-left: 3px solid var(--aws-green);
+        padding: 8px 10px;
+        margin: 5px 0;
+        border-radius: 4px;
+        font-family: monospace;
+        color: var(--aws-green);
+        font-size: 12px;
+      }
+
+      .why {
+        background: #1e293b;
+        border-radius: 8px;
+        padding: 10px;
+        color: #cbd5e1;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      /* CHALLENGE */
+      .challenge {
+        margin-top: auto;
+        padding-top: 15px;
+      }
+
+      .challenge-box {
+        background: #172554;
+        border: 1px solid #3b82f6;
+        padding: 12px;
+        border-radius: 8px;
+        line-height: 1.4;
+        font-size: 12px;
+        color: #dbeafe;
+      }
+
+      /* CONTROLS */
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+      }
+
+      button {
+        border: none;
+        border-radius: 6px;
+        padding: 10px 14px;
+        cursor: pointer;
+        background: #334155;
+        color: white;
+        font-size: 13px;
+        transition: 0.2s;
+        flex: 1;
+      }
+
+      button:hover {
+        background: #475569;
+      }
+
+      button.primary {
+        background: var(--aws-orange);
+        color: #111827;
+        font-weight: bold;
+      }
+
+      button.primary:hover {
+        background: #d97706;
+      }
+
+      /* RESPONSIVE DESIGN */
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: 1fr;
+          grid-template-rows: 1fr auto;
+          height: auto;
+          overflow-y: auto;
+        }
+        body {
+          overflow-y: auto;
+          height: auto;
+        }
+        .panel {
+          border-left: none;
+          border-top: 1px solid var(--card-border);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>🏙️ Linux City</h1>
+        <p>Linux explicado como una ciudad — AWS Cloud Practitioner</p>
+      </div>
+      <div class="progress">
+        <div class="progress-text">
+          <span>Progreso de la clase</span>
+          <span id="progressText">20%</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="city-container">
+        <div class="city-title">
+          <h2>Tu servidor Linux es una <span>ciudad</span></h2>
+        </div>
+
+        <div class="city-grid">
+          <div class="road-h"></div>
+          <div class="road-v"></div>
+
+          <!-- TOP ACCESS BAR -->
+          <div class="top-access-bar">
+            <div class="badge-btn ssh" onclick="showTopic('ssh')">
+              🔐 SSH
+              <small style="display: block; font-size: 9px; font-weight: normal"
+                >Entrada remota</small
+              >
+            </div>
+            <div class="aws-cloud">☁️ AWS / EC2</div>
+            <div class="badge-btn root" onclick="showTopic('root')">
+              👑 ROOT
+              <small style="display: block; font-size: 9px; font-weight: normal"
+                >Máximo privilegio</small
+              >
+            </div>
+          </div>
+
+          <!-- FILA SUPERIOR -->
+          <div id="home" class="building" onclick="showTopic('home')">
+            <div class="icon">🏠</div>
+            <strong>/home</strong>
+            <small>Casas de usuarios</small>
+          </div>
+
+          <div id="bin" class="building" onclick="showTopic('bin')">
+            <div class="icon">🛠️</div>
+            <strong>/usr/bin</strong>
+            <small>Herramientas</small>
+          </div>
+
+          <div id="etc" class="building" onclick="showTopic('etc')">
+            <div class="icon">⚙️</div>
+            <strong>/etc</strong>
+            <small>Configuración</small>
+          </div>
+
+          <!-- FILA CENTRAL (TERMINAL CENTRADA) -->
+          <div
+            style="
+              grid-column: 1 / -1;
+              display: flex;
+              justify-content: center;
+              width: 100%;
+              margin: 10px 0;
+            "
+          >
+            <div class="terminal">
+              <div class="terminal-header">● ● ● &nbsp; Terminal Linux</div>
+              <div class="terminal-line">
+                <span class="prompt">ec2-user@server</span>:~$ pwd
+              </div>
+              <div class="terminal-line">/home/ec2-user</div>
+              <div class="terminal-line">
+                <span class="prompt">ec2-user@server</span>:~$ whoami
+              </div>
+              <div class="terminal-line">ec2-user</div>
+            </div>
+          </div>
+
+          <!-- FILA INFERIOR -->
+          <div id="logs" class="building" onclick="showTopic('logs')">
+            <div class="icon">📚</div>
+            <strong>/var/log</strong>
+            <small>Historial</small>
+          </div>
+
+          <div id="processes" class="building" onclick="showTopic('processes')">
+            <div class="icon">👷</div>
+            <strong>Procesos</strong>
+            <small>Trabajadores</small>
+          </div>
+
+          <div id="tmp" class="building" onclick="showTopic('tmp')">
+            <div class="icon">🗑️</div>
+            <strong>/tmp</strong>
+            <small>Temporal</small>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h2 id="topicTitle">🏠 /home</h2>
+        <div id="topicConcept" class="concept">Las casas de los usuarios</div>
+        <p id="topicDescription" class="panel-description">
+          Cada usuario necesita un espacio propio para guardar sus archivos. En
+          Linux, /home contiene normalmente los directorios personales de los
+          usuarios.
+        </p>
+
+        <h3>💻 Comandos</h3>
+        <div id="commands"></div>
+
+        <h3>🤔 ¿Por qué?</h3>
+        <div id="why" class="why"></div>
+
+        <div class="challenge">
+          <h3>🎯 Pregunta para la clase</h3>
+          <div id="challenge" class="challenge-box"></div>
+        </div>
+
+        <div class="controls">
+          <button onclick="previousTopic()">← Anterior</button>
+          <button class="primary" onclick="nextTopic()">Siguiente →</button>
+        </div>
+      </aside>
+    </main>
+
+    <script>
+      const topics = {
+        home: {
+          title: "🏠 /home",
+          concept: "Las casas de los usuarios",
+          description:
+            "Cada usuario necesita un espacio propio para guardar sus archivos. En Linux, /home contiene normalmente los directorios personales de los usuarios.",
+          commands: ["pwd", "ls", "cd /home", "ls /home"],
+          why: "Piensa en /home como un barrio residencial. Cada usuario tiene su propia casa y sus propios archivos.",
+          challenge:
+            "¿Qué crees que ocurriría si todos los usuarios guardaran sus archivos en la misma carpeta?",
+          progress: 20,
+        },
+        etc: {
+          title: "⚙️ /etc",
+          concept: "La oficina de configuración",
+          description:
+            "En /etc encontramos muchos archivos utilizados para configurar el sistema y distintos servicios.",
+          commands: ["ls /etc", "cat /etc/hostname", "cat /etc/passwd"],
+          why: "No necesitas memorizar todos los archivos de /etc. Para Cloud Practitioner es importante comprender que Linux utiliza archivos para almacenar configuración.",
+          challenge:
+            "Si una aplicación está funcionando de una manera determinada, ¿dónde esperarías encontrar parte de su configuración?",
+          progress: 35,
+        },
+        logs: {
+          title: "📚 /var/log",
+          concept: "La memoria de la ciudad",
+          description:
+            "Los logs registran acontecimientos que ocurren en el sistema: accesos, errores, servicios y otros eventos.",
+          commands: [
+            "ls /var/log",
+            "less /var/log/syslog",
+            "tail /var/log/syslog",
+            "grep ERROR archivo.log",
+          ],
+          why: "Cuando una aplicación falla, muchas veces no necesitas adivinar qué ocurrió. Puedes investigar los registros.",
+          challenge:
+            "Una aplicación dejó de responder. ¿Qué revisarías antes de reiniciar todo el servidor?",
+          progress: 50,
+        },
+        tmp: {
+          title: "🗑️ /tmp",
+          concept: "La zona temporal",
+          description:
+            "Linux dispone de /tmp para almacenar archivos temporales utilizados por aplicaciones y procesos.",
+          commands: ["ls /tmp", "touch /tmp/prueba.txt", "rm /tmp/prueba.txt"],
+          why: "Es parecido a una mesa de trabajo: puedes colocar algo temporalmente mientras realizas una tarea.",
+          challenge:
+            "¿Guardarías allí un archivo crítico que necesitas conservar durante meses?",
+          progress: 60,
+        },
+        bin: {
+          title: "🛠️ /usr/bin",
+          concept: "La zona de herramientas",
+          description:
+            "Aquí encontramos muchos programas y comandos disponibles para utilizar en Linux.",
+          commands: ["ls /usr/bin", "which ls", "which python", "which ssh"],
+          why: "Los comandos que escribimos en la terminal son programas que el sistema puede ejecutar.",
+          challenge:
+            "Cuando escribes 'ls', ¿crees que Linux está ejecutando algo o simplemente interpretando texto?",
+          progress: 70,
+        },
+        processes: {
+          title: "👷 Procesos",
+          concept: "Los trabajadores de la ciudad",
+          description:
+            "Un proceso es una instancia de un programa que está siendo ejecutado por el sistema.",
+          commands: ["ps", "ps aux", "top", "kill PID"],
+          why: "Un servidor puede ejecutar muchos programas al mismo tiempo. Los procesos nos permiten observar qué está ocurriendo.",
+          challenge:
+            "Si una aplicación consume demasiada CPU, ¿qué información te gustaría conocer?",
+          progress: 80,
+        },
+        ssh: {
+          title: "🔐 SSH",
+          concept: "La entrada remota a la ciudad",
+          description:
+            "SSH permite conectarnos de forma remota a un servidor Linux. En AWS es una forma habitual de acceder a una instancia EC2.",
+          commands: ["ssh usuario@IP", "ssh -i clave.pem usuario@IP"],
+          why: "La instancia EC2 puede estar ejecutándose en un Data Center de AWS. No necesitas estar físicamente frente al servidor para administrarlo.",
+          challenge:
+            "Si EC2 está en AWS y tú estás en Chile, ¿cómo puedes abrir una terminal en ese servidor?",
+          progress: 90,
+        },
+        root: {
+          title: "👑 root",
+          concept: "La llave maestra",
+          description:
+            "root es el superusuario tradicional de Linux. Tiene privilegios muy elevados sobre el sistema.",
+          commands: ["whoami", "sudo comando", "sudo -i"],
+          why: "Tener privilegios elevados significa que puedes modificar partes críticas del sistema. Por eso no debes utilizar privilegios administrativos sin necesidad.",
+          challenge:
+            "¿Usarías una llave maestra para abrir todas las puertas de una ciudad si solamente necesitas entrar a una habitación?",
+          progress: 100,
+        },
+      };
+
+      const topicOrder = [
+        "home",
+        "etc",
+        "logs",
+        "tmp",
+        "bin",
+        "processes",
+        "ssh",
+        "root",
+      ];
+      let currentIndex = 0;
+
+      function showTopic(topicName) {
+        const topic = topics[topicName];
+        if (!topic) return;
+
+        document
+          .querySelectorAll(".building, .badge-btn")
+          .forEach((el) => el.classList.remove("active"));
+
+        const selectedBuilding = document.getElementById(topicName);
+        if (selectedBuilding) selectedBuilding.classList.add("active");
+
+        document.getElementById("topicTitle").textContent = topic.title;
+        document.getElementById("topicConcept").textContent = topic.concept;
+        document.getElementById("topicDescription").textContent =
+          topic.description;
+        document.getElementById("why").textContent = topic.why;
+        document.getElementById("challenge").textContent = topic.challenge;
+
+        const commandsContainer = document.getElementById("commands");
+        commandsContainer.innerHTML = "";
+        topic.commands.forEach((command) => {
+          const div = document.createElement("div");
+          div.className = "command";
+          div.textContent = command;
+          commandsContainer.appendChild(div);
+        });
+
+        document.getElementById("progressFill").style.width =
+          topic.progress + "%";
+        document.getElementById("progressText").textContent =
+          topic.progress + "%";
+
+        currentIndex = topicOrder.indexOf(topicName);
+      }
+
+      function nextTopic() {
+        if (currentIndex < topicOrder.length - 1) {
+          currentIndex++;
+          showTopic(topicOrder[currentIndex]);
+        }
+      }
+
+      function previousTopic() {
+        if (currentIndex > 0) {
+          currentIndex--;
+          showTopic(topicOrder[currentIndex]);
+        }
+      }
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowRight") nextTopic();
+        if (event.key === "ArrowLeft") previousTopic();
+      });
+
+      showTopic(topicOrder[0]);
+    </script>
+  </body>
+</html>
