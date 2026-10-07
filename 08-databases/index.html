@@ -1,0 +1,2327 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bases de Datos en AWS — AWS Certified Cloud Practitioner</title>
+    <style>
+      /* ==========================================================================
+       VARIABLES Y ESTILOS BASE
+       ========================================================================== */
+      :root {
+        --bg-dark: #0f172a;
+        --bg-card: #1e293b;
+        --bg-card-hover: #334155;
+        --aws-orange: #ff9900;
+        --aws-orange-hover: #e68a00;
+        --aws-squid: #232f3e;
+        --aws-blue: #3b82f6;
+        --aws-green: #10b981;
+        --aws-red: #ef4444;
+        --aws-purple: #8b5cf6;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --border-accent: rgba(255, 153, 0, 0.4);
+        --font-main:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        --transition-speed: 0.3s;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body,
+      html {
+        width: 100%;
+        height: 100dvh;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        font-family: var(--font-main);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ==========================================================================
+       HEADER Y BARRA SUPERIOR
+       ========================================================================== */
+      header {
+        height: 50px;
+        padding: 0 1.5rem;
+        background: var(--aws-squid);
+        border-bottom: 2px solid var(--aws-orange);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+        flex-shrink: 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .badge-aws {
+        background: var(--aws-orange);
+        color: #000;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+
+      .progress-container {
+        flex: 1;
+        max-width: 400px;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        margin: 0 1.5rem;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 4%;
+        background: linear-gradient(90deg, var(--aws-blue), var(--aws-orange));
+        transition: width var(--transition-speed) ease;
+      }
+
+      .slide-counter {
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      /* ==========================================================================
+       VIEWPORT DE SLIDES
+       ========================================================================== */
+      main {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        height: calc(100dvh - 100px);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        padding: 2rem 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(30px) scale(0.98);
+        transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+      }
+
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0) scale(1);
+      }
+
+      .slide-content {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .slide-title {
+        font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+        font-weight: 800;
+        text-align: center;
+        color: var(--text-main);
+        line-height: 1.2;
+      }
+
+      .slide-title span {
+        color: var(--aws-orange);
+      }
+
+      .slide-subtitle {
+        font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+        text-align: center;
+        color: var(--text-muted);
+        max-width: 800px;
+        margin: -0.5rem auto 0.5rem auto;
+      }
+
+      /* ==========================================================================
+       COMPONENTES VISUALES Y TARJETAS
+       ========================================================================== */
+      .grid-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.2s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .card.interactive {
+        cursor: pointer;
+      }
+
+      .card.interactive:hover {
+        border-color: var(--aws-orange);
+        background: var(--bg-card-hover);
+        transform: translateY(-3px);
+      }
+
+      .card.selected {
+        border-color: var(--aws-orange);
+        box-shadow: 0 0 15px rgba(255, 153, 0, 0.2);
+      }
+
+      .card-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+      }
+
+      .card-desc {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+      }
+
+      .info-box {
+        background: rgba(30, 41, 59, 0.7);
+        border-left: 4px solid var(--aws-orange);
+        padding: 1rem 1.25rem;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--text-main);
+      }
+
+      .info-box.exam-tip {
+        border-left-color: var(--aws-green);
+        background: rgba(16, 185, 129, 0.08);
+      }
+
+      .exam-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Diagramas y Diagramas de Flujo */
+      .flow-diagram {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        background: rgba(15, 23, 42, 0.6);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px dashed var(--border-color);
+        width: 100%;
+      }
+
+      .flow-node {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-align: center;
+        min-width: 110px;
+      }
+
+      .flow-node.highlight {
+        border-color: var(--aws-orange);
+        color: var(--aws-orange);
+        box-shadow: 0 0 10px rgba(255, 153, 0, 0.2);
+      }
+
+      .flow-arrow {
+        color: var(--aws-orange);
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+
+      /* Tablas estilo AWS */
+      .aws-table-container {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      .aws-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.9rem;
+      }
+
+      .aws-table th {
+        background: var(--aws-squid);
+        color: var(--text-main);
+        padding: 0.75rem 1rem;
+        font-weight: 700;
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .aws-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-muted);
+      }
+
+      .aws-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .aws-table td strong {
+        color: var(--text-main);
+      }
+
+      /* Código/JSON */
+      .code-block {
+        background: #090d16;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        color: #38bdf8;
+        overflow-x: auto;
+        line-height: 1.4;
+      }
+
+      /* Botones e Interacciones */
+      .btn {
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        user-select: none;
+      }
+
+      .btn:hover {
+        background: var(--bg-card-hover);
+        border-color: var(--aws-orange);
+      }
+
+      .btn-orange {
+        background: var(--aws-orange);
+        color: #000;
+        border: none;
+      }
+
+      .btn-orange:hover {
+        background: var(--aws-orange-hover);
+        color: #000;
+      }
+
+      .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+      }
+
+      /* Option boxes for Quizzes and Scenarios */
+      .quiz-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        width: 100%;
+      }
+
+      .quiz-opt {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .quiz-opt:hover {
+        border-color: var(--aws-blue);
+        background: var(--bg-card-hover);
+      }
+
+      .quiz-opt.correct {
+        border-color: var(--aws-green);
+        background: rgba(16, 185, 129, 0.15);
+        color: #6ee7b7;
+      }
+
+      .quiz-opt.incorrect {
+        border-color: var(--aws-red);
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+      }
+
+      .feedback-box {
+        margin-top: 0.75rem;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        line-height: 1.4;
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* Estructura Árbol de Decisión */
+      .tree-step {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      /* Mapa Mental Animado */
+      .mindmap-node {
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        padding: 0.75rem;
+        background: var(--bg-card);
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .mindmap-node:hover {
+        border-color: var(--aws-orange);
+        transform: scale(1.02);
+      }
+
+      /* ==========================================================================
+       FOOTER Y BARRA DE NAVEGACIÓN
+       ========================================================================== */
+      footer {
+        height: 50px;
+        padding: 0 1.5rem;
+        background: var(--aws-squid);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+        flex-shrink: 0;
+      }
+
+      .footer-hints {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 1rem;
+      }
+
+      .key-badge {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+      }
+
+      /* ==========================================================================
+       RESPONSIVIDAD
+       ========================================================================== */
+      @media (max-width: 768px) {
+        header,
+        footer {
+          padding: 0 1rem;
+        }
+        .slide {
+          padding: 1.25rem 1rem;
+        }
+        .grid-cards {
+          grid-template-columns: 1fr;
+        }
+        .footer-hints {
+          display: none;
+        }
+        .slide-title {
+          font-size: 1.5rem;
+        }
+        .slide-subtitle {
+          font-size: 0.9rem;
+        }
+        .flow-diagram {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .flow-arrow {
+          transform: rotate(90deg);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER / BARRA SUPERIOR -->
+    <header>
+      <div class="brand">
+        <span class="badge-aws">AWS</span>
+        <span>Bases de Datos</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="slide-counter" id="slideCounter">1 / 25</div>
+    </header>
+
+    <!-- VIEWPORT PRINCIPAL DE SLIDES -->
+    <main id="viewport">
+      <!-- SLIDE 1: PORTADA -->
+      <!-- SLIDE 1 -->
+      <section class="slide active" id="slide-1">
+        <div
+          class="slide-content"
+          style="text-align: center; align-items: center"
+        >
+          <span
+            class="badge-aws"
+            style="font-size: 0.9rem; padding: 0.3rem 0.8rem"
+            >AWS Certified Cloud Practitioner</span
+          >
+          <h1 class="slide-title" style="font-size: clamp(2.2rem, 4vw, 3.5rem)">
+            Bases de Datos en <span>AWS</span>
+          </h1>
+          <p class="slide-subtitle">
+            Estrategias de elección, patrones de acceso y arquitectura Cloud
+          </p>
+
+          <div style="margin: 1.5rem 0; max-width: 650px" class="info-box">
+            <p style="font-size: 1.1rem; font-style: italic; color: #f1f5f9">
+              "No existe una base de datos perfecta. Existe una base de datos
+              adecuada para cada necesidad del negocio."
+            </p>
+          </div>
+
+          <div class="flow-diagram" style="max-width: 700px; margin-top: 1rem">
+            <div class="flow-node">Aplicación</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-blue)">
+              Patrón Datos
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-orange)">
+              Servicio AWS
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: ¿POR QUÉ NECESITAMOS BASES DE DATOS? -->
+      <!-- SLIDE 2 -->
+      <section class="slide" id="slide-2">
+        <div class="slide-content">
+          <h2 class="slide-title">¿Por qué necesitamos bases de datos?</h2>
+          <p class="slide-subtitle">
+            Haz clic en los ejemplos para explorar qué datos almacena una
+            aplicación real
+          </p>
+
+          <div class="grid-cards">
+            <div
+              class="card interactive"
+              onclick="showS2Info('clientes', this)"
+            >
+              <div class="card-icon">👤</div>
+              <div class="card-title">Clientes</div>
+              <div class="card-desc">
+                Nombres, emails, direcciones y credenciales de acceso.
+              </div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showS2Info('productos', this)"
+            >
+              <div class="card-icon">📦</div>
+              <div class="card-title">Productos</div>
+              <div class="card-desc">
+                Catálogo, precios, stock e imágenes de inventario.
+              </div>
+            </div>
+            <div class="card interactive" onclick="showS2Info('pedidos', this)">
+              <div class="card-icon">🛒</div>
+              <div class="card-title">Pedidos</div>
+              <div class="card-desc">
+                Historial de compras, estados de envío y carritos.
+              </div>
+            </div>
+            <div class="card interactive" onclick="showS2Info('pagos', this)">
+              <div class="card-icon">💳</div>
+              <div class="card-title">Pagos</div>
+              <div class="card-desc">
+                Transacciones bancarias, comprobantes y facturación.
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-diagram" style="margin-top: 0.5rem">
+            <div class="flow-node">Aplicación (Lógica)</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-blue)">
+              Datos (Estado)
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-orange)">
+              Base de Datos (Persistencia)
+            </div>
+          </div>
+
+          <div
+            id="s2-detail"
+            class="info-box"
+            style="display: none; margin-top: 0.5rem"
+          ></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: ¿QUÉ PROBLEMA TRATAMOS DE RESOLVER? -->
+      <!-- SLIDE 3 -->
+      <section class="slide" id="slide-3">
+        <div class="slide-content">
+          <h2 class="slide-title">
+            ¿Qué problema estamos tratando de resolver?
+          </h2>
+          <p class="slide-subtitle">
+            Antes de elegir un servicio AWS, entiende el tipo de información a
+            manejar
+          </p>
+
+          <div class="grid-cards">
+            <div class="card interactive" onclick="showS3Info('rel', this)">
+              <div class="card-title">🔗 Relaciones Fuertes</div>
+              <div class="card-desc">
+                Clientes conectados con compras e inventario estructurado.
+              </div>
+            </div>
+            <div class="card interactive" onclick="showS3Info('doc', this)">
+              <div class="card-title">📄 Documentos / JSON</div>
+              <div class="card-desc">
+                Perfiles de usuarios con atributos dinámicos y variables.
+              </div>
+            </div>
+            <div class="card interactive" onclick="showS3Info('evt', this)">
+              <div class="card-title">📈 Métricas / Sensores</div>
+              <div class="card-desc">
+                Flujo constante de datos con marca de tiempo secuencial.
+              </div>
+            </div>
+            <div class="card interactive" onclick="showS3Info('ana', this)">
+              <div class="card-title">📊 Analytics / Histórico</div>
+              <div class="card-desc">
+                Millones de registros para consultas de Business Intelligence.
+              </div>
+            </div>
+          </div>
+
+          <div id="s3-detail" class="info-box" style="min-height: 70px">
+            👉
+            <em
+              >Haz clic en cualquier tarjeta para ver qué naturaleza de problema
+              representa.</em
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: BASES DE DATOS RELACIONALES (SQL) -->
+      <!-- SLIDE 4 -->
+      <section class="slide" id="slide-4">
+        <div class="slide-content">
+          <h2 class="slide-title">Bases de Datos Relacionales (SQL)</h2>
+          <p class="slide-subtitle">
+            Estructura rígida organizada en Tablas, Filas y Columnas con
+            relaciones mediante SQL
+          </p>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1rem;
+              align-items: center;
+            "
+          >
+            <div>
+              <div class="info-box" style="margin-bottom: 1rem">
+                <strong>Características clave:</strong>
+                <ul
+                  style="
+                    margin-left: 1.2rem;
+                    margin-top: 0.5rem;
+                    color: var(--text-muted);
+                  "
+                >
+                  <li>Esquema estricto y predefinido.</li>
+                  <li>Integridad de datos (Propiedades ACID).</li>
+                  <li>Consultas complejas mediante SQL.</li>
+                  <li>
+                    Ideal para sistemas transaccionales (ERP, CRM, Banca).
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="aws-table-container">
+              <table class="aws-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>1</strong></td>
+                    <td>Ana Gómez</td>
+                    <td>ana@email.com</td>
+                  </tr>
+                  <tr>
+                    <td><strong>2</strong></td>
+                    <td>Juan Pérez</td>
+                    <td>juan@email.com</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            Si la pregunta menciona "estructurado", "SQL", "transacciones
+            financieras" o "relaciones complejas", piensa en una solución
+            <strong>Relacional</strong>.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: BASES DE DATOS NOSQL -->
+      <!-- SLIDE 5 -->
+      <section class="slide" id="slide-5">
+        <div class="slide-content">
+          <h2 class="slide-title">Bases de Datos NoSQL</h2>
+          <p class="slide-subtitle">
+            Esquema flexible diseñado para gran escala, baja latencia y alta
+            concurrencia
+          </p>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1rem;
+              align-items: center;
+            "
+          >
+            <div>
+              <div class="info-box" style="margin-bottom: 1rem">
+                <strong>Características clave:</strong>
+                <ul
+                  style="
+                    margin-left: 1.2rem;
+                    margin-top: 0.5rem;
+                    color: var(--text-muted);
+                  "
+                >
+                  <li>Esquema dinámico (Key-Value, Documentos).</li>
+                  <li>Escalabilidad horizontal masiva.</li>
+                  <li>Mantenimiento de baja latencia a cualquier escala.</li>
+                  <li>Sin uniones (JOINs) complejas de SQL.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="code-block">
+              <span style="color: #64748b">// Documento JSON / Key-Value</span>
+              {
+              <span style="color: #f43f5e">"id"</span>:
+              <span style="color: #fbbf24">101</span>,
+              <span style="color: #f43f5e">"nombre"</span>:
+              <span style="color: #34d399">"Juan"</span>,
+              <span style="color: #f43f5e">"productos"</span>: [
+              <span style="color: #34d399">"Laptop"</span>,
+              <span style="color: #34d399">"Mouse"</span>
+              ],
+              <span style="color: #f43f5e">"activo"</span>:
+              <span style="color: #fbbf24">true</span>
+              }
+            </div>
+          </div>
+
+          <div class="info-box">
+            💡 <strong>Nota Pedagógica:</strong> NoSQL no reemplaza a SQL ni es
+            "mejor". Es simplemente la herramienta correcta para patrones de
+            acceso sin esquema fijo o que requieren latencias de milisegundos de
+            un solo dígito a escala masiva.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: COMPARACIÓN INTERACTIVA -->
+      <!-- SLIDE 6 -->
+      <section class="slide" id="slide-6">
+        <div class="slide-content">
+          <h2 class="slide-title">Comparación: Relacional vs NoSQL</h2>
+          <p class="slide-subtitle">
+            ¿Cuál elegirías? Evalúa el patrón antes de seleccionar la tecnología
+          </p>
+
+          <div class="aws-table-container">
+            <table class="aws-table">
+              <thead>
+                <tr>
+                  <th>Característica</th>
+                  <th>Relacional (SQL)</th>
+                  <th>NoSQL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Estructura</strong></td>
+                  <td>Tablas, filas y columnas fijas</td>
+                  <td>Llave-Valor, Documentos JSON</td>
+                </tr>
+                <tr>
+                  <td><strong>Esquema</strong></td>
+                  <td>Rígido / Predefinido</td>
+                  <td>Flexible / Dinámico</td>
+                </tr>
+                <tr>
+                  <td><strong>Escalabilidad</strong></td>
+                  <td>Principalmente Vertical (Cómputo)</td>
+                  <td>Horizontal (Particionado fácil)</td>
+                </tr>
+                <tr>
+                  <td><strong>Uso Típico</strong></td>
+                  <td>ERP, Contabilidad, Pedidos</td>
+                  <td>Catálogos, Redes Sociales, IoT</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="text-align: center; margin-top: 0.5rem">
+            <button class="btn btn-orange" onclick="runS6Scenario()">
+              🎲 Probar Escenario Práctico
+            </button>
+          </div>
+          <div
+            id="s6-scenario-box"
+            class="info-box"
+            style="display: none; text-align: center"
+          ></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: AMAZON RDS -->
+      <!-- SLIDE 7 -->
+      <section class="slide" id="slide-7">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon RDS</h2>
+          <p class="slide-subtitle">
+            Relational Database Service = Base de datos relacional administrada
+            por AWS
+          </p>
+
+          <div class="flow-diagram">
+            <div class="flow-node">Aplicación</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-orange)">
+              Amazon RDS
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-blue)">
+              DB Relacional
+            </div>
+          </div>
+
+          <div class="grid-cards">
+            <div class="card">
+              <div class="card-title">🛠️ Simplificación</div>
+              <div class="card-desc">
+                AWS aprovisiona el hardware, instala el motor y aplica parches
+                del sistema operativo.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">💾 Respaldos</div>
+              <div class="card-desc">
+                Backups automáticos configurables y snapshots bajo demanda.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🛡️ Alta Disponibilidad</div>
+              <div class="card-desc">
+                Opción Multi-AZ para redundancia y failover automático ante
+                fallas.
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            <strong>Amazon RDS</strong> quita la carga operativa de administrar
+            el sistema operativo y parches del servidor de la base de datos
+            relacional.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: MOTORES COMPATIBLES CON RDS -->
+      <!-- SLIDE 8 -->
+      <section class="slide" id="slide-8">
+        <div class="slide-content">
+          <h2 class="slide-title">Motores compatibles con RDS</h2>
+          <p class="slide-subtitle">
+            AWS te permite utilizar tus motores relacionales tradicionales
+            favoritos
+          </p>
+
+          <div class="grid-cards">
+            <div class="card interactive" onclick="showS8Motor('aurora', this)">
+              <div class="card-title" style="color: var(--aws-orange)">
+                Amazon Aurora
+              </div>
+              <div class="card-desc">
+                Motor nativo de AWS de alto rendimiento.
+              </div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showS8Motor('postgres', this)"
+            >
+              <div class="card-title">PostgreSQL</div>
+              <div class="card-desc">
+                Motor relacional de código abierto avanzado.
+              </div>
+            </div>
+            <div class="card interactive" onclick="showS8Motor('mysql', this)">
+              <div class="card-title">MySQL</div>
+              <div class="card-desc">
+                El motor relacional de código abierto más popular.
+              </div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showS8Motor('mariadb', this)"
+            >
+              <div class="card-title">MariaDB</div>
+              <div class="card-desc">
+                Derivado comunitario y compatible con MySQL.
+              </div>
+            </div>
+            <div class="card interactive" onclick="showS8Motor('oracle', this)">
+              <div class="card-title">Oracle</div>
+              <div class="card-desc">
+                Motor empresarial tradicional para grandes cargas.
+              </div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showS8Motor('sqlserver', this)"
+            >
+              <div class="card-title">SQL Server</div>
+              <div class="card-desc">Motor relacional de Microsoft.</div>
+            </div>
+          </div>
+
+          <div id="s8-detail" class="info-box" style="min-height: 60px">
+            👉
+            <em
+              >Haz clic en cada motor para ver detalles a nivel Cloud
+              Practitioner.</em
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: AMAZON AURORA -->
+      <!-- SLIDE 9 -->
+      <section class="slide" id="slide-9">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon Aurora</h2>
+          <p class="slide-subtitle">
+            Base de datos relacional de clase empresarial desarrollada por AWS,
+            compatible con MySQL y PostgreSQL
+          </p>
+
+          <div class="grid-cards">
+            <div class="card">
+              <div class="card-title">⚡ Rendimiento</div>
+              <div class="card-desc">
+                Hasta 5x más rápida que MySQL estándar y 3x más que PostgreSQL.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🛡️ Resiliencia</div>
+              <div class="card-desc">
+                Guarda 6 copias de tus datos en 3 Zonas de Disponibilidad (AZs).
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📈 Auto-escalado</div>
+              <div class="card-desc">
+                El almacenamiento crece automáticamente según la necesidad
+                (hasta 128 TiB).
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-diagram" style="margin-top: 0.5rem">
+            <div class="flow-node">Aplicación</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-orange)">
+              Aurora Cluster
+            </div>
+            <div class="flow-arrow">↙ ↓ ↘</div>
+            <div class="flow-node">AZ 1</div>
+            <div class="flow-node">AZ 2</div>
+            <div class="flow-node">AZ 3</div>
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            Si la pregunta busca una base de datos relacional
+            <strong
+              >propietaria de AWS con máxima disponibilidad y
+              rendimiento</strong
+            >
+            compatible con MySQL/Postgres, la respuesta es
+            <strong>Aurora</strong>.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 10: AMAZON DYNAMODB -->
+      <!-- SLIDE 10 -->
+      <section class="slide" id="slide-10">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon DynamoDB</h2>
+          <p class="slide-subtitle">
+            Base de datos NoSQL de clave-valor y documentos totalmente
+            administrada y Serverless
+          </p>
+
+          <div class="flow-diagram">
+            <div class="flow-node">Aplicación</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-orange)">
+              DynamoDB
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-purple)">
+              Documentos / Key-Value
+            </div>
+          </div>
+
+          <div class="grid-cards">
+            <div class="card">
+              <div class="card-title">🚀 Escalabilidad Masiva</div>
+              <div class="card-desc">
+                Soporta millones de solicitudes por segundo sin degradar el
+                rendimiento.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">⚡ Latencia Consistente</div>
+              <div class="card-desc">
+                Respuestas en milisegundos de un solo dígito a cualquier escala.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">☁️ Serverless</div>
+              <div class="card-desc">
+                Sin servidores que aprovisionar, parchear ni gestionar.
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            Palabras clave:
+            <strong
+              >NoSQL, Key-Value, Documentos, Serverless, Latencia de
+              milisegundos, Escalabilidad ilimitada</strong
+            >.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 11: AMAZON REDSHIFT -->
+      <!-- SLIDE 11 -->
+      <section class="slide" id="slide-11">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon Redshift</h2>
+          <p class="slide-subtitle">
+            Servicio de Data Warehouse petabyte-scale para análisis de grandes
+            volúmenes de datos (OLAP)
+          </p>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1rem;
+            "
+          >
+            <div class="card">
+              <div class="card-title">🔄 DB Operacional (RDS / DynamoDB)</div>
+              <div class="card-desc">
+                Optimizada para transacciones rápidas e individuales (OLTP).
+                Registrar compras actuales.
+              </div>
+            </div>
+            <div class="card" style="border-color: var(--aws-orange)">
+              <div class="card-title" style="color: var(--aws-orange)">
+                📊 Data Warehouse (Redshift)
+              </div>
+              <div class="card-desc">
+                Optimizado para consultas complejas sobre años de datos
+                analíticos (OLAP). Generar reportes de negocio.
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box">
+            💼 <strong>Caso de Negocio:</strong> Una tienda analiza 10 años de
+            ventas históricas para proyectar tendencias de mercado sin
+            ralentizar la base de datos de compras del día a día.
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            <strong>Redshift ≠ RDS</strong>. Redshift es para
+            <em>Analytics / Business Intelligence / Data Warehouse</em>.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 12: AMAZON ELASTICACHE -->
+      <!-- SLIDE 12 -->
+      <section class="slide" id="slide-12">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon ElastiCache</h2>
+          <p class="slide-subtitle">
+            Servicio de caché en memoria (In-Memory) para acelerar el
+            rendimiento de la aplicación
+          </p>
+
+          <div class="flow-diagram">
+            <div class="flow-node">Usuario</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node">Aplicación</div>
+            <div class="flow-arrow">⚡</div>
+            <div class="flow-node" style="border-color: var(--aws-green)">
+              ElastiCache (Memoria)
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-blue)">
+              Database (Disco)
+            </div>
+          </div>
+
+          <div class="grid-cards">
+            <div class="card">
+              <div class="card-title">⚡ Ultra Baja Latencia</div>
+              <div class="card-desc">
+                Respuestas en microsegundos al almacenar datos en RAM.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📉 Reduce Carga de DB</div>
+              <div class="card-desc">
+                Evita hacer consultas repetitivas a la base de datos principal.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">⚙️ Motores</div>
+              <div class="card-desc">Compatible con Redis y Memcached.</div>
+            </div>
+          </div>
+
+          <div class="info-box">
+            📖 <strong>Analogía:</strong> Tener los libros más leídos guardados
+            sobre tu escritorio en lugar de ir a buscarlos al archivo del sótano
+            cada vez.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 13: AMAZON DOCUMENTDB -->
+      <!-- SLIDE 13 -->
+      <section class="slide" id="slide-13">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon DocumentDB</h2>
+          <p class="slide-subtitle">
+            Base de datos de documentos administrada y compatible con cargas de
+            trabajo de MongoDB
+          </p>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1rem;
+              align-items: center;
+            "
+          >
+            <div class="card">
+              <div class="card-title">📄 Modelo orientado a documentos</div>
+              <div class="card-desc">
+                Diseñado para almacenar, consultar e indexar datos JSON de
+                manera natural y rápida.
+              </div>
+              <br />
+              <div class="card-desc">
+                ✔ Totalmente administrada por AWS.<br />
+                ✔ Escalado automático de almacenamiento.<br />
+                ✔ Alta disponibilidad incorporada.
+              </div>
+            </div>
+
+            <div class="code-block">
+              {
+              <span style="color: #f43f5e">"item"</span>:
+              <span style="color: #34d399">"Libro AWS"</span>,
+              <span style="color: #f43f5e">"autor"</span>:
+              <span style="color: #34d399">"Cloud Practitioner"</span>,
+              <span style="color: #f43f5e">"etiquetas"</span>: [<span
+                style="color: #34d399"
+                >"AWS"</span
+              >, <span style="color: #34d399">"Certificación"</span>],
+              <span style="color: #f43f5e">"detalles"</span>: {
+              <span style="color: #f43f5e">"paginas"</span>:
+              <span style="color: #fbbf24">300</span> } }
+            </div>
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            Si la pregunta busca compatibilidad con <strong>MongoDB</strong> o
+            almacenamiento nativo de documentos JSON administrado, la respuesta
+            es <strong>DocumentDB</strong>.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 14: AMAZON NEPTUNE -->
+      <!-- SLIDE 14 -->
+      <section class="slide" id="slide-14">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon Neptune</h2>
+          <p class="slide-subtitle">
+            Base de datos administrada orientada a Grafos para relaciones
+            altamente interconectadas
+          </p>
+
+          <div class="flow-diagram" style="padding: 1.5rem">
+            <div class="flow-node">Ana</div>
+            <div class="flow-arrow">── es_amigo ──</div>
+            <div class="flow-node">Juan</div>
+            <div class="flow-arrow">── compró ──</div>
+            <div class="flow-node">Laptop</div>
+          </div>
+
+          <div class="grid-cards">
+            <div class="card">
+              <div class="card-title">🕸️ Redes Sociales</div>
+              <div class="card-desc">
+                Mapeo de amigos, seguidores y conexiones entre usuarios.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">💡 Motores de Recomendación</div>
+              <div class="card-desc">
+                Sugerir productos según hábitos de personas conectadas.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🔍 Detección de Fraudes</div>
+              <div class="card-desc">
+                Encontrar patrones complejos entre cuentas y transacciones.
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            Palabras clave:
+            <strong
+              >Grafos, Relaciones Complejas, Redes Sociales, Recomendaciones,
+              Neptune</strong
+            >.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 15: AMAZON TIMESTREAM -->
+      <!-- SLIDE 15 -->
+      <section class="slide" id="slide-15">
+        <div class="slide-content">
+          <h2 class="slide-title">Amazon Timestream</h2>
+          <p class="slide-subtitle">
+            Base de datos Serverless administrada para datos de series
+            temporales (Time-Series)
+          </p>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 1rem;
+              align-items: center;
+            "
+          >
+            <div class="card">
+              <div class="card-title">⏱️ Datos Secuenciales en el Tiempo</div>
+              <div class="card-desc">
+                Diseñada para medir cómo cambian las métricas con el paso del
+                tiempo.
+              </div>
+              <br />
+              <div class="card-desc">
+                • Sensores IoT (Temperatura, Presión).<br />
+                • Telemetría de aplicaciones y redes.<br />
+                • Rastreo de métricas financieras.
+              </div>
+            </div>
+
+            <div class="code-block">
+              10:00:00 ➔ Sensor_1 ➔ Temp: 20.5°C 10:00:05 ➔ Sensor_1 ➔ Temp:
+              21.0°C 10:00:10 ➔ Sensor_1 ➔ Temp: 21.8°C 10:00:15 ➔ Sensor_1 ➔
+              Temp: 22.1°C
+            </div>
+          </div>
+
+          <div class="info-box exam-tip">
+            <span class="exam-tag">🎯 Clave de Examen</span>
+            Palabras clave:
+            <strong
+              >Series Temporales, IoT, Sensores, Secuencia de Tiempo,
+              Timestream</strong
+            >.
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 16: ÁRBOL DE DECISIÓN INTERACTIVO -->
+      <!-- SLIDE 16 -->
+      <section class="slide" id="slide-16">
+        <div class="slide-content">
+          <h2 class="slide-title">Árbol de Decisión Interactivo</h2>
+          <p class="slide-subtitle">
+            Recorre las preguntas para encontrar la base de datos AWS adecuada
+          </p>
+
+          <div
+            id="tree-container"
+            class="card"
+            style="padding: 1.5rem; text-align: center"
+          >
+            <h3
+              id="tree-question"
+              style="color: var(--aws-orange); margin-bottom: 1rem"
+            >
+              ¿Qué tipo de patrón de datos requiere tu aplicación?
+            </h3>
+            <div
+              id="tree-options"
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 0.75rem;
+              "
+            >
+              <!-- Renderizado por JS -->
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 0.5rem">
+            <button class="btn btn-sm" onclick="resetDecisionTree()">
+              🔄 Reiniciar Árbol
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 17: CASO PRÁCTICO 1 -->
+      <!-- SLIDE 17 -->
+      <section class="slide" id="slide-17">
+        <div class="slide-content">
+          <h2 class="slide-title">Caso 1: Tienda Online E-Commerce</h2>
+          <p class="slide-subtitle">
+            Escenario real de toma de decisión de arquitectura
+          </p>
+
+          <div class="card">
+            <div class="card-title">Situación de Negocio:</div>
+            <div class="card-desc" style="font-size: 1rem">
+              Una tienda en línea requiere almacenar registros estructurados con
+              relaciones claras entre <strong>Clientes</strong>,
+              <strong>Productos</strong>, <strong>Pedidos</strong> y
+              <strong>Pagos</strong>. Las transacciones deben ser consistentes y
+              seguras.
+            </div>
+          </div>
+
+          <p style="text-align: center; font-weight: bold; margin-top: 0.5rem">
+            ¿Qué servicio elegirías?
+          </p>
+
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkCase1(this, 'dynamo')">
+              Amazon DynamoDB
+            </div>
+            <div class="quiz-opt" onclick="checkCase1(this, 'rds')">
+              Amazon RDS / Aurora
+            </div>
+            <div class="quiz-opt" onclick="checkCase1(this, 'redshift')">
+              Amazon Redshift
+            </div>
+            <div class="quiz-opt" onclick="checkCase1(this, 'elasticache')">
+              Amazon ElastiCache
+            </div>
+          </div>
+
+          <div id="case1-feedback" class="feedback-box"></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 18: CASO PRÁCTICO 2 -->
+      <!-- SLIDE 18 -->
+      <section class="slide" id="slide-18">
+        <div class="slide-content">
+          <h2 class="slide-title">Caso 2: App Móvil a Gran Escala</h2>
+          <p class="slide-subtitle">
+            Escenario real de toma de decisión de arquitectura
+          </p>
+
+          <div class="card">
+            <div class="card-title">Situación de Negocio:</div>
+            <div class="card-desc" style="font-size: 1rem">
+              Una aplicación móvil global recibe
+              <strong>millones de solicitudes por segundo</strong> para leer y
+              escribir preferencias de usuario. Requiere escalabilidad
+              horizontal automática e instantánea con respuesta en milisegundos.
+            </div>
+          </div>
+
+          <p style="text-align: center; font-weight: bold; margin-top: 0.5rem">
+            ¿Qué servicio respondería mejor?
+          </p>
+
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkCase2(this, 'dynamo')">
+              Amazon DynamoDB
+            </div>
+            <div class="quiz-opt" onclick="checkCase2(this, 'rds')">
+              Amazon RDS
+            </div>
+            <div class="quiz-opt" onclick="checkCase2(this, 'neptune')">
+              Amazon Neptune
+            </div>
+            <div class="quiz-opt" onclick="checkCase2(this, 'redshift')">
+              Amazon Redshift
+            </div>
+          </div>
+
+          <div id="case2-feedback" class="feedback-box"></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 19: CASO PRÁCTICO 3 -->
+      <!-- SLIDE 19 -->
+      <section class="slide" id="slide-19">
+        <div class="slide-content">
+          <h2 class="slide-title">Caso 3: Análisis de Ventas Históricas</h2>
+          <p class="slide-subtitle">
+            Escenario real de toma de decisión de arquitectura
+          </p>
+
+          <div class="card">
+            <div class="card-title">Situación de Negocio:</div>
+            <div class="card-desc" style="font-size: 1rem">
+              El equipo de Business Intelligence quiere consolidar e interpretar
+              <strong>años de historial de ventas (Petabytes)</strong> para
+              ejecutar consultas complejas y generar reportes ejecutivos.
+            </div>
+          </div>
+
+          <p style="text-align: center; font-weight: bold; margin-top: 0.5rem">
+            ¿Qué servicio está optimizado para esto?
+          </p>
+
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkCase3(this, 'elasticache')">
+              Amazon ElastiCache
+            </div>
+            <div class="quiz-opt" onclick="checkCase3(this, 'redshift')">
+              Amazon Redshift
+            </div>
+            <div class="quiz-opt" onclick="checkCase3(this, 'dynamo')">
+              Amazon DynamoDB
+            </div>
+            <div class="quiz-opt" onclick="checkCase3(this, 'aurora')">
+              Amazon Aurora
+            </div>
+          </div>
+
+          <div id="case3-feedback" class="feedback-box"></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 20: CASO PRÁCTICO 4 -->
+      <!-- SLIDE 20 -->
+      <section class="slide" id="slide-20">
+        <div class="slide-content">
+          <h2 class="slide-title">Caso 4: Red de Sensores IoT</h2>
+          <p class="slide-subtitle">
+            Escenario real de toma de decisión de arquitectura
+          </p>
+
+          <div class="card">
+            <div class="card-title">Situación de Negocio:</div>
+            <div class="card-desc" style="font-size: 1rem">
+              Una fábrica instaló miles de sensores de temperatura y presión que
+              emiten lecturas continuas cada segundo. Se requiere almacenar y
+              analizar este flujo de datos según su secuencia temporal.
+            </div>
+          </div>
+
+          <p style="text-align: center; font-weight: bold; margin-top: 0.5rem">
+            ¿Qué servicio está diseñado para este propósito?
+          </p>
+
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="checkCase4(this, 'timestream')">
+              Amazon Timestream
+            </div>
+            <div class="quiz-opt" onclick="checkCase4(this, 'rds')">
+              Amazon RDS
+            </div>
+            <div class="quiz-opt" onclick="checkCase4(this, 'documentdb')">
+              Amazon DocumentDB
+            </div>
+            <div class="quiz-opt" onclick="checkCase4(this, 'neptune')">
+              Amazon Neptune
+            </div>
+          </div>
+
+          <div id="case4-feedback" class="feedback-box"></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 21: QUIZ INTERACTIVO GENERAL -->
+      <!-- SLIDE 21 -->
+      <section class="slide" id="slide-21">
+        <div class="slide-content">
+          <h2 class="slide-title">Quiz: Evaluador Cloud Practitioner</h2>
+          <p class="slide-subtitle" id="quiz-counter-text">Pregunta 1 de 5</p>
+
+          <div class="card">
+            <div class="card-title" id="quiz-q-title">Cargando pregunta...</div>
+            <div
+              class="quiz-options"
+              id="quiz-q-options"
+              style="margin-top: 1rem"
+            >
+              <!-- Opciones JS -->
+            </div>
+          </div>
+
+          <div id="quiz-q-feedback" class="feedback-box"></div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 0.5rem;
+            "
+          >
+            <span
+              id="quiz-score"
+              style="font-weight: bold; color: var(--aws-orange)"
+              >Puntaje: 0</span
+            >
+            <button
+              class="btn btn-orange btn-sm"
+              id="btn-next-quiz"
+              onclick="nextQuizQ()"
+              style="display: none"
+            >
+              Siguiente Pregunta ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 22: PALABRAS CLAVE DEL EXAMEN -->
+      <!-- SLIDE 22 -->
+      <section class="slide" id="slide-22">
+        <div class="slide-content">
+          <h2 class="slide-title">Palabras clave para el Examen</h2>
+          <p class="slide-subtitle">
+            Asociación rápida de conceptos clave al leer preguntas de
+            certificación
+          </p>
+
+          <div class="grid-cards">
+            <div class="card interactive" onclick="showKeyWord('RDS', this)">
+              <div class="card-title" style="color: var(--aws-orange)">RDS</div>
+              <div class="card-desc">Relacional / Administrado / SQL</div>
+            </div>
+            <div class="card interactive" onclick="showKeyWord('Aurora', this)">
+              <div class="card-title" style="color: var(--aws-orange)">
+                Aurora
+              </div>
+              <div class="card-desc">
+                Relacional AWS / Rendimiento / MySQL-Postgres
+              </div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showKeyWord('DynamoDB', this)"
+            >
+              <div class="card-title" style="color: var(--aws-orange)">
+                DynamoDB
+              </div>
+              <div class="card-desc">
+                NoSQL / Key-Value / Serverless / Escala
+              </div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showKeyWord('Redshift', this)"
+            >
+              <div class="card-title" style="color: var(--aws-orange)">
+                Redshift
+              </div>
+              <div class="card-desc">Data Warehouse / Analytics / OLAP</div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showKeyWord('ElastiCache', this)"
+            >
+              <div class="card-title" style="color: var(--aws-orange)">
+                ElastiCache
+              </div>
+              <div class="card-desc">
+                Caché / Memoria / In-Memory / Latencia
+              </div>
+            </div>
+            <div
+              class="card interactive"
+              onclick="showKeyWord('Neptune', this)"
+            >
+              <div class="card-title" style="color: var(--aws-orange)">
+                Neptune
+              </div>
+              <div class="card-desc">Grafos / Redes Sociales / Relaciones</div>
+            </div>
+          </div>
+
+          <div
+            id="keyword-box"
+            class="info-box exam-tip"
+            style="min-height: 60px"
+          >
+            👉
+            <em
+              >Haz clic en cada tarjeta para ver la regla de asociación directa
+              del examen.</em
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 23: DIFERENCIAS IMPORTANTES -->
+      <!-- SLIDE 23 -->
+      <section class="slide" id="slide-23">
+        <div class="slide-content">
+          <h2 class="slide-title">No confundas estos servicios</h2>
+          <p class="slide-subtitle">
+            Comparaciones directas para evitar trampas comunes en el examen
+          </p>
+
+          <div class="grid-cards">
+            <div class="card">
+              <div class="card-title">RDS vs DynamoDB</div>
+              <div class="card-desc">
+                <strong>Relacional (SQL)</strong> vs
+                <strong>NoSQL (Key-Value)</strong>. Tablas rígidas vs Esquema
+                flexible.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">RDS vs Redshift</div>
+              <div class="card-desc">
+                Transacciones del día a día (<strong>OLTP</strong>) vs Análisis
+                masivo histórico (<strong>OLAP</strong>).
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">DynamoDB vs ElastiCache</div>
+              <div class="card-desc">
+                Base de datos NoSQL persistente vs Almacenamiento temporal en
+                caché en RAM.
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">RDS vs Aurora</div>
+              <div class="card-desc">
+                Servicio administrado con varios motores vs Motor de alto
+                rendimiento propio de AWS.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 24: MAPA MENTAL FINAL -->
+      <!-- SLIDE 24 -->
+      <section class="slide" id="slide-24">
+        <div class="slide-content">
+          <h2 class="slide-title">Mapa Mental de Bases de Datos AWS</h2>
+          <p class="slide-subtitle">
+            Ecosistema visual completo del portafolio de datos
+          </p>
+
+          <div class="flow-diagram" style="flex-direction: column; gap: 1rem">
+            <div
+              class="mindmap-node"
+              style="
+                border-color: var(--aws-orange);
+                font-weight: bold;
+                font-size: 1.1rem;
+              "
+            >
+              BASES DE DATOS EN AWS
+            </div>
+
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 0.75rem;
+                width: 100%;
+              "
+            >
+              <div class="mindmap-node">
+                <strong style="color: var(--aws-blue)">Relacionales</strong
+                ><br />
+                RDS / Aurora
+              </div>
+              <div class="mindmap-node">
+                <strong style="color: var(--aws-purple)"
+                  >NoSQL / Serverless</strong
+                ><br />
+                DynamoDB
+              </div>
+              <div class="mindmap-node">
+                <strong style="color: var(--aws-orange)">Analytics</strong
+                ><br />
+                Redshift
+              </div>
+              <div class="mindmap-node">
+                <strong style="color: var(--aws-green)">Especializadas</strong
+                ><br />
+                DocumentDB / Neptune / Timestream / ElastiCache
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 25: REGLA DE ORO Y CIERRE -->
+      <!-- SLIDE 25 -->
+      <section class="slide" id="slide-25">
+        <div
+          class="slide-content"
+          style="text-align: center; align-items: center"
+        >
+          <span
+            class="badge-aws"
+            style="font-size: 0.9rem; padding: 0.3rem 0.8rem"
+            >Resumen Final</span
+          >
+          <h1 class="slide-title" style="margin-top: 0.5rem">
+            La Regla de Oro
+          </h1>
+
+          <div
+            class="info-box"
+            style="
+              max-width: 750px;
+              margin: 1rem 0;
+              border-left-color: var(--aws-orange);
+            "
+          >
+            <p
+              style="
+                font-size: 1.25rem;
+                font-weight: bold;
+                color: var(--aws-orange);
+              "
+            >
+              "No memorices solamente el nombre del servicio. Entiende el
+              problema de negocio que resuelve."
+            </p>
+          </div>
+
+          <div class="flow-diagram" style="max-width: 800px">
+            <div class="flow-node">Problema</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node">Datos</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node">Patrón</div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" style="border-color: var(--aws-orange)">
+              Servicio AWS
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem">
+            <button class="btn btn-orange" onclick="goToSlide(0)">
+              🔄 Volver al Inicio de la Clase
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER / NAVEGACIÓN -->
+    <footer>
+      <button class="btn" onclick="prevSlide()">← Anterior</button>
+
+      <div class="footer-hints">
+        <span
+          >Navegar: <span class="key-badge">←</span>
+          <span class="key-badge">→</span> o
+          <span class="key-badge">Espacio</span></span
+        >
+      </div>
+
+      <button class="btn btn-orange" onclick="nextSlide()">Siguiente →</button>
+    </footer>
+
+    <!-- ==========================================================================
+       JAVASCRIPT E INTERACTIVIDAD
+       ========================================================================== -->
+    <script>
+      // ESTADO DE LA PRESENTACIÓN
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const progressBar = document.getElementById("progressBar");
+      const slideCounter = document.getElementById("slideCounter");
+
+      function updateView() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.innerText = `${currentSlide + 1} / ${totalSlides}`;
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateView();
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateView();
+        }
+      }
+
+      function goToSlide(idx) {
+        currentSlide = idx;
+        updateView();
+      }
+
+      // Navegación mediante Teclado
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+
+      // --- INTERACCIONES DE SLIDES ESPECÍFICOS ---
+
+      // Slide 2: Ejemplo de Datos
+      function showS2Info(type, cardEl) {
+        document
+          .querySelectorAll("#slide-2 .card")
+          .forEach((c) => c.classList.remove("selected"));
+        cardEl.classList.add("selected");
+
+        const box = document.getElementById("s2-detail");
+        box.style.display = "block";
+
+        const info = {
+          clientes:
+            "<strong>Clientes:</strong> Requiere alta consistencia. Un cambio de email o dirección debe reflejarse correctamente.",
+          productos:
+            "<strong>Productos:</strong> Consultas frecuentes de lectura. Un catálogo puede verse millones de veces.",
+          pedidos:
+            "<strong>Pedidos:</strong> Requiere transacciones seguras (no perder un pedido) y estado actualizado.",
+          pagos:
+            "<strong>Pagos:</strong> Estricta necesidad de integridad transaccional (Propiedades ACID).",
+        };
+        box.innerHTML = info[type];
+      }
+
+      // Slide 3: Definición del problema
+      function showS3Info(type, cardEl) {
+        document
+          .querySelectorAll("#slide-3 .card")
+          .forEach((c) => c.classList.remove("selected"));
+        cardEl.classList.add("selected");
+
+        const box = document.getElementById("s3-detail");
+        const info = {
+          rel: "<strong>Relaciones Fuertes:</strong> Se adapta mejor a bases de datos Relacionales (RDS / Aurora).",
+          doc: "<strong>Documentos JSON:</strong> Se adapta mejor a bases NoSQL flexibles (DynamoDB / DocumentDB).",
+          evt: "<strong>Métricas / Sensores:</strong> Se adapta a bases de Series Temporales (Timestream).",
+          ana: "<strong>Analytics Histórico:</strong> Se adapta a Data Warehousing (Redshift).",
+        };
+        box.innerHTML = info[type];
+      }
+
+      // Slide 6: Escenario Aleatorio
+      function runS6Scenario() {
+        const scenarios = [
+          {
+            text: "Escenario: Sistema bancario con transferencias críticas de dinero.",
+            rec: "Recomendado: **Relacional (SQL)** por consistencia transaccional y ACID.",
+          },
+          {
+            text: "Escenario: Catálogo de e-commerce con atributos variables por producto.",
+            rec: "Recomendado: **NoSQL** por esquema flexible y rendimiento a escala.",
+          },
+          {
+            text: "Escenario: Registro de sesiones de usuarios en una app con millones de personas.",
+            rec: "Recomendado: **NoSQL (DynamoDB)** por ultra baja latencia y alta concurrencia.",
+          },
+        ];
+        const random = scenarios[Math.floor(Math.random() * scenarios.length)];
+        const box = document.getElementById("s6-scenario-box");
+        box.style.display = "block";
+        box.innerHTML = `<strong>${random.text}</strong><br><span style="color:var(--aws-orange);">${random.rec}</span>`;
+      }
+
+      // Slide 8: Motores RDS
+      function showS8Motor(motor, cardEl) {
+        document
+          .querySelectorAll("#slide-8 .card")
+          .forEach((c) => c.classList.remove("selected"));
+        cardEl.classList.add("selected");
+
+        const box = document.getElementById("s8-detail");
+        const details = {
+          aurora:
+            "<strong>Amazon Aurora:</strong> Desarrollado por AWS. Hasta 5x rendimiento de MySQL, almacenamiento auto-escalable.",
+          postgres:
+            "<strong>PostgreSQL:</strong> Excelente para cargas relacionales complejas de código abierto.",
+          mysql:
+            "<strong>MySQL:</strong> El motor relacional web más utilizado.",
+          mariadb:
+            "<strong>MariaDB:</strong> Reemplazo directo y de código abierto para MySQL.",
+          oracle:
+            "<strong>Oracle:</strong> Compatible con licencias empresariales existentes (BYOL).",
+          sqlserver:
+            "<strong>SQL Server:</strong> Integración nativa para ecosistemas Microsoft.",
+        };
+        box.innerHTML = details[motor];
+      }
+
+      // Slide 16: Árbol de Decisión
+      const decisionTree = {
+        start: {
+          q: "¿Qué tipo de datos o patrón de acceso necesitas?",
+          options: [
+            { text: "Relacional / Tablas SQL", next: "relational" },
+            { text: "NoSQL / Baja latencia a escala", next: "nosql" },
+            { text: "Análisis masivo de datos (Analytics)", next: "analytics" },
+            { text: "Aceleración en memoria (Caché)", next: "cache" },
+            {
+              text: "Especializado (Documentos / Grafos / Tiempo)",
+              next: "specialized",
+            },
+          ],
+        },
+        relational: {
+          q: "¿Buscas rendimiento nativo AWS de clase empresarial o motores tradicionales?",
+          options: [
+            { text: "Máximo rendimiento nativo AWS", res: "Amazon Aurora" },
+            {
+              text: "Motores tradicionales (MySQL, Postgres, Oracle, SQL Server)",
+              res: "Amazon RDS",
+            },
+          ],
+        },
+        nosql: {
+          q: "La solución recomendada es una base de datos NoSQL Key-Value Serverless:",
+          options: [
+            { text: "Ver Servicio Recomendado", res: "Amazon DynamoDB" },
+          ],
+        },
+        analytics: {
+          q: "Para consultas analíticas sobre grandes volúmenes de datos históricos (Data Warehouse):",
+          options: [
+            { text: "Ver Servicio Recomendado", res: "Amazon Redshift" },
+          ],
+        },
+        cache: {
+          q: "Para almacenar datos en memoria RAM y acelerar la latencia de lectura:",
+          options: [
+            { text: "Ver Servicio Recomendado", res: "Amazon ElastiCache" },
+          ],
+        },
+        specialized: {
+          q: "¿Cuál es la naturaleza específica de tus datos?",
+          options: [
+            {
+              text: "Documentos compatibilidad MongoDB",
+              res: "Amazon DocumentDB",
+            },
+            { text: "Redes de contactos o Grafos", res: "Amazon Neptune" },
+            {
+              text: "Métricas secuenciales IoT en tiempo",
+              res: "Amazon Timestream",
+            },
+          ],
+        },
+      };
+
+      function renderDecisionTree(nodeKey) {
+        const node = decisionTree[nodeKey];
+        const qEl = document.getElementById("tree-question");
+        const optEl = document.getElementById("tree-options");
+
+        if (node.res) {
+          qEl.innerText = "Servicio AWS Recomendado:";
+          optEl.innerHTML = `<div style="grid-column: 1/-1; background: rgba(255,153,0,0.15); border: 2px solid var(--aws-orange); padding: 1.5rem; border-radius: 12px; font-size: 1.5rem; font-weight: bold; color: var(--aws-orange);">${node.res}</div>`;
+          return;
+        }
+
+        qEl.innerText = node.q;
+        optEl.innerHTML = "";
+        node.options.forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.style.padding = "0.8rem";
+          btn.innerText = opt.text;
+          btn.onclick = () => {
+            if (opt.next) renderDecisionTree(opt.next);
+            else if (opt.res) {
+              qEl.innerText = "Servicio AWS Recomendado:";
+              optEl.innerHTML = `<div style="grid-column: 1/-1; background: rgba(255,153,0,0.15); border: 2px solid var(--aws-orange); padding: 1.5rem; border-radius: 12px; font-size: 1.5rem; font-weight: bold; color: var(--aws-orange);">${opt.res}</div>`;
+            }
+          };
+          optEl.appendChild(btn);
+        });
+      }
+
+      function resetDecisionTree() {
+        renderDecisionTree("start");
+      }
+
+      // Inicializar Árbol de decisión
+      renderDecisionTree("start");
+
+      // Evaluadores Casos Prácticos
+      function evalCase(optEl, isCorrect, fbId, expText) {
+        const parent = optEl.parentElement;
+        parent
+          .querySelectorAll(".quiz-opt")
+          .forEach((o) => o.classList.remove("correct", "incorrect"));
+
+        const fb = document.getElementById(fbId);
+        fb.style.display = "block";
+
+        if (isCorrect) {
+          optEl.classList.add("correct");
+          fb.className = "feedback-box";
+          fb.style.background = "rgba(16,185,129,0.15)";
+          fb.style.border = "1px solid var(--aws-green)";
+          fb.innerHTML = `<strong>¡Correcto!</strong> ${expText}`;
+        } else {
+          optEl.classList.add("incorrect");
+          fb.className = "feedback-box";
+          fb.style.background = "rgba(239,68,68,0.15)";
+          fb.style.border = "1px solid var(--aws-red)";
+          fb.innerHTML = `<strong>Inténtalo de nuevo.</strong> ${expText}`;
+        }
+      }
+
+      function checkCase1(el, choice) {
+        evalCase(
+          el,
+          choice === "rds",
+          "case1-feedback",
+          "Amazon RDS / Aurora ofrece la estructura relacional e integridad transaccional requerida para conectar Clientes, Pedidos y Pagos.",
+        );
+      }
+
+      function checkCase2(el, choice) {
+        evalCase(
+          el,
+          choice === "dynamo",
+          "case2-feedback",
+          "Amazon DynamoDB es una base NoSQL Serverless capaz de escalar horizontalmente para millones de solicitudes con baja latencia.",
+        );
+      }
+
+      function checkCase3(el, choice) {
+        evalCase(
+          el,
+          choice === "redshift",
+          "case3-feedback",
+          "Amazon Redshift es el Data Warehouse diseñado para análisis complejo (OLAP) sobre petabytes de datos de ventas.",
+        );
+      }
+
+      function checkCase4(el, choice) {
+        evalCase(
+          el,
+          choice === "timestream",
+          "case4-feedback",
+          "Amazon Timestream es la base de datos Serverless optimizada para medir datos de series temporales emitidos por sensores IoT.",
+        );
+      }
+
+      // Slide 21: QUIZ SYSTEM
+      const quizData = [
+        {
+          q: "¿Qué servicio es una base de datos NoSQL administrada que ofrece latencia de milisegundos a cualquier escala?",
+          opts: [
+            "Amazon RDS",
+            "Amazon DynamoDB",
+            "Amazon Redshift",
+            "Amazon ElastiCache",
+          ],
+          correct: 1,
+          exp: "DynamoDB es el servicio NoSQL insignia de AWS para baja latencia a escala masiva.",
+        },
+        {
+          q: "Una empresa necesita acelerar las lecturas repetitivas de su base de datos guardando información en memoria RAM. ¿Qué servicio debería utilizar?",
+          opts: [
+            "Amazon ElastiCache",
+            "Amazon Neptune",
+            "Amazon DocumentDB",
+            "AWS DMS",
+          ],
+          correct: 0,
+          exp: "ElastiCache proporciona almacenamiento en memoria (In-Memory) con Redis/Memcached.",
+        },
+        {
+          q: "¿Qué motor de base de datos relacional nativo de AWS es compatible con MySQL y PostgreSQL?",
+          opts: [
+            "Amazon Redshift",
+            "Amazon Timestream",
+            "Amazon Aurora",
+            "Amazon DynamoDB",
+          ],
+          correct: 2,
+          exp: "Amazon Aurora es el motor relacional desarrollado por AWS compatible con MySQL/Postgres.",
+        },
+        {
+          q: "Un equipo de Business Intelligence necesita ejecutar consultas analíticas sobre años de información financiera. ¿Qué servicio es el más adecuado?",
+          opts: [
+            "Amazon RDS",
+            "Amazon Redshift",
+            "Amazon ElastiCache",
+            "Amazon DynamoDB",
+          ],
+          correct: 1,
+          exp: "Amazon Redshift es la solución de Data Warehouse optimizada para análisis (OLAP).",
+        },
+        {
+          q: "¿Cuál de las siguientes es una responsabilidad del CLIENTE al utilizar Amazon RDS?",
+          opts: [
+            "Aplicar parches al sistema operativo",
+            "Reemplazar hardware defectuoso",
+            "Optimizar las consultas SQL y gestionar accesos de usuarios",
+            "Gestionar copias de seguridad de la infraestructura física",
+          ],
+          correct: 2,
+          exp: "AWS administra la infraestructura y el SO. El cliente administra sus datos, usuarios y consultas SQL.",
+        },
+      ];
+
+      let currentQuizQ = 0;
+      let quizScore = 0;
+
+      function renderQuizQ() {
+        const qData = quizData[currentQuizQ];
+        document.getElementById("quiz-counter-text").innerText =
+          `Pregunta ${currentQuizQ + 1} de ${quizData.length}`;
+        document.getElementById("quiz-q-title").innerText = qData.q;
+
+        const optsContainer = document.getElementById("quiz-q-options");
+        optsContainer.innerHTML = "";
+        document.getElementById("quiz-q-feedback").style.display = "none";
+        document.getElementById("btn-next-quiz").style.display = "none";
+
+        qData.opts.forEach((optText, idx) => {
+          const div = document.createElement("div");
+          div.className = "quiz-opt";
+          div.innerText = optText;
+          div.onclick = () => evalQuizAnswer(div, idx);
+          optsContainer.appendChild(div);
+        });
+      }
+
+      function evalQuizAnswer(optEl, selectedIdx) {
+        const qData = quizData[currentQuizQ];
+        const opts = document.querySelectorAll("#quiz-q-options .quiz-opt");
+        opts.forEach((o) => (o.style.pointerEvents = "none"));
+
+        const fb = document.getElementById("quiz-q-feedback");
+        fb.style.display = "block";
+
+        if (selectedIdx === qData.correct) {
+          optEl.classList.add("correct");
+          quizScore++;
+          document.getElementById("quiz-score").innerText =
+            `Puntaje: ${quizScore}`;
+          fb.className = "feedback-box";
+          fb.style.background = "rgba(16,185,129,0.15)";
+          fb.style.border = "1px solid var(--aws-green)";
+          fb.innerHTML = `<strong>¡Correcto!</strong> ${qData.exp}`;
+        } else {
+          optEl.classList.add("incorrect");
+          opts[qData.correct].classList.add("correct");
+          fb.className = "feedback-box";
+          fb.style.background = "rgba(239,68,68,0.15)";
+          fb.style.border = "1px solid var(--aws-red)";
+          fb.innerHTML = `<strong>Incorrecto.</strong> ${qData.exp}`;
+        }
+
+        if (currentQuizQ < quizData.length - 1) {
+          document.getElementById("btn-next-quiz").style.display =
+            "inline-block";
+        }
+      }
+
+      function nextQuizQ() {
+        if (currentQuizQ < quizData.length - 1) {
+          currentQuizQ++;
+          renderQuizQ();
+        }
+      }
+
+      // Inicializar Quiz
+      renderQuizQ();
+
+      // Slide 22: Keywords
+      function showKeyWord(term, cardEl) {
+        document
+          .querySelectorAll("#slide-22 .card")
+          .forEach((c) => c.classList.remove("selected"));
+        cardEl.classList.add("selected");
+
+        const box = document.getElementById("keyword-box");
+        const text = {
+          RDS: 'Si ves <strong>"Relacional"</strong> + <strong>"Administrado"</strong> + motores tradicionales ➔ Elige <strong>RDS</strong>.',
+          Aurora:
+            'Si ves <strong>"Relacional"</strong> + <strong>"Desarrollado por AWS"</strong> + <strong>"Alto rendimiento"</strong> ➔ Elige <strong>Aurora</strong>.',
+          DynamoDB:
+            'Si ves <strong>"NoSQL"</strong> + <strong>"Key-Value"</strong> + <strong>"Serverless"</strong> + <strong>"Milisegundos"</strong> ➔ Elige <strong>DynamoDB</strong>.',
+          Redshift:
+            'Si ves <strong>"Data Warehouse"</strong> + <strong>"Analytics"</strong> + <strong>"OLAP"</strong> + <strong>"Petabytes"</strong> ➔ Elige <strong>Redshift</strong>.',
+          ElastiCache:
+            'Si ves <strong>"Caché"</strong> + <strong>"En memoria"</strong> + <strong>"Redis / Memcached"</strong> ➔ Elige <strong>ElastiCache</strong>.',
+          Neptune:
+            'Si ves <strong>"Grafos"</strong> + <strong>"Redes de contactos"</strong> + <strong>"Recomendaciones"</strong> ➔ Elige <strong>Neptune</strong>.',
+        };
+        box.innerHTML = text[term];
+      }
+    </script>
+  </body>
+</html>
