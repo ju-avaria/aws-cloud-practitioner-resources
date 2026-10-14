@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AWS CLF-C02 | Repaso Intensivo Dominio 1</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- NAVBAR HEADER -->
+    <header class="navbar">
+      <div class="logo">
+        <span class="aws-bold">AWS</span> CLF-C02 |
+        <span class="accent">Dominio 1: Conceptos de Cloud</span>
+      </div>
+      <div class="time-tracker">
+        <!-- <span class="badge">CLASE DE 60 MINUTOS</span>
+        <div class="timer" id="global-timer">00:00 / 60:00</div> -->
+      </div>
+    </header>
+
+    <!-- PROGRESS BAR GLOBAL -->
+    <div class="progress-container">
+      <div class="progress-bar" id="main-progress"></div>
+    </div>
+
+    <!-- MAIN APP LAYOUT -->
+    <div class="app-container">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="sidebar">
+        <button class="nav-btn active" data-section="sec-checkpoint">
+          <span class="time-tag"></span> 1. Checkpoint Inicial
+        </button>
+        <button class="nav-btn" data-section="sec-express">
+          <span class="time-tag"></span> 2. Repaso Express
+        </button>
+        <button class="nav-btn" data-section="sec-comparaciones">
+          <span class="time-tag"></span> 3. Comparaciones Críticas
+        </button>
+        <button class="nav-btn" data-section="sec-escenarios">
+          <span class="time-tag"></span> 4. Escenarios AWS
+        </button>
+        <button class="nav-btn" data-section="sec-preguntas">
+          <span class="time-tag"></span> 5. Preguntas de Examen
+        </button>
+        <button class="nav-btn" data-section="sec-simulacro">
+          <span class="time-tag"></span> 6. Mini Simulacro
+        </button>
+        <button class="nav-btn" data-section="sec-cierre">
+          <span class="time-tag"></span> 7. Resumen &amp; Trampas
+        </button>
+      </aside>
+
+      <!-- CONTENT AREA -->
+      <main class="content">
+        <!-- SECCIÓN 1: CHECKPOINT INICIAL (0-5 MIN) -->
+        <section id="sec-checkpoint" class="section-block active">
+          <div class="section-header">
+            <h2>1. Checkpoint Inicial </h2>
+            <p>
+              Comprobación ultrarrápida. Responde cada pregunta en 30-45
+              segundos.
+            </p>
+          </div>
+          <div id="checkpoint-cards"></div>
+          <div class="checkpoint-actions">
+            <button class="btn btn-primary" onclick="evaluarCheckpoint()">
+              Ver Resultados Checkpoint
+            </button>
+          </div>
+          <div id="checkpoint-score" class="score-card hidden"></div>
+        </section>
+
+        <!-- SECCIÓN 2: REPASO EXPRESS (5-15 MIN) -->
+        <section id="sec-express" class="section-block">
+          <div class="section-header">
+            <h2>2. Repaso Express </h2>
+            <p>10 conceptos clave que debes dominar sin titubear.</p>
+          </div>
+          <div class="grid-cards" id="express-grid"></div>
+        </section>
+
+        <!-- SECCIÓN 3: COMPARACIONES CRÍTICAS (15-25 MIN) -->
+        <section id="sec-comparaciones" class="section-block">
+          <div class="section-header">
+            <h2>3. Comparaciones Críticas </h2>
+            <p>
+              Diferencias definitivas para evitar trampas frecuentes del examen.
+            </p>
+          </div>
+
+          <div class="diagram-container">
+            <svg viewBox="0 0 700 160" width="100%" class="aws-diagram">
+              <rect
+                x="10"
+                y="20"
+                width="200"
+                height="120"
+                rx="8"
+                fill="#1e293b"
+                stroke="#38bdf8"
+                stroke-width="2"
+              />
+              <text
+                x="110"
+                y="50"
+                fill="#38bdf8"
+                text-anchor="middle"
+                font-weight="bold"
+              >
+                Región AWS
+              </text>
+              <text
+                x="110"
+                y="80"
+                fill="#94a3b8"
+                text-anchor="middle"
+                font-size="12"
+              >
+                Ubicación Física
+              </text>
+              <text
+                x="110"
+                y="100"
+                fill="#94a3b8"
+                text-anchor="middle"
+                font-size="12"
+              >
+                Global (ej. us-east-1)
+              </text>
+
+              <line
+                x1="210"
+                y1="80"
+                x2="270"
+                y2="80"
+                stroke="#f59e0b"
+                stroke-width="2"
+                stroke-dasharray="4"
+              />
+
+              <rect
+                x="270"
+                y="20"
+                width="420"
+                height="120"
+                rx="8"
+                fill="#1e293b"
+                stroke="#10b981"
+                stroke-width="2"
+              />
+              <text
+                x="480"
+                y="45"
+                fill="#10b981"
+                text-anchor="middle"
+                font-weight="bold"
+              >
+                Availability Zones (AZs)
+              </text>
+
+              <rect
+                x="290"
+                y="60"
+                width="110"
+                height="65"
+                rx="5"
+                fill="#0f172a"
+                stroke="#64748b"
+              />
+              <text
+                x="345"
+                y="95"
+                fill="#e2e8f0"
+                text-anchor="middle"
+                font-size="11"
+              >
+                AZ 1 (Datacenters)
+              </text>
+
+              <rect
+                x="425"
+                y="60"
+                width="110"
+                height="65"
+                rx="5"
+                fill="#0f172a"
+                stroke="#64748b"
+              />
+              <text
+                x="480"
+                y="95"
+                fill="#e2e8f0"
+                text-anchor="middle"
+                font-size="11"
+              >
+                AZ 2 (Datacenters)
+              </text>
+
+              <rect
+                x="560"
+                y="60"
+                width="110"
+                height="65"
+                rx="5"
+                fill="#0f172a"
+                stroke="#64748b"
+              />
+              <text
+                x="615"
+                y="95"
+                fill="#e2e8f0"
+                text-anchor="middle"
+                font-size="11"
+              >
+                AZ 3 (Datacenters)
+              </text>
+            </svg>
+          </div>
+
+          <div id="comparaciones-list"></div>
+        </section>
+
+        <!-- SECCIÓN 4: ESCENARIOS (25-40 MIN) -->
+        <section id="sec-escenarios" class="section-block">
+          <div class="section-header">
+            <h2>4. Escenarios AWS CLF-C02 </h2>
+            <p>
+              8 situaciones prácticas para aplicar los conceptos aprendidos.
+            </p>
+          </div>
+          <div id="escenarios-container"></div>
+        </section>
+
+        <!-- SECCIÓN 5: PREGUNTAS TIPO EXAMEN (40-52 MIN) -->
+        <section id="sec-preguntas" class="section-block">
+          <div class="section-header">
+            <h2>5. Preguntas Tipo Examen </h2>
+            <p>
+              8 preguntas oficiales de práctica (Reconocimiento, Comparación y
+              Escenario).
+            </p>
+          </div>
+          <div id="preguntas-container"></div>
+        </section>
+
+        <!-- SECCIÓN 6: MINI SIMULACRO (52-60 MIN) -->
+        <section id="sec-simulacro" class="section-block">
+          <div class="section-header">
+            <h2>6. Mini Simulacro </h2>
+            <p>
+              Evaluación final a ciegas. 5 preguntas sin retroalimentación
+              inmediata.
+            </p>
+          </div>
+          <div id="simulacro-container"></div>
+          <button class="btn btn-primary" onclick="evaluarSimulacro()">
+            Finalizar y Ver Diagnóstico
+          </button>
+          <div id="simulacro-resultado" class="score-card hidden"></div>
+        </section>
+
+        <!-- SECCIÓN 7: CIERRE Y RECOMENDACIONES -->
+        <section id="sec-cierre" class="section-block">
+          <div class="section-header">
+            <h2>7. Cierre de Clase</h2>
+            <p>Resumen táctico final para el día del examen.</p>
+          </div>
+
+          <div class="cierre-grid">
+            <div class="cierre-card border-green">
+              <h3>💡 10 Conceptos que Debes Recordar</h3>
+              <ul id="lista-cierre-conceptos" class="checklist"></ul>
+            </div>
+            <div class="cierre-card border-red">
+              <h3>⚠️ 5 Trampas que Debes Evitar</h3>
+              <ul id="lista-cierre-trampas" class="checklist warning"></ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

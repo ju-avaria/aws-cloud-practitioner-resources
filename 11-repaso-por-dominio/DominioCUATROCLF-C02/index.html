@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      AWS CLF-C02 | Repaso Intensivo Dominio 4: Facturación, Precios y Soporte
+    </title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- NAVBAR HEADER -->
+    <header class="navbar">
+      <div class="logo">
+        <span class="aws-bold">AWS</span> CLF-C02 |
+        <span class="accent">Dominio 4: Facturación, Precios y Soporte</span>
+      </div>
+      <div class="time-tracker">
+        <!-- <span class="badge">REPASO — 60 MIN</span>
+        <div class="timer" id="global-timer">00:00 / 60:00</div> -->
+      </div>
+    </header>
+
+    <!-- PROGRESS BAR GLOBAL -->
+    <div class="progress-container">
+      <div class="progress-bar" id="main-progress"></div>
+    </div>
+
+    <!-- MAIN APP LAYOUT -->
+    <div class="app-container">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="sidebar">
+        <button class="nav-btn active" data-section="sec-checkpoint">
+          <span class="time-tag"></span> 1. Checkpoint
+        </button>
+        <button class="nav-btn" data-section="sec-express">
+          <span class="time-tag"></span> 2. Repaso Express
+        </button>
+        <button class="nav-btn" data-section="sec-comparaciones">
+          <span class="time-tag"></span> 3. Comparaciones
+        </button>
+        <button class="nav-btn" data-section="sec-tabla">
+          <span class="time-tag"></span> Tabla Fundamental
+        </button>
+        <button class="nav-btn" data-section="sec-escenarios">
+          <span class="time-tag"></span> 4. Escenarios
+        </button>
+        <button class="nav-btn" data-section="sec-preguntas">
+          <span class="time-tag"></span> 5. Preguntas Examen
+        </button>
+        <button class="nav-btn" data-section="sec-simulacro">
+          <span class="time-tag"></span> 6. Mini Simulacro
+        </button>
+        <button class="nav-btn" data-section="sec-cierre">
+          <span class="time-tag"></span> 7. Cierre &amp; Trampas
+        </button>
+      </aside>
+
+      <!-- CONTENT AREA -->
+      <main class="content">
+        <!-- 1. CHECKPOINT (0-5 MIN) -->
+        <section id="sec-checkpoint" class="section-block active">
+          <div class="section-header">
+            <h2>1. Checkpoint Inicial </h2>
+            <p>
+              Comprobación ultrarrápida: Asocia el problema financiero o de
+              soporte con la herramienta adecuada.
+            </p>
+          </div>
+          <div id="checkpoint-cards"></div>
+          <div style="margin-top: 20px">
+            <button class="btn btn-primary" onclick="evaluarCheckpoint()">
+              Ver Resultados Checkpoint
+            </button>
+          </div>
+          <div id="checkpoint-score" class="score-card hidden"></div>
+        </section>
+
+        <!-- 2. REPASO EXPRESS (5-15 MIN) -->
+        <section id="sec-express" class="section-block">
+          <div class="section-header">
+            <h2>2. Repaso Express </h2>
+            <p>
+              Conceptos esenciales de facturación, modelos de compra y niveles
+              de soporte (Máximo 2 líneas por concepto).
+            </p>
+          </div>
+          <div class="grid-cards" id="express-grid"></div>
+        </section>
+
+        <!-- 3. COMPARACIONES (15-25 MIN) -->
+        <section id="sec-comparaciones" class="section-block">
+          <div class="section-header">
+            <h2>3. Comparaciones Críticas </h2>
+            <p>
+              Tablas comparativas para evitar los distractores más comunes del
+              examen.
+            </p>
+          </div>
+          <div id="comparaciones-list"></div>
+        </section>
+
+        <!-- TABLA FUNDAMENTAL -->
+        <section id="sec-tabla" class="section-block">
+          <div class="section-header">
+            <h2>⚡ Tabla Fundamental: "¿QUIÉRO...?"</h2>
+            <p>
+              Matriz de decisión rápida para identificar la herramienta o modelo
+              de compra según la necesidad.
+            </p>
+          </div>
+          <div class="table-responsive">
+            <table class="express-table">
+              <thead>
+                <tr>
+                  <th>NECESIDAD ("QUIERO...")</th>
+                  <th>HERRAMIENTA / CONCEPTO CORRECTO</th>
+                  <th>PALABRA CLAVE DE EXAMEN</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-fundamental-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 4. ESCENARIOS (25-40 MIN) -->
+        <section id="sec-escenarios" class="section-block">
+          <div class="section-header">
+            <h2>4. Escenarios de Examen </h2>
+            <p>
+              8 situaciones prácticas con análisis de respuestas correctas,
+              palabras clave y distractores.
+            </p>
+          </div>
+          <div id="escenarios-container"></div>
+        </section>
+
+        <!-- 5. PREGUNTAS (40-52 MIN) -->
+        <section id="sec-preguntas" class="section-block">
+          <div class="section-header">
+            <h2>5. Preguntas Tipo Examen </h2>
+            <p>
+              8 preguntas con estilo y nivel de dificultad equivalente al
+              CLF-C02 oficial.
+            </p>
+          </div>
+          <div id="preguntas-container"></div>
+        </section>
+
+        <!-- 6. MINI SIMULACRO (52-60 MIN) -->
+        <section id="sec-simulacro" class="section-block">
+          <div class="section-header">
+            <h2>6. Mini Simulacro </h2>
+            <p>
+              5 preguntas a ciegas. El diagnóstico y retroalimentación se
+              mostrarán al finalizar.
+            </p>
+          </div>
+          <div id="simulacro-container"></div>
+          <button class="btn btn-primary" onclick="evaluarSimulacro()">
+            Finalizar y Diagnosticar
+          </button>
+          <div id="simulacro-resultado" class="score-card hidden"></div>
+        </section>
+
+        <!-- 7. CIERRE DE CLASE -->
+        <section id="sec-cierre" class="section-block">
+          <div class="section-header">
+            <h2>7. Cierre de Clase &amp; Trampas Frecuentes</h2>
+            <p>Resumen táctico final para el día del examen.</p>
+          </div>
+
+          <div class="cierre-grid">
+            <div class="cierre-card border-green">
+              <h3>🔑 15 Conceptos de Billing que Debo Recordar</h3>
+              <ul id="lista-cierre-conceptos" class="checklist"></ul>
+            </div>
+            <div class="cierre-card border-red">
+              <h3>⚠️ 10 Trampas Frecuentes del Examen</h3>
+              <ul id="lista-cierre-trampas" class="checklist warning"></ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

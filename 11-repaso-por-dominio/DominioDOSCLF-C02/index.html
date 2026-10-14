@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      AWS CLF-C02 | Repaso Intensivo Dominio 2: Seguridad y Cumplimiento
+    </title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- NAVBAR HEADER -->
+    <header class="navbar">
+      <div class="logo">
+        <span class="aws-bold">AWS</span> CLF-C02 |
+        <span class="accent">Dominio 2: Seguridad y Cumplimiento</span>
+      </div>
+      <div class="time-tracker">
+        <!-- <span class="badge">REPASO — 60 MIN</span>
+        <div class="timer" id="global-timer">00:00 / 60:00</div> -->
+      </div>
+    </header>
+
+    <!-- PROGRESS BAR GLOBAL -->
+    <div class="progress-container">
+      <div class="progress-bar" id="main-progress"></div>
+    </div>
+
+    <!-- MAIN APP LAYOUT -->
+    <div class="app-container">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="sidebar">
+        <button class="nav-btn active" data-section="sec-checkpoint">
+          <span class="time-tag"></span> 1. Checkpoint
+        </button>
+        <button class="nav-btn" data-section="sec-express">
+          <span class="time-tag"></span> 2. Repaso Express
+        </button>
+        <button class="nav-btn" data-section="sec-comparaciones">
+          <span class="time-tag"></span> 3. Comparaciones
+        </button>
+        <button class="nav-btn" data-section="sec-escenarios">
+          <span class="time-tag"></span> 4. Escenarios
+        </button>
+        <button class="nav-btn" data-section="sec-preguntas">
+          <span class="time-tag"></span> 5. Preguntas
+        </button>
+        <button class="nav-btn" data-section="sec-simulacro">
+          <span class="time-tag"></span> 6. Mini Simulacro
+        </button>
+        <button class="nav-btn" data-section="sec-cierre">
+          <span class="time-tag"></span> 7. Cierre de Clase
+        </button>
+      </aside>
+
+      <!-- CONTENT AREA -->
+      <main class="content">
+        <!-- 1. CHECKPOINT (0-5m) -->
+        <section id="sec-checkpoint" class="section-block active">
+          <div class="section-header">
+            <h2>1. Checkpoint Inicial </h2>
+            <p>
+              Comprobación ultrarrápida sobre los pilares del Dominio 2.
+              Responde en 30 segundos cada una.
+            </p>
+          </div>
+          <div id="checkpoint-cards"></div>
+          <div style="margin-top: 20px">
+            <button class="btn btn-primary" onclick="evaluarCheckpoint()">
+              Ver Resultados Checkpoint
+            </button>
+          </div>
+          <div id="checkpoint-score" class="score-card hidden"></div>
+        </section>
+
+        <!-- 2. REPASO EXPRESS (5-15m) -->
+        <section id="sec-express" class="section-block">
+          <div class="section-header">
+            <h2>2. Repaso Express </h2>
+            <p>
+              Servicios y conceptos críticos. Asocia directamente función,
+              palabras clave y no caigas en confusiones.
+            </p>
+          </div>
+          <div class="grid-cards" id="express-grid"></div>
+        </section>
+
+        <!-- 3. COMPARACIONES CRÍTICAS (15-25m) -->
+        <section id="sec-comparaciones" class="section-block">
+          <div class="section-header">
+            <h2>3. Comparaciones Críticas </h2>
+            <p>
+              Aprende a diferenciar servicios similares evaluando el problema
+              planteado.
+            </p>
+          </div>
+          <div id="comparaciones-list"></div>
+        </section>
+
+        <!-- 4. ESCENARIOS (25-40m) -->
+        <section id="sec-escenarios" class="section-block">
+          <div class="section-header">
+            <h2>4. Escenarios de Examen </h2>
+            <p>
+              Casos prácticos del CLF-C02 con análisis de distractores y
+              palabras clave.
+            </p>
+          </div>
+          <div id="escenarios-container"></div>
+        </section>
+
+        <!-- 5. PREGUNTAS (40-52m) -->
+        <section id="sec-preguntas" class="section-block">
+          <div class="section-header">
+            <h2>5. Preguntas Tipo Examen </h2>
+            <p>
+              Práctica focalizada: Reconocimiento, Comparación y Escenarios.
+            </p>
+          </div>
+          <div id="preguntas-container"></div>
+        </section>
+
+        <!-- 6. MINI SIMULACRO (52-60m) -->
+        <section id="sec-simulacro" class="section-block">
+          <div class="section-header">
+            <h2>6. Mini Simulacro + Cierre </h2>
+            <p>Evaluación final a ciegas sin ayuda inmediata.</p>
+          </div>
+          <div id="simulacro-container"></div>
+          <button class="btn btn-primary" onclick="evaluarSimulacro()">
+            Finalizar y Diagnosticar
+          </button>
+          <div id="simulacro-resultado" class="score-card hidden"></div>
+        </section>
+
+        <!-- CIERRE -->
+        <section id="sec-cierre" class="section-block">
+          <div class="section-header">
+            <h2>7. Resumen de Cierre</h2>
+            <p>Lista táctica final para repasar antes del examen oficial.</p>
+          </div>
+          <div class="cierre-grid">
+            <div class="cierre-card border-green">
+              <h3>🔑 15 Servicios que Debo Reconocer</h3>
+              <ul id="lista-cierre-servicios" class="checklist"></ul>
+            </div>
+            <div class="cierre-card border-red">
+              <h3>⚠️ 10 Trampas de Seguridad del Examen</h3>
+              <ul id="lista-cierre-trampas" class="checklist warning"></ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

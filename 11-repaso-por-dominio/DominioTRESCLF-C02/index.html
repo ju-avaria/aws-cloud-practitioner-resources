@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      AWS CLF-C02 | Repaso Intensivo Dominio 3: Tecnología y Servicios
+    </title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- NAVBAR HEADER -->
+    <header class="navbar">
+      <div class="logo">
+        <span class="aws-bold">AWS</span> CLF-C02 |
+        <span class="accent">Dominio 3: Tecnología y Servicios</span>
+      </div>
+      <div class="time-tracker">
+        <!-- <span class="badge">REPASO — 60 MIN</span>
+        <div class="timer" id="global-timer">00:00 / 60:00</div> -->
+      </div>
+    </header>
+
+    <!-- PROGRESS BAR GLOBAL -->
+    <div class="progress-container">
+      <div class="progress-bar" id="main-progress"></div>
+    </div>
+
+    <!-- MAIN APP LAYOUT -->
+    <div class="app-container">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="sidebar">
+        <button class="nav-btn active" data-section="sec-checkpoint">
+          <span class="time-tag"></span> 1. Checkpoint
+        </button>
+        <button class="nav-btn" data-section="sec-mapa">
+          <span class="time-tag"></span> 2. Mapa y Express
+        </button>
+        <button class="nav-btn" data-section="sec-comparaciones">
+          <span class="time-tag"></span> 3. Comparaciones
+        </button>
+        <button class="nav-btn" data-section="sec-battle">
+          <span class="time-tag"></span> Battle de Servicios
+        </button>
+        <button class="nav-btn" data-section="sec-escenarios">
+          <span class="time-tag"></span> 4. Escenarios
+        </button>
+        <button class="nav-btn" data-section="sec-preguntas">
+          <span class="time-tag"></span> 5. Preguntas Examen
+        </button>
+        <button class="nav-btn" data-section="sec-simulacro">
+          <span class="time-tag"></span> 6. Mini Simulacro
+        </button>
+        <button class="nav-btn" data-section="sec-cierre">
+          <span class="time-tag"></span> 7. Cierre &amp; Trampas
+        </button>
+      </aside>
+
+      <!-- CONTENT AREA -->
+      <main class="content">
+        <!-- 1. CHECKPOINT (0-5 MIN) -->
+        <section id="sec-checkpoint" class="section-block active">
+          <div class="section-header">
+            <h2>1. Checkpoint Inicial </h2>
+            <p>
+              Reconocimiento ultrarrápido: Asocia el patrón técnico con el
+              servicio correcto.
+            </p>
+          </div>
+          <div id="checkpoint-cards"></div>
+          <div style="margin-top: 20px">
+            <button class="btn btn-primary" onclick="evaluarCheckpoint()">
+              Ver Resultados Checkpoint
+            </button>
+          </div>
+          <div id="checkpoint-score" class="score-card hidden"></div>
+        </section>
+
+        <!-- 2. MAPA + REPASO EXPRESS (5-15 MIN) -->
+        <section id="sec-mapa" class="section-block">
+          <div class="section-header">
+            <h2>2. Mapa y Repaso Express </h2>
+            <p>
+              Categorías de servicios y matriz de asociación directa (Problema ➔
+              Servicio ➔ Palabra clave).
+            </p>
+          </div>
+
+          <h3 style="color: var(--aws-orange); margin-bottom: 15px">
+            Mapa de Categorías de Servicios
+          </h3>
+          <div
+            class="grid-cards"
+            id="categories-grid"
+            style="margin-bottom: 30px"
+          ></div>
+
+          <h3 style="color: var(--aws-orange); margin-bottom: 15px">
+            Matriz Ultrarrápida de Servicios
+          </h3>
+          <div class="table-responsive">
+            <table class="express-table">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th>Problema que Resuelve</th>
+                  <th>Palabras Clave de Examen</th>
+                </tr>
+              </thead>
+              <tbody id="express-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 3. COMPARACIONES (15-25 MIN) -->
+        <section id="sec-comparaciones" class="section-block">
+          <div class="section-header">
+            <h2>3. Comparaciones Críticas </h2>
+            <p>
+              Diferenciadores clave para elegir el servicio correcto en dilemas
+              del examen.
+            </p>
+          </div>
+          <div id="comparaciones-list"></div>
+        </section>
+
+        <!-- BATTLE DE SERVICIOS -->
+        <section id="sec-battle" class="section-block">
+          <div class="section-header">
+            <h2>⚡ Battle de Services (Decisión Rápida)</h2>
+            <p>
+              Elige el servicio correcto para el caso en el menor tiempo
+              posible.
+            </p>
+          </div>
+          <div id="battle-container"></div>
+        </section>
+
+        <!-- 4. ESCENARIOS (25-40 MIN) -->
+        <section id="sec-escenarios" class="section-block">
+          <div class="section-header">
+            <h2>4. Escenarios Prácticos </h2>
+            <p>
+              10 situaciones reales tipo CLF-C02. Identifica la necesidad y
+              descarta distractores.
+            </p>
+          </div>
+          <div id="escenarios-container"></div>
+        </section>
+
+        <!-- 5. PREGUNTAS (40-52 MIN) -->
+        <section id="sec-preguntas" class="section-block">
+          <div class="section-header">
+            <h2>5. Preguntas de Examen </h2>
+            <p>10 preguntas con estilo y dificultad idéntica al examen real.</p>
+          </div>
+          <div id="preguntas-container"></div>
+        </section>
+
+        <!-- 6. MINI SIMULACRO (52-60 MIN) -->
+        <section id="sec-simulacro" class="section-block">
+          <div class="section-header">
+            <h2>6. Mini Simulacro </h2>
+            <p>5 preguntas sin retroalimentación hasta enviar todo.</p>
+          </div>
+          <div id="simulacro-container"></div>
+          <button class="btn btn-primary" onclick="evaluarSimulacro()">
+            Finalizar y Diagnosticar
+          </button>
+          <div id="simulacro-resultado" class="score-card hidden"></div>
+        </section>
+
+        <!-- 7. CIERRE DE CLASE -->
+        <section id="sec-cierre" class="section-block">
+          <div class="section-header">
+            <h2>7. Cierre de Clase &amp; Trampas Frecuentes</h2>
+            <p>Reglas mnemotécnicas de respuesta inmediata para la prueba.</p>
+          </div>
+
+          <div class="cierre-grid">
+            <div class="cierre-card border-green">
+              <h3>🔑 20 Asociaciones Directas</h3>
+              <ul id="lista-cierre-asociaciones" class="checklist"></ul>
+            </div>
+            <div class="cierre-card border-red">
+              <h3>⚠️ 10 Trampas del Examen</h3>
+              <ul id="lista-cierre-trampas" class="checklist warning"></ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
