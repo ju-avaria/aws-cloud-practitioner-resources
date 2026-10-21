@@ -1,0 +1,2070 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acto 1: Fundamentos de Python para AWS Cloud Practitioner</title>
+    <style>
+      /* RESET & BASE STYLES */
+      * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+      }
+
+      body {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          background-color: #0f172a;
+          color: #f8fafc;
+          height: 100vh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          user-select: none;
+      }
+
+      /* HEADER / BARRA DE NAVEGACIÓN SUPERIOR */
+      header {
+          height: 60px;
+          background-color: #1e293b;
+          border-bottom: 1px solid #334155;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 1.5rem;
+          z-index: 10;
+      }
+
+      .brand {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-weight: 700;
+          font-size: 1.1rem;
+          color: #f8fafc;
+      }
+
+      .brand-badge {
+          background-color: #ff9900;
+          color: #0f172a;
+          padding: 0.2rem 0.6rem;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+      }
+
+      .header-controls {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+      }
+
+      .btn-icon {
+          background: #334155;
+          border: none;
+          color: #f8fafc;
+          padding: 0.5rem 0.8rem;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          transition: all 0.2s ease;
+      }
+
+      .btn-icon:hover {
+          background: #475569;
+          color: #ff9900;
+      }
+
+      /* BARRA DE PROGRESO */
+      .progress-container {
+          width: 100%;
+          height: 4px;
+          background: #1e293b;
+          position: relative;
+      }
+
+      .progress-bar {
+          height: 100%;
+          background: linear-gradient(90deg, #ff9900, #38bdf8);
+          width: 6.66%;
+          transition: width 0.3s ease;
+      }
+
+      /* SLIDE CONTAINER */
+      main {
+          flex: 1;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+      }
+
+      .slide {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          padding: 2.5rem 3rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateX(30px);
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          overflow-y: auto;
+      }
+
+      .slide.active {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(0);
+      }
+
+      /* ELEMENTOS COMUNES DE SLIDE */
+      .slide-header {
+          margin-bottom: 1.5rem;
+      }
+
+      .slide-tag {
+          color: #38bdf8;
+          font-size: 0.85rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 0.4rem;
+          display: block;
+      }
+
+      .slide-title {
+          font-size: 2.2rem;
+          font-weight: 700;
+          color: #ffffff;
+          line-height: 1.2;
+      }
+
+      .slide-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          max-width: 1100px;
+          margin: 0 auto;
+          width: 100%;
+      }
+
+      /* COMPONENTES PEDAGÓGICOS */
+      .grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+          align-items: center;
+      }
+
+      .grid-3 {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+      }
+
+      .card {
+          background-color: #1e293b;
+          border: 1px solid #334155;
+          border-radius: 12px;
+          padding: 1.5rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+          transition: transform 0.2s, border-color 0.2s;
+      }
+
+      .card:hover {
+          border-color: #475569;
+      }
+
+      .card-highlight {
+          border-left: 4px solid #ff9900;
+      }
+
+      .card-accent {
+          border-left: 4px solid #38bdf8;
+      }
+
+      .card-success {
+          border-left: 4px solid #22c55e;
+      }
+
+      /* CÓDIGO Y SINTAXIS */
+      pre, code {
+          font-family: "Consolas", "Monaco", "Courier New", monospace;
+      }
+
+      .code-block {
+          background-color: #090d16;
+          border: 1px solid #1e293b;
+          border-radius: 8px;
+          padding: 1.2rem;
+          color: #e2e8f0;
+          font-size: 1.05rem;
+          line-height: 1.5;
+          overflow-x: auto;
+          position: relative;
+          margin: 1rem 0;
+      }
+
+      .code-keyword { color: #ff79c6; font-weight: bold; }
+      .code-string { color: #f1fa8c; }
+      .code-func { color: #50fa7b; }
+      .code-num { color: #bd93f9; }
+      .code-comment { color: #6272a4; font-style: italic; }
+      .code-var { color: #8be9fd; }
+
+      /* INTERACTIVIDAD & BOTONES DE INTERACCIÓN */
+      .interactive-area {
+          background: #182232;
+          border: 1px dashed #334155;
+          border-radius: 12px;
+          padding: 1.5rem;
+          margin-top: 1rem;
+      }
+
+      .btn-option {
+          width: 100%;
+          text-align: left;
+          background: #1e293b;
+          border: 1px solid #334155;
+          color: #f8fafc;
+          padding: 1rem 1.2rem;
+          border-radius: 8px;
+          margin-bottom: 0.6rem;
+          cursor: pointer;
+          font-size: 1rem;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+      }
+
+      .btn-option:hover {
+          background: #334155;
+          border-color: #38bdf8;
+      }
+
+      .btn-option.correct {
+          background: rgba(34, 197, 94, 0.15);
+          border-color: #22c55e;
+          color: #4ade80;
+      }
+
+      .btn-option.incorrect {
+          background: rgba(239, 68, 68, 0.15);
+          border-color: #ef4444;
+          color: #f87171;
+      }
+
+      .feedback-box {
+          margin-top: 1rem;
+          padding: 1rem;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          display: none;
+          animation: fadeIn 0.3s forwards;
+      }
+
+      .feedback-box.show {
+          display: block;
+      }
+
+      .feedback-box.info {
+          background: rgba(56, 189, 248, 0.1);
+          border: 1px solid #38bdf8;
+          color: #38bdf8;
+      }
+
+      .feedback-box.success {
+          background: rgba(34, 197, 94, 0.1);
+          border: 1px solid #22c55e;
+          color: #4ade80;
+      }
+
+      /* DIAGRAMAS Y FLUJOS */
+      .diagram-flow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1.5rem;
+          margin: 2rem 0;
+      }
+
+      .diagram-step {
+          background: #1e293b;
+          border: 2px solid #334155;
+          border-radius: 10px;
+          padding: 1.2rem 2rem;
+          text-align: center;
+          min-width: 160px;
+          position: relative;
+          transition: all 0.3s;
+      }
+
+      .diagram-step.active {
+          border-color: #ff9900;
+          box-shadow: 0 0 15px rgba(255, 153, 0, 0.3);
+          transform: scale(1.05);
+      }
+
+      .diagram-arrow {
+          font-size: 1.5rem;
+          color: #38bdf8;
+          font-weight: bold;
+      }
+
+      /* FOOTER DE NAVEGACIÓN */
+      footer {
+          height: 70px;
+          background-color: #1e293b;
+          border-top: 1px solid #334155;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 2rem;
+          z-index: 10;
+      }
+
+      .nav-btn {
+          background-color: #ff9900;
+          color: #0f172a;
+          border: none;
+          padding: 0.75rem 1.8rem;
+          border-radius: 8px;
+          font-weight: 700;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+      }
+
+      .nav-btn:hover:not(:disabled) {
+          background-color: #ffad33;
+          transform: translateY(-2px);
+      }
+
+      .nav-btn:disabled {
+          background-color: #334155;
+          color: #64748b;
+          cursor: not-allowed;
+          transform: none;
+      }
+
+      .slide-counter {
+          font-size: 0.95rem;
+          color: #94a3b8;
+          font-weight: 600;
+      }
+
+      /* MODAL ÍNDICE */
+      .modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(15, 23, 42, 0.9);
+          backdrop-filter: blur(5px);
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          pointer-events: none;
+          transition: all 0.3s ease;
+      }
+
+      .modal.open {
+          opacity: 1;
+          pointer-events: auto;
+      }
+
+      .modal-content {
+          background: #1e293b;
+          border: 1px solid #334155;
+          border-radius: 16px;
+          width: 90%;
+          max-width: 800px;
+          max-height: 80vh;
+          overflow-y: auto;
+          padding: 2rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          border-bottom: 1px solid #334155;
+          padding-bottom: 1rem;
+      }
+
+      .index-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 1rem;
+      }
+
+      .index-item {
+          background: #0f172a;
+          border: 1px solid #334155;
+          padding: 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-size: 0.9rem;
+      }
+
+      .index-item:hover {
+          border-color: #ff9900;
+          background: #182232;
+      }
+
+      .index-item-num {
+          color: #38bdf8;
+          font-weight: bold;
+          font-size: 0.8rem;
+          margin-bottom: 0.3rem;
+          display: block;
+      }
+
+      /* ANIMACIONES */
+      @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.03); }
+      }
+
+      .pulse {
+          animation: pulse 2s infinite;
+      }
+
+      /* ESTILOS ESPECÍFICOS DE SLIDES */
+      .memory-box {
+          display: flex;
+          align-items: center;
+          background: #0f172a;
+          border: 2px dashed #38bdf8;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-bottom: 1rem;
+      }
+
+      .memory-label {
+          background: #38bdf8;
+          color: #0f172a;
+          padding: 0.4rem 0.8rem;
+          border-radius: 4px;
+          font-weight: bold;
+          font-family: monospace;
+          margin-right: 1rem;
+      }
+
+      .memory-val {
+          font-family: monospace;
+          font-size: 1.2rem;
+          color: #f1fa8c;
+      }
+
+      .log-line {
+          font-family: monospace;
+          background: #090d16;
+          padding: 0.6rem 1rem;
+          border-radius: 4px;
+          border-left: 3px solid #64748b;
+          margin-bottom: 0.4rem;
+          font-size: 0.9rem;
+      }
+
+      .log-line.err { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.05); }
+      .log-line.info { border-left-color: #38bdf8; }
+
+      /* RESPONSIVE DESIGN */
+      @media (max-width: 768px) {
+          header { padding: 0 1rem; }
+          .brand span { display: none; }
+          .slide { padding: 1.5rem 1rem; }
+          .slide-title { font-size: 1.6rem; }
+          .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 1rem; }
+          .diagram-flow { flex-direction: column; gap: 0.5rem; }
+          .diagram-arrow { transform: rotate(90deg); }
+          footer { padding: 0 1rem; }
+          .nav-btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER / BARRA DE NAVEGACIÓN SUPERIOR -->
+    <header>
+      <div class="brand">
+        <span class="brand-badge">AWS Cloud Practitioner</span>
+        <span>Fundamentos de Python</span>
+      </div>
+      <div class="header-controls">
+        <button class="btn-icon" id="btnIndex">📋 <span>Índice</span></button>
+        <button class="btn-icon" id="btnFullscreen">
+          ⛶ <span>Pantalla Completa</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- BARRA DE PROGRESO -->
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DE DIAPOSITIVAS -->
+    <main>
+      <!-- SLIDE 1: ¿Qué vamos a hacer? -->
+      <section class="slide active" id="slide-1">
+        <div class="slide-header">
+          <span class="slide-tag">Introducción</span>
+          <h1 class="slide-title">Python: De los datos a una solución</h1>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div>
+              <p
+                style="
+                  font-size: 1.2rem;
+                  line-height: 1.6;
+                  margin-bottom: 1.5rem;
+                  color: #cbd5e1;
+                "
+              >
+                En el entorno Cloud de AWS, la cantidad de registros e
+                información se genera a gran velocidad.
+                <strong>Python</strong> es la herramienta clave para transformar
+                montañas de datos en decisiones automatizadas.
+              </p>
+              <div class="card card-highlight">
+                <h3 style="color: #ff9900; margin-bottom: 0.5rem">
+                  Objetivo de hoy
+                </h3>
+                <p style="font-size: 0.95rem; color: #94a3b8">
+                  No memorizar sintaxis compleja, sino comprender el poder de
+                  las herramientas básicas para resolver problemas reales.
+                </p>
+              </div>
+            </div>
+
+            <div class="interactive-area">
+              <h3
+                style="margin-bottom: 1rem; font-size: 1.1rem; color: #38bdf8"
+              >
+                Reflexión inicial:
+              </h3>
+              <p style="margin-bottom: 1rem; font-size: 0.95rem">
+                Si tuvieras <strong>10.000 registros de logs</strong> en un
+                servidor de AWS y necesitaras encontrar todos los errores...
+                ¿Los revisarías uno por uno manualmente?
+              </p>
+              <button class="btn-option" onclick="answerSlide1(this, 'manual')">
+                <span>A) Sí, con paciencia fila por fila.</span>
+                <span>🔍</span>
+              </button>
+              <button class="btn-option" onclick="answerSlide1(this, 'auto')">
+                <span
+                  >B) No, crearía una instrucción para que el sistema lo haga
+                  por mí.</span
+                >
+                <span>⚡</span>
+              </button>
+
+              <div id="feedback-s1" class="feedback-box success">
+                <strong>¡Exacto!</strong> Aquí comienza el valor de la
+                programación: automatizar tareas repetitivas y liberar tiempo
+                estratégico.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: Python en una frase -->
+      <section class="slide" id="slide-2">
+        <div class="slide-header">
+          <span class="slide-tag">Concepto Clave</span>
+          <h1 class="slide-title">Python en una sola frase</h1>
+        </div>
+        <div class="slide-content">
+          <div style="text-align: center; margin-bottom: 2.5rem">
+            <blockquote
+              style="
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #38bdf8;
+                background: #1e293b;
+                padding: 1.5rem;
+                border-radius: 12px;
+                border: 1px solid #334155;
+                display: inline-block;
+                max-width: 900px;
+              "
+            >
+              "Python es un lenguaje interpretado que permite dar instrucciones
+              precisas a una computadora para procesar información y resolver
+              problemas."
+            </blockquote>
+          </div>
+
+          <div class="grid-3">
+            <div class="card card-accent">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem">🤖</div>
+              <h3 style="margin-bottom: 0.5rem">1. Automatizar</h3>
+              <p style="font-size: 0.9rem; color: #94a3b8">
+                Eliminar tareas manuales y repetitivas de monitoreo y
+                administración.
+              </p>
+            </div>
+            <div class="card card-accent">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem">📊</div>
+              <h3 style="margin-bottom: 0.5rem">2. Procesar Datos</h3>
+              <p style="font-size: 0.9rem; color: #94a3b8">
+                Filtrar, contar, extraer y transformar información desordenada
+                en reportes.
+              </p>
+            </div>
+            <div class="card card-accent">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem">☁️</div>
+              <h3 style="margin-bottom: 0.5rem">3. Crear Soluciones</h3>
+              <p style="font-size: 0.9rem; color: #94a3b8">
+                Construir pequeñas aplicaciones o funciones que reaccionan a
+                eventos.
+              </p>
+            </div>
+          </div>
+
+          <div
+            style="
+              margin-top: 2rem;
+              background: rgba(255, 153, 0, 0.1);
+              border: 1px solid #ff9900;
+              padding: 1rem;
+              border-radius: 8px;
+              text-align: center;
+            "
+          >
+            <p style="color: #ff9900; font-weight: 600; font-size: 0.95rem">
+              💡 Conexión AWS Cloud Practitioner: En servicios como AWS Lambda,
+              usas Python para ejecutar código automáticamente sin gestionar
+              servidores.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: El Modelo Mental -->
+      <section class="slide" id="slide-3">
+        <div class="slide-header">
+          <span class="slide-tag">Fundamento Universal</span>
+          <h1 class="slide-title">El Modelo Mental de Programación</h1>
+        </div>
+        <div class="slide-content">
+          <p
+            style="
+              text-align: center;
+              color: #94a3b8;
+              font-size: 1.1rem;
+              margin-bottom: 1.5rem;
+            "
+          >
+            Todo sistema de cómputo sigue de manera ininterrumpida este ciclo
+            fundamental:
+          </p>
+
+          <div class="diagram-flow">
+            <div class="diagram-step" id="step-in">
+              <span
+                style="
+                  color: #38bdf8;
+                  font-weight: bold;
+                  display: block;
+                  font-size: 0.8rem;
+                "
+                >ETAPA 1</span
+              >
+              <h3 style="margin-top: 0.3rem">ENTRADA</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.4rem">
+                Datos crudos (10 registros)
+              </p>
+            </div>
+            <div class="diagram-arrow">➔</div>
+            <div class="diagram-step" id="step-proc">
+              <span
+                style="
+                  color: #ff9900;
+                  font-weight: bold;
+                  display: block;
+                  font-size: 0.8rem;
+                "
+                >ETAPA 2</span
+              >
+              <h3 style="margin-top: 0.3rem">PROCESAMIENTO</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.4rem">
+                Python (Cuenta errores)
+              </p>
+            </div>
+            <div class="diagram-arrow">➔</div>
+            <div class="diagram-step" id="step-out">
+              <span
+                style="
+                  color: #22c55e;
+                  font-weight: bold;
+                  display: block;
+                  font-size: 0.8rem;
+                "
+                >ETAPA 3</span
+              >
+              <h3 style="margin-top: 0.3rem">SALIDA</h3>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.4rem">
+                Resultado (3 errores)
+              </p>
+            </div>
+          </div>
+
+          <div class="interactive-area" style="margin-top: 2rem">
+            <h3 style="font-size: 1rem; color: #ff9900; margin-bottom: 0.8rem">
+              Prueba tu intuición:
+            </h3>
+            <p style="font-size: 0.95rem; margin-bottom: 1rem">
+              Un archivo de auditoría sube a AWS CloudWatch, Python filtra los
+              eventos críticos y los guarda en un resumen. ¿Qué representa el
+              archivo subido?
+            </p>
+            <div style="display: flex; gap: 1rem">
+              <button
+                class="btn-option"
+                style="margin: 0"
+                onclick="checkS3Stage('in', true)"
+              >
+                A) Entrada
+              </button>
+              <button
+                class="btn-option"
+                style="margin: 0"
+                onclick="checkS3Stage('proc', false)"
+              >
+                B) Procesamiento
+              </button>
+              <button
+                class="btn-option"
+                style="margin: 0"
+                onclick="checkS3Stage('out', false)"
+              >
+                C) Salida
+              </button>
+            </div>
+            <div id="feedback-s3" class="feedback-box"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: Variables -->
+      <section class="slide" id="slide-4">
+        <div class="slide-header">
+          <span class="slide-tag">Herramienta 1</span>
+          <h1 class="slide-title">Variables: Cajas de Memoria</h1>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div>
+              <p
+                style="
+                  margin-bottom: 1rem;
+                  font-size: 1.05rem;
+                  line-height: 1.5;
+                  color: #cbd5e1;
+                "
+              >
+                Una <strong>variable</strong> es simplemente un nombre o
+                etiqueta que le asignamos a un dato guardado en la memoria para
+                usarlo después.
+              </p>
+              <div class="code-block">
+                <span class="code-comment"
+                  ># Guardando diferentes tipos de datos</span
+                >
+                <br />
+                <span class="code-var">severity</span> =
+                <span class="code-string">"ERROR"</span>
+                <br />
+                <span class="code-var">error_count</span> =
+                <span class="code-num">3</span>
+                <br />
+                <span class="code-var">system_active</span> =
+                <span class="code-keyword">True</span>
+              </div>
+              <p style="font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem">
+                Las variables pueden guardar texto (cadenas), números enteros,
+                decimales o estados verdaderos/falsos (booleanos).
+              </p>
+            </div>
+
+            <div class="card">
+              <h3
+                style="color: #38bdf8; margin-bottom: 1rem; font-size: 1.1rem"
+              >
+                Representación en Memoria
+              </h3>
+
+              <div class="memory-box">
+                <span class="memory-label">severity</span>
+                <span class="memory-val">"ERROR"</span>
+              </div>
+
+              <div class="memory-box" style="border-color: #ff9900">
+                <span class="memory-label" style="background: #ff9900"
+                  >error_count</span
+                >
+                <span class="memory-val">3</span>
+              </div>
+
+              <div
+                class="interactive-area"
+                style="padding: 1rem; margin-top: 1rem"
+              >
+                <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
+                  <strong>Pregunta rápida:</strong> ¿Qué valor exacto guarda la
+                  variable <code style="color: #ff9900">error_count</code>?
+                </p>
+                <input
+                  type="number"
+                  id="var-input"
+                  placeholder="Escribe el número"
+                  style="
+                    background: #0f172a;
+                    border: 1px solid #334155;
+                    color: #fff;
+                    padding: 0.5rem;
+                    border-radius: 4px;
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                  "
+                />
+                <button
+                  class="btn-icon"
+                  style="width: 100%; justify-content: center"
+                  onclick="checkVarValue()"
+                >
+                  Validar
+                </button>
+                <div id="feedback-s4" class="feedback-box"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: Decisiones (if) -->
+      <section class="slide" id="slide-5">
+        <div class="slide-header">
+          <span class="slide-tag">Herramienta 2</span>
+          <h1 class="slide-title">
+            Tomar Decisiones (<code style="color: #ff79c6">if</code>)
+          </h1>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div>
+              <p style="margin-bottom: 1rem; color: #cbd5e1">
+                La instrucción
+                <code style="color: #ff79c6; font-weight: bold">if</code>
+                permite evaluar una condición. Si la condición se cumple (es
+                Verdadera), Python ejecuta las líneas de código indicadas.
+              </p>
+
+              <div class="code-block">
+                <span class="code-var">severity</span> =
+                <span class="code-string">"ERROR"</span>
+                <br />
+                <span class="code-keyword">if</span>
+                <span class="code-var">severity</span> ==
+                <span class="code-string">"ERROR"</span>:
+                <br />
+                <span class="code-func">print</span>(<span class="code-string"
+                  >"⚠️ Se encontró un error"</span
+                >)
+              </div>
+
+              <div
+                style="
+                  background: rgba(56, 189, 248, 0.1);
+                  border-left: 3px solid #38bdf8;
+                  padding: 0.8rem;
+                  margin-top: 1rem;
+                  border-radius: 4px;
+                "
+              >
+                <strong style="color: #38bdf8; font-size: 0.9rem"
+                  >REGLA DE ORO: Indentación</strong
+                >
+                <p
+                  style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.2rem"
+                >
+                  La sangría (espacios a la izquierda) le indica a Python qué
+                  instrucciones pertenecen al bloque de la decisión.
+                </p>
+              </div>
+            </div>
+
+            <div class="interactive-area">
+              <h3 style="color: #38bdf8; margin-bottom: 1rem">
+                Simulador de Decisión
+              </h3>
+              <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
+                Selecciona el valor de
+                <code style="color: #8be9fd">severity</code>:
+              </p>
+
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem">
+                <button class="btn-icon" onclick="runIfSim('ERROR')">
+                  "ERROR"
+                </button>
+                <button class="btn-icon" onclick="runIfSim('INFO')">
+                  "INFO"
+                </button>
+                <button class="btn-icon" onclick="runIfSim('WARNING')">
+                  "WARNING"
+                </button>
+              </div>
+
+              <p
+                style="
+                  font-size: 0.85rem;
+                  color: #94a3b8;
+                  margin-bottom: 0.3rem;
+                "
+              >
+                Terminal / Pantalla de Salida:
+              </p>
+              <div
+                id="if-terminal"
+                style="
+                  background: #000;
+                  border: 1px solid #334155;
+                  padding: 1rem;
+                  border-radius: 6px;
+                  font-family: monospace;
+                  min-height: 80px;
+                  color: #4ade80;
+                "
+              >
+                > Esperando selección...
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: Repetición (for) -->
+      <section class="slide" id="slide-6">
+        <div class="slide-header">
+          <span class="slide-tag">Herramienta 3</span>
+          <h1 class="slide-title">
+            Repetición de Tareas (<code style="color: #ff79c6">for</code>)
+          </h1>
+        </div>
+        <div class="slide-content">
+          <p style="margin-bottom: 1rem; color: #cbd5e1">
+            Cuando tenemos listas con cientos de datos, la instrucción
+            <code style="color: #ff79c6; font-weight: bold">for</code> nos
+            permite procesar cada elemento, uno por uno, de forma automatizada.
+          </p>
+
+          <div class="grid-2">
+            <div class="code-block">
+              <span class="code-var">errors</span> = [<span class="code-string"
+                >"Database"</span
+              >, <span class="code-string">"API"</span>,
+              <span class="code-string">"Storage"</span>]
+              <br />
+              <span class="code-comment"
+                ># Recorre cada elemento de la lista</span
+              >
+              <br />
+              <span class="code-keyword">for</span>
+              <span class="code-var">error</span>
+              <span class="code-keyword">in</span>
+              <span class="code-var">errors</span>:
+              <br />
+              <span class="code-func">print</span>(<span class="code-string"
+                >"Revisando módulo:"</span
+              >, <span class="code-var">error</span>)
+            </div>
+
+            <div class="interactive-area">
+              <h3 style="color: #ff9900; margin-bottom: 1rem">
+                Ejecución paso a paso
+              </h3>
+              <p style="font-size: 0.9rem; margin-bottom: 1rem">
+                Presiona el botón para avanzar el bucle
+                <code style="color: #ff79c6">for</code>:
+              </p>
+
+              <button
+                class="nav-btn"
+                style="
+                  width: 100%;
+                  justify-content: center;
+                  margin-bottom: 1rem;
+                "
+                onclick="stepLoop()"
+              >
+                <span>▶ Siguiente Iteración</span>
+              </button>
+
+              <div
+                id="loop-display"
+                style="
+                  background: #090d16;
+                  border: 1px solid #334155;
+                  padding: 1rem;
+                  border-radius: 6px;
+                  font-family: monospace;
+                "
+              >
+                <div style="color: #64748b">Estado: Listo para iniciar...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 7: Listas -->
+      <section class="slide" id="slide-7">
+        <div class="slide-header">
+          <span class="slide-tag">Estructura de Datos 1</span>
+          <h1 class="slide-title">Listas: Colecciones Ordenadas</h1>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div>
+              <p style="margin-bottom: 1rem; color: #cbd5e1">
+                Una <strong>Lista</strong> es un contenedor agrupado que guarda
+                múltiples elementos en un orden específico. Se define utilizando
+                corchetes <code style="color: #38bdf8">[ ]</code>.
+              </p>
+              <div class="code-block">
+                <span class="code-var">errors</span> = [
+                <span class="code-string">"Database"</span>,
+                <span class="code-string">"API"</span>,
+                <span class="code-string">"Database"</span>
+                ]
+              </div>
+              <p style="font-size: 0.9rem; color: #94a3b8">
+                Es perfecta para acumular líneas de registros que leemos desde
+                un archivo de logs.
+              </p>
+            </div>
+
+            <div class="interactive-area">
+              <h3 style="color: #38bdf8; margin-bottom: 1rem">
+                Inspeccionando la Lista
+              </h3>
+
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 0.5rem;
+                  margin-bottom: 1.5rem;
+                "
+              >
+                <div
+                  style="
+                    background: #1e293b;
+                    padding: 0.8rem;
+                    border-radius: 6px;
+                    border-left: 4px solid #38bdf8;
+                    display: flex;
+                    justify-content: space-between;
+                  "
+                >
+                  <span>Posición [0]</span>
+                  <strong style="color: #f1fa8c">"Database"</strong>
+                </div>
+                <div
+                  style="
+                    background: #1e293b;
+                    padding: 0.8rem;
+                    border-radius: 6px;
+                    border-left: 4px solid #38bdf8;
+                    display: flex;
+                    justify-content: space-between;
+                  "
+                >
+                  <span>Posición [1]</span>
+                  <strong style="color: #f1fa8c">"API"</strong>
+                </div>
+                <div
+                  style="
+                    background: #1e293b;
+                    padding: 0.8rem;
+                    border-radius: 6px;
+                    border-left: 4px solid #38bdf8;
+                    display: flex;
+                    justify-content: space-between;
+                  "
+                >
+                  <span>Posición [2]</span>
+                  <strong style="color: #f1fa8c">"Database"</strong>
+                </div>
+              </div>
+
+              <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
+                <strong>Pregunta:</strong> ¿Cuántos elementos totales contiene
+                esta lista?
+              </p>
+              <div style="display: flex; gap: 0.5rem">
+                <button
+                  class="btn-option"
+                  style="margin: 0"
+                  onclick="checkListCount(2, false)"
+                >
+                  2
+                </button>
+                <button
+                  class="btn-option"
+                  style="margin: 0"
+                  onclick="checkListCount(3, true)"
+                >
+                  3
+                </button>
+                <button
+                  class="btn-option"
+                  style="margin: 0"
+                  onclick="checkListCount(4, false)"
+                >
+                  4
+                </button>
+              </div>
+              <div id="feedback-s7" class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 8: Diccionarios -->
+      <section class="slide" id="slide-8">
+        <div class="slide-header">
+          <span class="slide-tag">Estructura de Datos 2</span>
+          <h1 class="slide-title">Diccionarios: Parejas Clave ➔ Valor</h1>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div>
+              <p style="margin-bottom: 1rem; color: #cbd5e1">
+                Un <strong>Diccionario</strong> permite asociar una
+                <strong>Clave</strong> con un <strong>Valor</strong>. Se define
+                con llaves <code style="color: #ff9900">{ }</code>.
+              </p>
+              <div class="code-block">
+                <span class="code-var">error_count</span> = {
+                <span class="code-string">"Database"</span>:
+                <span class="code-num">2</span>,
+                <span class="code-string">"API"</span>:
+                <span class="code-num">1</span>
+                }
+              </div>
+              <p style="font-size: 0.9rem; color: #94a3b8">
+                Ideal para resúmenes y contadores (ej. "¿Cuántos fallos registró
+                cada servicio de la app?").
+              </p>
+            </div>
+
+            <div class="card">
+              <h3 style="color: #ff9900; margin-bottom: 1rem">
+                Estructura Clave ➔ Valor
+              </h3>
+              <div
+                style="
+                  background: #0f172a;
+                  padding: 1rem;
+                  border-radius: 8px;
+                  font-family: monospace;
+                  margin-bottom: 1rem;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                    border-bottom: 1px solid #1e293b;
+                    padding-bottom: 0.3rem;
+                  "
+                >
+                  <span style="color: #8be9fd">Clave (Módulo)</span>
+                  <span style="color: #ff9900">Valor (Conteo)</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.4rem;
+                  "
+                >
+                  <span style="color: #f1fa8c">"Database"</span>
+                  <span style="color: #bd93f9; font-weight: bold">2</span>
+                </div>
+                <div style="display: flex; justify-content: space-between">
+                  <span style="color: #f1fa8c">"API"</span>
+                  <span style="color: #bd93f9; font-weight: bold">1</span>
+                </div>
+              </div>
+
+              <div class="interactive-area" style="padding: 1rem">
+                <p style="font-size: 0.85rem; margin-bottom: 0.5rem">
+                  <strong>Reto:</strong> Si aparece un nuevo error de
+                  "Database", ¿cuál debería ser su nuevo valor?
+                </p>
+                <input
+                  type="number"
+                  id="dict-input"
+                  placeholder="Ingresa el valor"
+                  style="
+                    background: #0f172a;
+                    border: 1px solid #334155;
+                    color: #fff;
+                    padding: 0.5rem;
+                    border-radius: 4px;
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                  "
+                />
+                <button
+                  class="btn-icon"
+                  style="width: 100%; justify-content: center"
+                  onclick="checkDictValue()"
+                >
+                  Verificar
+                </button>
+                <div id="feedback-s8" class="feedback-box"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 9: Funciones -->
+      <section class="slide" id="slide-9">
+        <div class="slide-header">
+          <span class="slide-tag">Herramienta 4</span>
+          <h1 class="slide-title">Funciones: Bloques Reutilizables</h1>
+        </div>
+        <div class="slide-content">
+          <p style="margin-bottom: 1.5rem; color: #cbd5e1; text-align: center">
+            Una <strong>Función</strong> es un bloque de código organizativo que
+            realiza una tarea específica y puede ser reutilizado múltiples
+            veces.
+          </p>
+
+          <div class="diagram-flow" style="margin-bottom: 2rem">
+            <div class="diagram-step">
+              <span style="font-size: 0.8rem; color: #38bdf8">Entrada</span>
+              <h4 style="margin-top: 0.2rem">Lista de Datos</h4>
+            </div>
+            <div class="diagram-arrow">➔</div>
+            <div class="diagram-step active" style="border-color: #38bdf8">
+              <span style="font-size: 0.8rem; color: #38bdf8"
+                >Procesamiento</span
+              >
+              <h4 style="margin-top: 0.2rem; color: #38bdf8">FUNCIÓN</h4>
+              <code style="font-size: 0.75rem; color: #ff79c6"
+                >count_errors()</code
+              >
+            </div>
+            <div class="diagram-arrow">➔</div>
+            <div class="diagram-step">
+              <span style="font-size: 0.8rem; color: #22c55e">Resultado</span>
+              <h4 style="margin-top: 0.2rem">Total / Informe</h4>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="code-block"></div>
+
+            <div class="card card-accent">
+              <h3 style="color: #38bdf8; margin-bottom: 0.8rem">
+                ¿Por qué usar Funciones?
+              </h3>
+              <ul
+                style="
+                  padding-left: 1.2rem;
+                  font-size: 0.95rem;
+                  color: #cbd5e1;
+                  line-height: 1.6;
+                "
+              >
+                <li>
+                  Evitan repetir la misma lógica en diferentes partes del
+                  programa.
+                </li>
+                <li>
+                  Permiten dividir un problema complejo en tareas pequeñas.
+                </li>
+                <li>
+                  Hacen que el código sea fácil de leer, mantener y probar.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 10: Lectura de Archivos -->
+      <section class="slide" id="slide-10">
+        <div class="slide-header">
+          <span class="slide-tag">Integración</span>
+          <h1 class="slide-title">Lectura de Archivos de Logs</h1>
+        </div>
+        <div class="slide-content">
+          <p style="margin-bottom: 1rem; color: #cbd5e1">
+            En la práctica empresarial, los datos residen en archivos en disco
+            (como <code style="color: #ff9900">logs.txt</code>). Python los lee
+            secuencialmente:
+          </p>
+
+          <div class="grid-2">
+            <div>
+              <div class="code-block"></div>
+              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem">
+                <code style="color: #ff79c6">with open(...)</code> garantiza que
+                el archivo se abra y cierre de manera segura en el sistema.
+              </p>
+            </div>
+
+            <div class="card">
+              <h3
+                style="font-size: 1rem; color: #ff9900; margin-bottom: 0.8rem"
+              >
+                Contenido simulado de logs.txt
+              </h3>
+              <div class="log-line err">ERROR|Database|Connection failed</div>
+              <div class="log-line info">
+                INFO|API|Request processed correctly
+              </div>
+              <div class="log-line err">
+                ERROR|API|Timeout during connection
+              </div>
+              <div class="log-line info">
+                INFO|Storage|File uploaded successfully
+              </div>
+
+              <div
+                style="
+                  margin-top: 1rem;
+                  font-size: 0.85rem;
+                  color: #cbd5e1;
+                  background: #0f172a;
+                  padding: 0.8rem;
+                  border-radius: 6px;
+                "
+              >
+                <strong>Proceso:</strong> Abrir ➔ Leer línea por línea ➔ Filtrar
+                solo las que contengan
+                <code style="color: #ef4444">ERROR</code>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 11: Juntando las Piezas -->
+      <section class="slide" id="slide-11">
+        <div class="slide-header">
+          <span class="slide-tag">Visión Holística</span>
+          <h1 class="slide-title">Juntando todas las Piezas</h1>
+        </div>
+        <div class="slide-content">
+          <p style="text-align: center; color: #94a3b8; margin-bottom: 2rem">
+            Ninguna herramienta trabaja aislada. Un programa real combina cada
+            bloque para construir una solución automatizada:
+          </p>
+
+          <div
+            style="
+              background: #1e293b;
+              border: 1px solid #334155;
+              padding: 2rem;
+              border-radius: 12px;
+              max-width: 850px;
+              margin: 0 auto;
+            "
+          >
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr auto 1fr;
+                gap: 1.5rem;
+                align-items: center;
+              "
+            >
+              <div style="display: flex; flex-direction: column; gap: 0.6rem">
+                <div
+                  style="
+                    background: #0f172a;
+                    padding: 0.5rem 1rem;
+                    border-radius: 6px;
+                    border-left: 3px solid #38bdf8;
+                    font-size: 0.9rem;
+                  "
+                >
+                  Variables
+                </div>
+                <div
+                  style="
+                    background: #0f172a;
+                    padding: 0.5rem 1rem;
+                    border-radius: 6px;
+                    border-left: 3px solid #ff79c6;
+                    font-size: 0.9rem;
+                  "
+                >
+                  Condiciones (if)
+                </div>
+                <div
+                  style="
+                    background: #0f172a;
+                    padding: 0.5rem 1rem;
+                    border-radius: 6px;
+                    border-left: 3px solid #bd93f9;
+                    font-size: 0.9rem;
+                  "
+                >
+                  Ciclos (for)
+                </div>
+                <div
+                  style="
+                    background: #0f172a;
+                    padding: 0.5rem 1rem;
+                    border-radius: 6px;
+                    border-left: 3px solid #f1fa8c;
+                    font-size: 0.9rem;
+                  "
+                >
+                  Listas / Diccionarios
+                </div>
+                <div
+                  style="
+                    background: #0f172a;
+                    padding: 0.5rem 1rem;
+                    border-radius: 6px;
+                    border-left: 3px solid #50fa7b;
+                    font-size: 0.9rem;
+                  "
+                >
+                  Funciones / Archivos
+                </div>
+              </div>
+
+              <div style="font-size: 2.5rem; color: #ff9900">➔</div>
+
+              <div
+                style="
+                  background: rgba(255, 153, 0, 0.1);
+                  border: 2px solid #ff9900;
+                  padding: 1.5rem;
+                  border-radius: 10px;
+                  text-align: center;
+                "
+              >
+                <span
+                  style="font-size: 2rem; display: block; margin-bottom: 0.5rem"
+                  >⚙️</span
+                >
+                <h3 style="color: #ff9900">SOLUCIÓN</h3>
+                <p
+                  style="font-size: 0.85rem; color: #cbd5e1; margin-top: 0.4rem"
+                >
+                  Analizador de Logs Automatizado
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 12: Mini Desafíos de Predicción -->
+      <section class="slide" id="slide-12">
+        <div class="slide-header">
+          <span class="slide-tag">Verificación de Conocimiento</span>
+          <h1 class="slide-title">Mini Desafíos de Predicción</h1>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <!-- Desafío 1 -->
+            <div class="card">
+              <h3
+                style="color: #38bdf8; font-size: 1rem; margin-bottom: 0.8rem"
+              >
+                Desafío 1: El Bucle
+              </h3>
+              <div class="code-block" style="font-size: 0.9rem">
+                items = [<span class="code-string">"DB"</span>,
+                <span class="code-string">"API"</span>]
+                <br />
+                <span class="code-keyword">for</span> i
+                <span class="code-keyword">in</span> items:
+                <br />
+                <span class="code-func">print</span>(i)
+              </div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.6rem">
+                ¿Qué se imprimirá en pantalla?
+              </p>
+              <button
+                class="btn-option"
+                style="padding: 0.6rem; font-size: 0.85rem"
+                onclick="checkChallenge1(this, false)"
+              >
+                A) "DB API" en una sola línea
+              </button>
+              <button
+                class="btn-option"
+                style="padding: 0.6rem; font-size: 0.85rem"
+                onclick="checkChallenge1(this, true)"
+              >
+                B) "DB" y luego "API" en líneas separadas
+              </button>
+              <div id="feedback-c1" class="feedback-box"></div>
+            </div>
+
+            <!-- Desafío 2 -->
+            <div class="card">
+              <h3
+                style="color: #ff9900; font-size: 1rem; margin-bottom: 0.8rem"
+              >
+                Desafío 2: La Condición
+              </h3>
+              <div class="code-block" style="font-size: 0.9rem">
+                severity = <span class="code-string">"WARNING"</span>
+                <br />
+                <span class="code-keyword">if</span> severity ==
+                <span class="code-string">"ERROR"</span>:
+                <br />
+                <span class="code-func">print</span>(<span class="code-string"
+                  >"Alerta detectada"</span
+                >)
+              </div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.6rem">
+                ¿Se imprimirá "Alerta detectada"?
+              </p>
+              <button
+                class="btn-option"
+                style="padding: 0.6rem; font-size: 0.85rem"
+                onclick="checkChallenge2(this, false)"
+              >
+                A) Sí, porque existe una severidad
+              </button>
+              <button
+                class="btn-option"
+                style="padding: 0.6rem; font-size: 0.85rem"
+                onclick="checkChallenge2(this, true)"
+              >
+                B) No, porque "WARNING" no es igual a "ERROR"
+              </button>
+              <div id="feedback-c2" class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 13: Del Concepto al Problema -->
+      <section class="slide" id="slide-13">
+        <div class="slide-header">
+          <span class="slide-tag">Transición</span>
+          <h1 class="slide-title">Del Concepto al Problema Real</h1>
+        </div>
+        <div class="slide-content" style="text-align: center">
+          <h2 style="font-size: 1.8rem; color: #cbd5e1; margin-bottom: 2rem">
+            Conoces los bloques básicos... <br />
+            <span style="color: #38bdf8"
+              >¿Es hora de combinarlos en un escenario empresarial?</span
+            >
+          </h2>
+
+          <div
+            style="
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 2rem;
+              margin-bottom: 2.5rem;
+            "
+          >
+            <div class="card" style="width: 250px">
+              <h3 style="color: #ff9900; margin-bottom: 0.5rem">
+                Herramientas
+              </h3>
+              <p style="font-size: 0.85rem; color: #94a3b8">
+                Variables, ciclos, condiciones, listas, diccionarios, archivos.
+              </p>
+            </div>
+
+            <div style="font-size: 2rem; color: #22c55e; font-weight: bold">
+              +
+            </div>
+
+            <div class="card" style="width: 250px">
+              <h3 style="color: #38bdf8; margin-bottom: 0.5rem">
+                Caso Práctico
+              </h3>
+              <p style="font-size: 0.85rem; color: #94a3b8">
+                Desafío de logs en una aplicación de E-Commerce.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="pulse"
+            style="
+              display: inline-block;
+              background: #ff9900;
+              color: #0f172a;
+              padding: 1rem 2rem;
+              border-radius: 30px;
+              font-weight: 800;
+              font-size: 1.1rem;
+            "
+          >
+            ¡Estamos listos para el caso de negocio!
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 14: Presentación del Caso Empresarial -->
+      <section class="slide" id="slide-14">
+        <div class="slide-header">
+          <span class="slide-tag">Escenario de Negocio</span>
+          <h1 class="slide-title">El Problema de los Registros (Logs)</h1>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div>
+              <div class="card card-highlight" style="margin-bottom: 1rem">
+                <h3 style="color: #ff9900; margin-bottom: 0.5rem">
+                  Planteamiento
+                </h3>
+                <p style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.5">
+                  Una plataforma de comercio electrónico alojada en AWS genera
+                  miles de líneas de registros por minuto.
+                </p>
+              </div>
+              <div class="card">
+                <h3 style="color: #38bdf8; margin-bottom: 0.5rem">
+                  El equipo de Soporte necesita saber:
+                </h3>
+                <ul
+                  style="
+                    padding-left: 1.2rem;
+                    font-size: 0.9rem;
+                    color: #cbd5e1;
+                    line-height: 1.6;
+                  "
+                >
+                  <li>¿Cuántos errores ocurrieron en total?</li>
+                  <li>¿Qué componente crítico está fallando más?</li>
+                  <li>¿Cuáles son las fallas recurrentes?</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="interactive-area" style="text-align: center">
+              <span
+                style="font-size: 3rem; display: block; margin-bottom: 0.5rem"
+                >📋➔💻</span
+              >
+              <h3 style="color: #f8fafc; margin-bottom: 1rem">
+                ¿Podemos automatizar esta auditoría con Python?
+              </h3>
+              <p
+                style="
+                  color: #4ade80;
+                  font-size: 1.3rem;
+                  font-weight: 700;
+                  margin-bottom: 1.5rem;
+                "
+              >
+                ¡Sí, absolutamente!
+              </p>
+              <p style="font-size: 0.85rem; color: #94a3b8">
+                Construiremos una solución que lea los archivos de registro y
+                genere un resumen automático de métricas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 15: Transición al Acto 2 -->
+      <section class="slide" id="slide-15">
+        <div class="slide-header">
+          <span class="slide-tag">Próximo Paso</span>
+          <h1 class="slide-title">Transición al Acto 2</h1>
+        </div>
+        <div class="slide-content" style="text-align: center">
+          <div
+            class="grid-2"
+            style="max-width: 800px; margin: 0 auto 2.5rem auto"
+          >
+            <div class="card card-accent">
+              <h3 style="color: #38bdf8; margin-bottom: 0.5rem">
+                ACTO 1 (Completado)
+              </h3>
+              <p style="font-size: 0.9rem; color: #cbd5e1">
+                Conocemos las herramientas fundamentales de Python.
+              </p>
+            </div>
+            <div class="card card-highlight">
+              <h3 style="color: #ff9900; margin-bottom: 0.5rem">
+                ACTO 2 (A continuación)
+              </h3>
+              <p style="font-size: 0.9rem; color: #cbd5e1">
+                Las utilizaremos juntas para resolver el caso real.
+              </p>
+            </div>
+          </div>
+
+          <div class="diagram-flow" style="margin-bottom: 2.5rem">
+            <div class="diagram-step">
+              <h4 style="color: #94a3b8">logs.txt</h4>
+            </div>
+            <div class="diagram-arrow">➔</div>
+            <div class="diagram-step active" style="border-color: #ff9900">
+              <h3 style="color: #ff9900">¿?</h3>
+              <span style="font-size: 0.75rem; color: #cbd5e1"
+                >Código de Python</span
+              >
+            </div>
+            <div class="diagram-arrow">➔</div>
+            <div class="diagram-step">
+              <h4 style="color: #4ade80">results.txt</h4>
+            </div>
+          </div>
+
+          <h2 style="font-size: 1.4rem; color: #f8fafc">
+            Pregunta abierta: <br />
+            <span style="color: #ff9900"
+              >¿Qué instrucciones exactas tendrá que ejecutar Python para
+              procesar el archivo?</span
+            >
+          </h2>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER DE NAVEGACIÓN -->
+    <footer>
+      <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">
+        <span>◄ Anterior</span>
+      </button>
+      <span class="slide-counter" id="slideCounter">Diapositiva 1 de 15</span>
+      <button class="nav-btn" id="btnNext" onclick="navigate(1)">
+        <span>Siguiente ►</span>
+      </button>
+    </footer>
+
+    <!-- MODAL ÍNDICE -->
+    <div class="modal" id="modalIndex">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Índice de Diapositivas</h2>
+          <button class="btn-icon" onclick="toggleModal(false)">
+            ✖ Cerrar
+          </button>
+        </div>
+        <div class="index-grid" id="indexGrid"></div>
+      </div>
+    </div>
+
+    <!-- JAVASCRIPT VANILLA -->
+    <script>
+      // ESTADO DE LA APLICACIÓN
+      let currentSlide = 1;
+      const totalSlides = 15;
+
+      // INICIALIZACIÓN
+      document.addEventListener("DOMContentLoaded", () => {
+        updateSlideView();
+        buildIndex();
+
+        // Eventos de Teclado
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight" || e.key === " ") {
+            navigate(1);
+          } else if (e.key === "ArrowLeft") {
+            navigate(-1);
+          } else if (e.key === "Escape") {
+            toggleModal(false);
+          }
+        });
+
+        // Botones Header
+        document
+          .getElementById("btnIndex")
+          .addEventListener("click", () => toggleModal(true));
+        document
+          .getElementById("btnFullscreen")
+          .addEventListener("click", toggleFullscreen);
+      });
+
+      // NAVEGACIÓN ENTRE SLIDES
+      function navigate(direction) {
+        const target = currentSlide + direction;
+        if (target >= 1 && target <= totalSlides) {
+          currentSlide = target;
+          updateSlideView();
+        }
+      }
+
+      function goToSlide(slideNum) {
+        currentSlide = slideNum;
+        updateSlideView();
+        toggleModal(false);
+      }
+
+      function updateSlideView() {
+        // Actualizar visibilidad de slides
+        document.querySelectorAll(".slide").forEach((slide, idx) => {
+          if (idx + 1 === currentSlide) {
+            slide.classList.add("active");
+          } else {
+            slide.classList.remove("active");
+          }
+        });
+
+        // Actualizar botones de footer
+        document.getElementById("btnPrev").disabled = currentSlide === 1;
+        document.getElementById("btnNext").disabled =
+          currentSlide === totalSlides;
+        document.getElementById("slideCounter").textContent =
+          `Diapositiva ${currentSlide} de ${totalSlides}`;
+
+        // Actualizar barra de progreso
+        const percentage = (currentSlide / totalSlides) * 100;
+        document.getElementById("progressBar").style.width = `${percentage}%`;
+      }
+
+      // CONSTRUIR MODAL ÍNDICE
+      function buildIndex() {
+        const indexGrid = document.getElementById("indexGrid");
+        indexGrid.innerHTML = "";
+
+        const titles = [
+          "¿Qué vamos a hacer?",
+          "Python en una frase",
+          "El Modelo Mental",
+          "Variables",
+          "Decisiones (if)",
+          "Repetición (for)",
+          "Listas",
+          "Diccionarios",
+          "Funciones",
+          "Lectura de Archivos",
+          "Juntando las Piezas",
+          "Mini Desafíos",
+          "Del Concepto al Problema",
+          "Presentación del Caso",
+          "Transición al Acto 2",
+        ];
+
+        titles.forEach((title, idx) => {
+          const item = document.createElement("div");
+          item.className = "index-item";
+          item.onclick = () => goToSlide(idx + 1);
+          item.innerHTML = `
+                    <span class="index-item-num">DIAPOSITIVA ${idx + 1}</span>
+                    <strong>${title}</strong>
+                `;
+          indexGrid.appendChild(item);
+        });
+      }
+
+      function toggleModal(show) {
+        const modal = document.getElementById("modalIndex");
+        if (show) modal.classList.add("open");
+        else modal.classList.remove("open");
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch((err) => {
+            console.log(`Error al activar pantalla completa: ${err.message}`);
+          });
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+
+      // LÓGICA INTERACTIVA POR SLIDE
+
+      // Slide 1
+      function answerSlide1(btn, type) {
+        const fb = document.getElementById("feedback-s1");
+        fb.classList.add("show");
+
+        document.querySelectorAll("#slide-1 .btn-option").forEach((b) => {
+          b.style.borderColor = "#334155";
+        });
+
+        if (type === "auto") {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("incorrect");
+        }
+      }
+
+      // Slide 3
+      function checkS3Stage(stage, isCorrect) {
+        const fb = document.getElementById("feedback-s3");
+        fb.classList.add("show");
+
+        // Remover resaltados previos
+        document.getElementById("step-in").classList.remove("active");
+        document.getElementById("step-proc").classList.remove("active");
+        document.getElementById("step-out").classList.remove("active");
+
+        if (stage === "in") {
+          document.getElementById("step-in").classList.add("active");
+          fb.className = "feedback-box success show";
+          fb.innerHTML =
+            "<strong>¡Correcto!</strong> El archivo con registros representa la <strong>Entrada</strong> de datos que alimentará a Python.";
+        } else {
+          fb.className = "feedback-box info show";
+          fb.innerHTML =
+            "<strong>Casi.</strong> Recuerda que los datos originales son la <strong>Entrada</strong> antes de ser transformados.";
+        }
+      }
+
+      // Slide 4
+      function checkVarValue() {
+        const val = document.getElementById("var-input").value;
+        const fb = document.getElementById("feedback-s4");
+        fb.classList.add("show");
+
+        if (val === "3") {
+          fb.className = "feedback-box success show";
+          fb.innerHTML = "¡Excelente! La variable contiene el número entero 3.";
+        } else {
+          fb.className = "feedback-box info show";
+          fb.innerHTML =
+            "Revisa la caja de memoria de error_count. Guarda el valor 3.";
+        }
+      }
+
+      // Slide 5
+      function runIfSim(val) {
+        const term = document.getElementById("if-terminal");
+        if (val === "ERROR") {
+          term.style.color = "#ef4444";
+          term.innerHTML = `> severity = "ERROR"<br>> Evaluando: ¿severity == "ERROR"? ➔ Sí<br><strong style="color:#4ade80;">> Salida: ⚠️ Se encontró un error</strong>`;
+        } else {
+          term.style.color = "#94a3b8";
+          term.innerHTML = `> severity = "${val}"<br>> Evaluando: ¿severity == "ERROR"? ➔ No<br>> (No se imprime ningún mensaje)`;
+        }
+      }
+
+      // Slide 6
+      let loopIndex = 0;
+      const loopItems = ["Database", "API", "Storage"];
+      function stepLoop() {
+        const disp = document.getElementById("loop-display");
+        if (loopIndex < loopItems.length) {
+          disp.innerHTML = `
+                    <div style="color: #38bdf8;">Iteración ${loopIndex + 1}: error = "${loopItems[loopIndex]}"</div>
+                    <div style="color: #4ade80; margin-top: 0.3rem;">> Revisando módulo: ${loopItems[loopIndex]}</div>
+                `;
+          loopIndex++;
+        } else {
+          disp.innerHTML = `<div style="color: #ff9900;">✔ Bucle finalizado. Se procesaron los 3 elementos.</div>`;
+          loopIndex = 0;
+        }
+      }
+
+      // Slide 7
+      function checkListCount(num, isCorrect) {
+        const fb = document.getElementById("feedback-s7");
+        fb.classList.add("show");
+        if (isCorrect) {
+          fb.className = "feedback-box success show";
+          fb.innerHTML = "¡Correcto! La lista contiene 3 elementos en total.";
+        } else {
+          fb.className = "feedback-box info show";
+          fb.innerHTML =
+            "Cuenta los elementos delimitados por comas dentro de la lista.";
+        }
+      }
+
+      // Slide 8
+      function checkDictValue() {
+        const val = document.getElementById("dict-input").value;
+        const fb = document.getElementById("feedback-s8");
+        fb.classList.add("show");
+        if (val === "3") {
+          fb.className = "feedback-box success show";
+          fb.innerHTML =
+            "¡Exacto! Tenía 2 errores, al sumarse 1 nuevo, el valor se actualiza a 3.";
+        } else {
+          fb.className = "feedback-box info show";
+          fb.innerHTML =
+            "Si la clave 'Database' tenía 2 y suma 1 evento más, ¿cuál es el total?";
+        }
+      }
+
+      // Slide 12 - Desafíos
+      function checkChallenge1(btn, isCorrect) {
+        const fb = document.getElementById("feedback-c1");
+        fb.classList.add("show");
+        if (isCorrect) {
+          btn.classList.add("correct");
+          fb.className = "feedback-box success show";
+          fb.innerHTML =
+            "¡Correcto! <code style='color:#fff;'>print()</code> genera una nueva línea en cada iteración del ciclo <code style='color:#fff;'>for</code>.";
+        } else {
+          btn.classList.add("incorrect");
+          fb.className = "feedback-box info show";
+          fb.innerHTML =
+            "Recuerda que cada ejecución de print() por defecto imprime en un renglón nuevo.";
+        }
+      }
+
+      function checkChallenge2(btn, isCorrect) {
+        const fb = document.getElementById("feedback-c2");
+        fb.classList.add("show");
+        if (isCorrect) {
+          btn.classList.add("correct");
+          fb.className = "feedback-box success show";
+          fb.innerHTML =
+            "¡Correcto! Al no cumplirse la condición (<code style='color:#fff;'>'WARNING' == 'ERROR'</code> es Falso), el bloque de código se omite.";
+        } else {
+          btn.classList.add("incorrect");
+          fb.className = "feedback-box info show";
+          fb.innerHTML =
+            "Revisa los valores: severity vale 'WARNING', pero el if busca 'ERROR'.";
+        }
+      }
+    </script>
+  </body>
+</html>

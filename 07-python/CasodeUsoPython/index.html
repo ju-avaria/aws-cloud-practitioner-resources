@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Python & AWS Cloud Practitioner: Caso de Análisis de Registros
+    </title>
+    <style>
+      :root {
+        --bg-primary: #0f172a;
+        --bg-card: #1e293b;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --accent-blue: #38bdf8;
+        --accent-green: #4ade80;
+        --accent-yellow: #facc15;
+        --accent-red: #f87171;
+        --code-bg: #020617;
+        --border: #334155;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      header {
+        background-color: var(--bg-card);
+        padding: 1rem 2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      header h1 {
+        font-size: 1.1rem;
+        color: var(--accent-blue);
+      }
+
+      .progress-bar-container {
+        width: 100%;
+        height: 4px;
+        background-color: var(--border);
+      }
+
+      .progress-bar {
+        height: 100%;
+        background-color: var(--accent-blue);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+        max-width: 1100px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .slide {
+        display: none;
+        width: 100%;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.4s ease;
+      }
+
+      .slide.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h2 {
+        color: var(--accent-blue);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+      }
+
+      h3 {
+        color: var(--text-main);
+        font-size: 1.2rem;
+        margin: 1rem 0 0.5rem 0;
+      }
+
+      p,
+      li {
+        color: var(--text-muted);
+        line-height: 1.6;
+        font-size: 0.95rem;
+        margin-bottom: 0.8rem;
+      }
+
+      ul,
+      ol {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      .badge-info {
+        background-color: rgba(56, 189, 248, 0.2);
+        color: var(--accent-blue);
+      }
+      .badge-warning {
+        background-color: rgba(250, 204, 21, 0.2);
+        color: var(--accent-yellow);
+      }
+      .badge-error {
+        background-color: rgba(248, 113, 113, 0.2);
+        color: var(--accent-red);
+      }
+
+      pre {
+        background-color: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.88rem;
+        color: #e2e8f0;
+      }
+
+      code {
+        font-family: "Courier New", Courier, monospace;
+        background-color: var(--code-bg);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        color: var(--accent-blue);
+        font-size: 0.88rem;
+      }
+
+      .diagram {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--code-bg);
+        padding: 1.2rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        margin: 1rem 0;
+      }
+
+      .diagram-node {
+        background-color: var(--bg-card);
+        border: 1px solid var(--accent-blue);
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 0.85rem;
+      }
+
+      .diagram-arrow {
+        color: var(--text-muted);
+        font-weight: bold;
+      }
+
+      .interactive-box {
+        background-color: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+
+      .btn {
+        background-color: var(--accent-blue);
+        color: var(--bg-primary);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 0.9rem;
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+      }
+
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .btn-option {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background-color: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border);
+        margin-bottom: 0.5rem;
+        padding: 0.75rem;
+      }
+
+      .btn-option:hover {
+        border-color: var(--accent-blue);
+        background-color: rgba(56, 189, 248, 0.05);
+      }
+
+      .feedback {
+        margin-top: 0.8rem;
+        padding: 0.8rem;
+        border-radius: 6px;
+        display: none;
+        font-size: 0.9rem;
+      }
+
+      .feedback.correct {
+        display: block;
+        background-color: rgba(74, 222, 128, 0.15);
+        border: 1px solid var(--accent-green);
+        color: var(--accent-green);
+      }
+
+      .feedback.incorrect {
+        display: block;
+        background-color: rgba(248, 113, 113, 0.15);
+        border: 1px solid var(--accent-red);
+        color: var(--accent-red);
+      }
+
+      footer {
+        background-color: var(--bg-card);
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      @media (max-width: 640px) {
+        main {
+          padding: 0.5rem;
+        }
+        .slide {
+          padding: 1rem;
+        }
+        .diagram {
+          flex-direction: column;
+        }
+        .diagram-arrow {
+          transform: rotate(90deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Python & Cloud Practitioner: Analizador de Logs</h1>
+      <span id="slide-counter">Diapositiva 1 de 10</span>
+    </header>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <main>
+      <!-- BLOQUE 1 -->
+      <section class="slide active">
+        <h2>Bloque 1: El Problema Empresarial</h2>
+        <p>
+          Una plataforma de comercio electrónico procesa cientos de pedidos al
+          día. Su equipo de soporte técnico recibe reportes frecuentes de fallos
+          en compras, pero analizar la causa toma horas.
+        </p>
+        <p>
+          Actualmente, los operadores revisan archivos de registros (logs) de
+          forma manual. Un extracto típico luce así:
+        </p>
+        <pre>
+2026-10-12 08:15:22|INFO|auth_service|Usuario inicio sesion exitosamente.
+2026-10-12 08:17:10|ERROR|payment_gateway|Fallo en la conexion con la pasarela de pagos.
+2026-10-12 08:20:12|INVALID_LOG_ENTRY_WITHOUT_DELIMITERS</pre
+        >
+        <div class="interactive-box">
+          <h3>Pregunta de reflexión:</h3>
+          <p>
+            ¿Qué problemas identificas al analizar miles de líneas como estas
+            manualmente?
+          </p>
+          <button class="btn" onclick="toggleHint('hint1')">
+            Ver análisis técnico
+          </button>
+          <p
+            id="hint1"
+            style="
+              display: none;
+              margin-top: 0.5rem;
+              color: var(--accent-yellow);
+            "
+          >
+            Análisis: El proceso manual es lento, propenso a errores humanos, no
+            detecta registros corruptos fácilmente y no permite agrupar fallos
+            por componente crítico para tomar decisiones operativas inmediatas.
+          </p>
+        </div>
+      </section>
+
+      <!-- BLOQUE 2 -->
+      <section class="slide">
+        <h2>Bloque 2: Pensar Antes de Programar</h2>
+        <p>
+          Antes de escribir código en Python, debemos abstraer la solución en
+          una estructura de Entradas, Procesos y Salidas (IPO):
+        </p>
+        <div class="diagram">
+          <div class="diagram-node">
+            ENTRADA<br /><small>Archivo logs.txt</small>
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node">
+            PROCESO<br /><small>Lectura + Validación</small>
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node">
+            PROCESO<br /><small>Conteo + Conteo por Dicts</small>
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node">
+            SALIDA<br /><small>Archivo results.txt</small>
+          </div>
+        </div>
+        <h3>Algoritmo en Lenguaje Natural:</h3>
+        <ol>
+          <li>Abrir y leer el archivo de registros línea por línea.</li>
+          <li>
+            Comprobar si la línea tiene exactamente 4 campos separados por el
+            carácter <code>|</code>.
+          </li>
+          <li>
+            Si es inválida, incrementar el contador de errores de formato y
+            continuar.
+          </li>
+          <li>
+            Si es válida, clasificar por severidad (INFO, WARNING, ERROR).
+          </li>
+          <li>
+            Si es un ERROR, contabilizar el componente de software afectado y el
+            mensaje.
+          </li>
+          <li>
+            Escribir las métricas calculadas en un archivo estructurado
+            <code>results.txt</code>.
+          </li>
+        </ol>
+      </section>
+
+      <!-- BLOQUE 3.1 -->
+      <section class="slide">
+        <h2>Bloque 3.1: Python Básico - Listas y Cadenas</h2>
+        <p>
+          Para manipular texto en Python, utilizamos el método
+          <code>split()</code> de las cadenas de texto (strings). Este divide
+          una cadena en partes separadas por un delimitador, devolviendo una
+          <strong>lista</strong>.
+        </p>
+        <pre>
+# Ejemplo mínimo
+linea = "2026-10-12|ERROR|payment_gateway|Timeout en la respuesta"
+campos = linea.split("|")
+
+print(campos[1])  # Resultado: "ERROR"
+print(len(campos)) # Resultado: 4</pre
+        >
+        <div class="interactive-box">
+          <p>
+            <strong>Desafío rápido:</strong> Si ejecutamos
+            <code>"A|B".split("|")</code>, ¿cuántos elementos tendrá la lista
+            resultante?
+          </p>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                false,
+                'fb1',
+                'Incorrecto. Tendrá 2 elementos: [\&quot;A\&quot;, \&quot;B\&quot;].',
+              )
+            "
+          >
+            1 elemento
+          </button>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                true,
+                'fb1',
+                '¡Correcto! Separará la cadena en [\&quot;A\&quot;, \&quot;B\&quot;].',
+              )
+            "
+          >
+            2 elementos
+          </button>
+          <div id="fb1" class="feedback"></div>
+        </div>
+      </section>
+
+      <!-- BLOQUE 3.2 -->
+      <section class="slide">
+        <h2>Bloque 3.2: Contadores con Diccionarios</h2>
+        <p>
+          Un <strong>diccionario</strong> guarda información en pares de
+          clave-valor. Es la herramienta ideal para agrupar y contar elementos
+          dinámicamente (como errores por componente).
+        </p>
+        <pre>
+# Inicializar diccionario de conteo
+errores = {}
+componente = "payment_gateway"
+
+# Patrón de acumulación
+if componente in errores:
+    errores[componente] += 1
+else:
+    errores[componente] = 1
+
+print(errores) # Output: {'payment_gateway': 1}</pre
+        >
+        <p>
+          Este patrón nos permite registrar componentes nuevos sin necesidad de
+          conocer sus nombres de antemano.
+        </p>
+      </section>
+
+      <!-- BLOQUE 4 -->
+      <section class="slide">
+        <h2>Bloque 4: Construcción del Programa (`main.py`)</h2>
+        <p>
+          El programa principal se estructura en funciones pequeñas con
+          responsabilidad única:
+        </p>
+        <pre>
+def validar_y_extraer_registro(linea):
+    linea_limpia = linea.strip()
+    if not linea_limpia:
+        return None
+    campos = linea_limpia.split("|")
+    if len(campos) != 4:
+        return None  # Registro mal formado
+    return [campo.strip() for campo in campos]</pre
+        >
+        <p>
+          <strong>Manejo preventivo de errores:</strong> Si un registro no tiene
+          exactamente 4 campos (como un log incompleto o corrupto), la función
+          retorna <code>None</code>. El programa no se interrumpe y registra la
+          falla en la estadística de registros inválidos.
+        </p>
+      </section>
+
+      <!-- BLOQUE 5 -->
+      <section class="slide">
+        <h2>Bloque 5: Análisis de Resultados (`results.txt`)</h2>
+        <p>
+          Al procesar los registros de prueba con nuestro script, obtenemos el
+          siguiente resumen en <code>results.txt</code>:
+        </p>
+        <pre>
+1. RESUMEN GENERAL DE EVENTOS
+Total de registros válidos procesados: 13
+Total de registros mal formados:       1
+
+2. DESGLOSE POR SEVERIDAD
+- INFO: 4 | WARNING: 3 | ERROR: 6
+
+3. ERRORES POR COMPONENTE
+- payment_gateway: 4 error(es)
+- inventory: 2 error(es)</pre
+        >
+        <p>
+          <strong>Diagnóstico Técnico:</strong> El componente
+          <code>payment_gateway</code> concentra el 66.6% de todos los errores.
+          Se distingue el hecho medido de la hipótesis operativa: existe un
+          fallo de red o latencia con la pasarela de pagos.
+        </p>
+      </section>
+
+      <!-- BLOQUE 6.1 -->
+      <section class="slide">
+        <h2>Bloque 6.1: Conexión con AWS Cloud Practitioner</h2>
+        <p>
+          En un entorno local, nuestro programa procesa un archivo estático. En
+          una arquitectura en la nube con AWS, esta solución evoluciona hacia
+          una infraestructura automatizada y escalable.
+        </p>
+        <div class="diagram">
+          <div class="diagram-node">
+            App E-Commerce<br /><small>Genera Logs</small>
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node">
+            Amazon S3<br /><small>Almacenamiento Objeto</small>
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node">
+            AWS Lambda<br /><small>Procesa con Python</small>
+          </div>
+          <div class="diagram-arrow">&rarr;</div>
+          <div class="diagram-node">
+            Amazon CloudWatch<br /><small>Monitoreo y Alertas</small>
+          </div>
+        </div>
+        <ul>
+          <li>
+            <strong>Amazon S3:</strong> Almacena archivos de logs de manera
+            highly disponible y duradera.
+          </li>
+          <li>
+            <strong>AWS Lambda:</strong> Ejecuta el código Python
+            automáticamente cada vez que se sube un nuevo archivo de log a S3
+            (serverless, sin gestionar servidores).
+          </li>
+          <li>
+            <strong>Amazon CloudWatch:</strong> Recopila métricas de ejecución y
+            activa alarmas si los eventos de nivel ERROR superan un umbral.
+          </li>
+        </ul>
+      </section>
+
+      <!-- BLOQUE 6.2 -->
+      <section class="slide">
+        <h2>Bloque 6.2: Dominios de Certificación AWS</h2>
+        <ul>
+          <li>
+            <strong>Conceptos de la Nube:</strong> Tareas que antes requerían
+            servidores encendidos 24/7 para procesar datos se convierten en
+            cómputo <em>Serverless</em> (pago por uso exacto y escalabilidad
+            automática).
+          </li>
+          <li>
+            <strong>Seguridad (Modelo de Responsabilidad Compartida):</strong>
+            AWS asegura la infraestructura subyacente de Lambda y S3. El usuario
+            es responsable de configurar los permisos IAM adecuados (Principio
+            de Mínimo Privilegio) para que Lambda solo lea del bucket de logs
+            autorizado.
+          </li>
+          <li>
+            <strong>Facturación y Precios:</strong> AWS Lambda no cobra por
+            tiempo de inactividad, lo que optimiza significativamente los costos
+            operativos comparado con mantener una máquina virtual (Amazon EC2)
+            fija.
+          </li>
+        </ul>
+      </section>
+
+      <!-- BLOQUE 7 -->
+      <section class="slide">
+        <h2>Bloque 7: Desafío Práctico</h2>
+        <p>
+          <strong>Enunciado:</strong> La gerencia requiere que el programa
+          identifique automáticamente cualquier componente que acumule 3 o más
+          errores y añada una sección dedicada de
+          <code>ALERTAS CRÍTICAS</code> en el archivo <code>results.txt</code>.
+        </p>
+        <p><strong>Criterios de Aceptación:</strong></p>
+        <ul>
+          <li>Filtrar el diccionario de errores por componente.</li>
+          <li>
+            Si un componente tiene &ge; 3 errores, incluirlo en la alerta.
+          </li>
+          <li>
+            Probar que en nuestro caso de ejemplo,
+            <code>payment_gateway</code> (4 errores) genere la alerta e
+            <code>inventory</code> (2 errores) no.
+          </li>
+        </ul>
+        <div class="interactive-box">
+          <button class="btn" onclick="toggleHint('solution-code')">
+            Ver Pista / Solución de Referencia
+          </button>
+          <pre id="solution-code" style="display: none; margin-top: 0.8rem">
+# Código de referencia para añadir al informe:
+f.write("6. ALERTAS CRÍTICAS DE INFRAESTRUCTURA\n")
+f.write("----------------------------------------------------\n")
+hay_alertas = False
+for comp, cant in resumen['errores_por_componente'].items():
+    if cant >= 3:
+        f.write(f"¡ALERTA!: El componente '{comp}' requiere atención (Errors: {cant})\n")
+        hay_alertas = True
+if not hay_alertas:
+    f.write("No se registraron componentes críticos con alto volumen de fallos.\n")</pre
+          >
+        </div>
+      </section>
+
+      <!-- BLOQUE 8.1 -->
+      <section class="slide">
+        <h2>Bloque 8.1: Cuestionario de Evaluación (1/2)</h2>
+        <div class="interactive-box">
+          <p>
+            <strong
+              >P1: ¿Qué retorna la función <code>linea.split("|")</code> si la
+              variable contiene <code>"INFO|auth|OK"</code>?</strong
+            >
+          </p>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                false,
+                'q1',
+                'Incorrecto. El delimitador especificado es | y la cadena tiene 3 partes.',
+              )
+            "
+          >
+            A) Una cadena de texto sin barras
+          </button>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                true,
+                'q1',
+                'Correcto. Retorna la lista [\&quot;INFO\&quot;, \&quot;auth\&quot;, \&quot;OK\&quot;].',
+              )
+            "
+          >
+            B) Una lista con 3 elementos
+          </button>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                false,
+                'q1',
+                'Incorrecto. La función split genera una lista de elementos.',
+              )
+            "
+          >
+            C) Un diccionario con 3 claves
+          </button>
+          <div id="q1" class="feedback"></div>
+        </div>
+
+        <div class="interactive-box">
+          <p>
+            <strong
+              >P2: Si un registro de log no cumple el formato esperado, ¿por qué
+              es buena práctica usar <code>continue</code> en el ciclo en lugar
+              de detener el programa con un error?</strong
+            >
+          </p>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                true,
+                'q2',
+                'Correcto. Garantiza la resiliencia del análisis sin perder información del resto del archivo.',
+              )
+            "
+          >
+            A) Para descartar la línea corrupta y procesar las demás líneas
+            válidas
+          </button>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                false,
+                'q2',
+                'Incorrecto. La instrucción continue no corrige la línea, simplemente salta a la siguiente iteración.',
+              )
+            "
+          >
+            B) Para corregir automáticamente el texto de la línea
+          </button>
+          <div id="q2" class="feedback"></div>
+        </div>
+      </section>
+
+      <!-- BLOQUE 8.2 -->
+      <section class="slide">
+        <h2>Bloque 8.2: Cuestionario de Evaluación (2/2)</h2>
+        <div class="interactive-box">
+          <p>
+            <strong
+              >P3: ¿Qué servicio de AWS es el más indicado para ejecutar el
+              código Python de procesamiento de registros sin administrar
+              servidores?</strong
+            >
+          </p>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                false,
+                'q3',
+                'Incorrecto. Amazon EC2 es un servicio de servidor virtual asignado, no serverless por evento.',
+              )
+            "
+          >
+            A) Amazon EC2
+          </button>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                true,
+                'q3',
+                'Correcto. AWS Lambda ejecuta código en respuesta a eventos (como la llegada de un log a S3) sin gestionar servidores.',
+              )
+            "
+          >
+            B) AWS Lambda
+          </button>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                false,
+                'q3',
+                'Incorrecto. Amazon S3 es para almacenamiento de objetos, no para ejecutar código dinámico.',
+              )
+            "
+          >
+            C) Amazon S3
+          </button>
+          <div id="q3" class="feedback"></div>
+        </div>
+
+        <div class="interactive-box">
+          <p>
+            <strong
+              >P4: ¿Cuál es el beneficio de almacenar los registros de logs en
+              un bucket de Amazon S3 en lugar de un disco local?</strong
+            >
+          </p>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                true,
+                'q4',
+                'Correcto. S3 proporciona una durabilidad del 99.999999999% (11 nueves) y alta disponibilidad escala global.',
+              )
+            "
+          >
+            A) Durabilidad extremadamente alta y acceso centralizado para
+            microservicios
+          </button>
+          <button
+            class="btn-option"
+            onclick="
+              checkAnswer(
+                this,
+                false,
+                'q4',
+                'Incorrecto. Amazon S3 no analiza el código Python por sí solo, es un almacenamiento de objetos.',
+              )
+            "
+          >
+            B) S3 ejecuta automáticamente el análisis sintáctico de Python sin
+            código
+          </button>
+          <div id="q4" class="feedback"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="nav-controls">
+        <button class="btn" id="prev-btn" onclick="changeSlide(-1)">
+          Anterior
+        </button>
+        <button class="btn" id="next-btn" onclick="changeSlide(1)">
+          Siguiente
+        </button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted)">
+        Proyecto Educativo: Python + AWS Cloud Practitioner
+      </p>
+    </footer>
+
+    <script>
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const progressBar = document.getElementById("progress-bar");
+      const slideCounter = document.getElementById("slide-counter");
+
+      function updateSlide() {
+        slides.forEach((slide, index) => {
+          slide.classList.toggle("active", index === currentSlide);
+        });
+        const progress = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        slideCounter.textContent = `Diapositiva ${currentSlide + 1} de ${slides.length}`;
+
+        document.getElementById("prev-btn").disabled = currentSlide === 0;
+        document.getElementById("next-btn").disabled =
+          currentSlide === slides.length - 1;
+      }
+
+      function changeSlide(direction) {
+        currentSlide += direction;
+        if (currentSlide < 0) currentSlide = 0;
+        if (currentSlide >= slides.length) currentSlide = slides.length - 1;
+        updateSlide();
+      }
+
+      function toggleHint(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === "none" ? "block" : "none";
+      }
+
+      function checkAnswer(btn, isCorrect, feedbackId, message) {
+        const feedbackEl = document.getElementById(feedbackId);
+        feedbackEl.textContent = message;
+        feedbackEl.className = `feedback ${isCorrect ? "correct" : "incorrect"}`;
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "PageDown") {
+          if (currentSlide < slides.length - 1) changeSlide(1);
+        } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          if (currentSlide > 0) changeSlide(-1);
+        }
+      });
+
+      updateSlide();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+2026-10-12 08:15:22|INFO|auth_service|Usuario inicio sesion exitosamente.
+2026-10-12 08:16:01|WARNING|inventory|Stock bajo para el producto ID 4589.
+2026-10-12 08:17:10|ERROR|payment_gateway|Fallo en la conexion con la pasarela de pagos.
+2026-10-12 08:18:05|INFO|cart_service|Producto agregado al carrito por el usuario 102.
+2026-10-12 08:19:40|ERROR|payment_gateway|Fallo en la conexion con la pasarela de pagos.
+2026-10-12 08:20:12|INVALID_LOG_ENTRY_WITHOUT_DELIMITERS
+2026-10-12 08:21:00|ERROR|inventory|Error al actualizar la base de datos de inventario.
+2026-10-12 08:22:15|WARNING|auth_service|Intento de inicio de sesion fallido para usuario admin.
+2026-10-12 08:23:30|ERROR|payment_gateway|Timeout en la respuesta de la pasarela de pagos.
+2026-10-12 08:24:10|INFO|shipping_service|Etiqueta de envio generada para el pedido 892.
+2026-10-12 08:25:00|ERROR|payment_gateway|Fallo en la conexion con la pasarela de pagos.
+2026-10-12 08:26:45|WARNING|inventory|Stock bajo para el producto ID 1204.
+2026-10-12 08:27:11|ERROR|inventory|Error al actualizar la base de datos de inventario.
+2026-10-12 08:28:50|INFO|auth_service|Usuario cerro sesion exitosamente.
