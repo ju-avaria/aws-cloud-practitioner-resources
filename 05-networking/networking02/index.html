@@ -1,0 +1,3485 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fundamentos de Redes y AWS VPC - Cloud Practitioner</title>
+    <style>
+      :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-card: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --aws-orange: #ff9900;
+        --aws-blue: #00a4e4;
+        --aws-green: #10b981;
+        --aws-red: #ef4444;
+        --aws-purple: #8b5cf6;
+        --border-color: #475569;
+        --font-family:
+          system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-primary);
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        overflow-x: hidden;
+        line-height: 1.5;
+      }
+
+      /* BARRA SUPERIOR */
+      header {
+        background-color: var(--bg-secondary);
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid var(--aws-orange);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .aws-badge {
+        background-color: var(--aws-orange);
+        color: #000;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+      }
+
+      .header-controls {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-tool {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-tool:hover {
+        background: #475569;
+        border-color: var(--aws-orange);
+      }
+
+      /* BARRA DE PROGRESO */
+      .progress-bar-container {
+        width: 100%;
+        height: 6px;
+        background-color: var(--bg-secondary);
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--aws-blue), var(--aws-orange));
+        width: 5%;
+        transition: width 0.3s ease;
+      }
+
+      /* CONTENEDOR PRINCIPAL */
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* SLIDES */
+      .slide {
+        display: none;
+        width: 100%;
+        background-color: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--border-color);
+        animation: fadeIn 0.4s ease-in-out;
+      }
+
+      .slide.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .slide-title {
+        font-size: 1.8rem;
+        color: var(--aws-orange);
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+      }
+
+      .slide-number {
+        font-size: 1rem;
+        color: var(--text-muted);
+        background: var(--bg-primary);
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 15px;
+      }
+
+      @media (max-width: 850px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* BLOQUES DE CONTENIDO */
+      .card {
+        background-color: var(--bg-card);
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 15px;
+      }
+
+      .card-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .analogia-card {
+        border-left: 4px solid var(--aws-blue);
+      }
+      .aws-card {
+        border-left: 4px solid var(--aws-orange);
+      }
+      .exam-card {
+        border-left: 4px solid var(--aws-green);
+        background-color: rgba(16, 185, 129, 0.1);
+      }
+      .teacher-card {
+        border-left: 4px solid var(--aws-purple);
+        background-color: rgba(139, 92, 246, 0.1);
+        font-size: 0.9rem;
+      }
+
+      /* INTERACCIONES Y DIAGRAMAS */
+      .diagram-container {
+        background-color: var(--bg-primary);
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 220px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px dashed var(--border-color);
+      }
+
+      .interactive-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .btn-option {
+        background-color: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 10px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: left;
+        transition: all 0.2s;
+      }
+
+      .btn-option:hover {
+        border-color: var(--aws-blue);
+        background-color: #475569;
+      }
+
+      .btn-option.correct {
+        background-color: rgba(16, 185, 129, 0.3) !important;
+        border-color: var(--aws-green) !important;
+      }
+
+      .btn-option.incorrect {
+        background-color: rgba(239, 68, 68, 0.3) !important;
+        border-color: var(--aws-red) !important;
+      }
+
+      .feedback-box {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 6px;
+        display: none;
+        font-size: 0.9rem;
+      }
+
+      /* ANIMACIONES Y ELEMENTOS VISUALES */
+      .network-flow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 600px;
+        position: relative;
+      }
+
+      .node {
+        background: var(--bg-card);
+        border: 2px solid var(--aws-blue);
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.85rem;
+        z-index: 2;
+      }
+
+      .packet {
+        width: 14px;
+        height: 14px;
+        background-color: var(--aws-orange);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 10%;
+        box-shadow: 0 0 8px var(--aws-orange);
+      }
+
+      .packet-animate {
+        animation: movePacket 3s infinite linear;
+      }
+
+      @keyframes movePacket {
+        0% {
+          left: 10%;
+        }
+        100% {
+          left: 85%;
+        }
+      }
+
+      /* NAVEGACIÓN INFERIOR */
+      footer {
+        background-color: var(--bg-secondary);
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .btn-nav {
+        background-color: var(--aws-orange);
+        color: #000;
+        font-weight: bold;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-nav:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      .btn-nav:disabled {
+        background-color: var(--border-color);
+        color: var(--text-muted);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* MODALES */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 200;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background-color: var(--bg-secondary);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 800px;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        position: relative;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-muted);
+      }
+
+      /* GLOSARIO */
+      .glossary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 15px;
+      }
+
+      .glossary-item {
+        background-color: var(--bg-card);
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+      }
+
+      .glossary-item h4 {
+        color: var(--aws-orange);
+        margin-bottom: 4px;
+      }
+
+      /* COMPONENTES ESPECÍFICOS */
+      .cidr-bar-container {
+        width: 100%;
+        background: var(--bg-primary);
+        height: 24px;
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 10px 0;
+        display: flex;
+      }
+      .cidr-fill {
+        background: var(--aws-blue);
+        height: 100%;
+        transition: width 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+      .comparison-table th,
+      .comparison-table td {
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+        text-align: left;
+      }
+      .comparison-table th {
+        background-color: var(--bg-card);
+        color: var(--aws-orange);
+      }
+
+      /* MAPA MENTAL */
+      .mindmap-node {
+        border: 1px solid var(--aws-blue);
+        background: var(--bg-card);
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 4px;
+        display: inline-block;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- BARRA SUPERIOR -->
+    <header>
+      <div class="logo-container">
+        <span class="aws-badge">AWS CCP</span>
+        <span style="font-weight: bold; font-size: 1.1rem"
+          >Fundamentos de Redes</span
+        >
+      </div>
+      <div class="header-controls">
+        <button class="btn-tool" onclick="toggleGlossary()">📖 Glosario</button>
+        <button class="btn-tool" onclick="toggleReviewMode()">
+          ⚡ Modo Repaso
+        </button>
+      </div>
+    </header>
+
+    <!-- BARRA DE PROGRESO -->
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DE SLIDES -->
+    <main id="slideContainer">
+      <!-- ACTO 1: ¿Qué es una red? -->
+      <div class="slide active" data-slide="1">
+        <div class="slide-title">
+          <span>1. ¿Qué es una red?</span>
+          <span class="slide-number">1 / 20</span>
+        </div>
+        <p>
+          Abres tu navegador web y escribes: <code>www.amazon.com</code>.
+          Presionas Enter. ¿Qué ocurre exactamente en ese instante?
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 El Concepto</div>
+              <p>
+                Una <strong>Red de Computadoras</strong> es simplemente dos o
+                más dispositivos conectados entre sí para compartir información
+                y recursos.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">📮 La Analogía cotidiana</div>
+              <p>
+                Es como el sistema postal. Tú redactas una carta (datos), la
+                pones en un sobre con dirección, la echas al buzón y el sistema
+                de correo la entrega a su destino.
+              </p>
+            </div>
+            <div class="card aws-card">
+              <div class="card-title">☁️ En la nube AWS</div>
+              <p>
+                AWS es una red gigantesca de centros de datos distribuidos
+                globalmente. Cuando usas AWS, estás creando tus propias "redes
+                virtuales" dentro de su infraestructura física.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <div class="network-flow">
+                <div class="node">👤<br />Usuario</div>
+                <div class="node">💻<br />Laptop</div>
+                <div class="node">🌐<br />Internet</div>
+                <div class="node">☁️<br />AWS App</div>
+              </div>
+              <div class="packet packet-animate"></div>
+              <p
+                style="
+                  font-size: 0.8rem;
+                  color: var(--text-muted);
+                  margin-top: 25px;
+                "
+              >
+                El viaje continuo de una solicitud web
+              </p>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta rápida</div>
+              <p>¿Dónde reside físicamente la página web que estás viendo?</p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, el navegador solo procesa el código recibido.',
+                    )
+                  "
+                >
+                  A. Dentro de tu navegador
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, la red es solo el medio de transporte.',
+                    )
+                  "
+                >
+                  B. En los cables de Internet
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! La web vive en un servidor (computadora) distante que responde a tu solicitud.',
+                    )
+                  "
+                >
+                  C. En un servidor remoto
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Enfatice a la clase: Una red no es algo 'mágico' ni invisible; son
+            computadoras hablando con otras computadoras a través de reglas
+            claras."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            En el examen Cloud Practitioner, AWS evalúa si entiendes que los
+            recursos (como servidores EC2) necesitan estar conectados en red
+            para ser accesibles por los usuarios.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 2: ¿Qué viaja por una red? -->
+      <div class="slide" data-slide="2">
+        <div class="slide-title">
+          <span>2. Paquetes de Datos</span>
+          <span class="slide-number">2 / 20</span>
+        </div>
+        <p>
+          La información no se envía como un bloque gigante; se fragmenta en
+          pequeñas piezas llamadas <strong>paquetes</strong>.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 El Concepto</div>
+              <p>
+                Un <strong>Paquete</strong> es la unidad básica de información
+                en una red. Contiene tanto los datos reales como la "etiqueta"
+                con la dirección de origen y destino.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">📦 La Analogía cotidiana</div>
+              <p>
+                Si vas a enviar un rompecabezas de 1,000 piezas por correo, no
+                mandas la mesa armada. Separas las piezas en cajas pequeñas
+                numeradas y las envías por separado.
+              </p>
+            </div>
+            <div class="card aws-card">
+              <div class="card-title">☁️ En la nube AWS</div>
+              <p>
+                AWS cobra la transferencia de datos principalmente por el
+                volumen de <em>paquetes que salen</em> de sus centros de datos
+                hacia Internet (Data Transfer OUT).
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <p style="font-size: 0.85rem; margin-bottom: 10px">
+                Haz clic en el paquete para inspeccionar su etiqueta:
+              </p>
+              <div
+                id="interactivePacket"
+                onclick="inspectPacket()"
+                style="
+                  cursor: pointer;
+                  background: var(--aws-orange);
+                  color: #000;
+                  padding: 12px 20px;
+                  border-radius: 8px;
+                  font-weight: bold;
+                  box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
+                "
+              >
+                📦 Paquete de Datos #1042
+              </div>
+              <div
+                id="packetDetails"
+                style="
+                  display: none;
+                  margin-top: 15px;
+                  text-align: left;
+                  background: var(--bg-card);
+                  padding: 10px;
+                  border-radius: 6px;
+                  width: 100%;
+                  font-family: monospace;
+                  font-size: 0.85rem;
+                "
+              >
+                📌 Origen: 192.168.1.15<br />
+                🎯 Destino: 54.239.25.200<br />
+                🛡️ Protocolo: HTTPS (443)<br />
+                📄 Carga útil: "Solicitud de imagen producto.png"
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta para la clase</div>
+              <p>
+                ¿Por qué dividimos los archivos en paquetes en lugar de
+                enviarlos enteros?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! Si falla un paquete pequeño, solo se reenvía ese trozo y no el archivo entero.',
+                    )
+                  "
+                >
+                  A. Para que si falla la conexión no haya que reexpedir todo
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, la velocidad física del cable es constante.',
+                    )
+                  "
+                >
+                  B. Porque hace que los cables de fibra óptica vayan más rápido
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Pregunte a la clase: ¿Qué pasaría si envías un video de 10GB en un
+            solo bloque y se interrumpe la red al 99%? Tendrías que empezar de
+            cero."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            AWS mide y cobra el tráfico de red en Gigabytes (GB). El tráfico
+            entrante (Data Transfer IN) suele ser gratis, pero el saliente (OUT)
+            se cobra.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 3: Direcciones IP -->
+      <div class="slide" data-slide="3">
+        <div class="slide-title">
+          <span>3. Direcciones IP (IPv4)</span>
+          <span class="slide-number">3 / 20</span>
+        </div>
+        <p>
+          Para que los paquetes lleguen a su destino, cada dispositivo en una
+          red debe poseer un identificador único: la
+          <strong>Dirección IP</strong>.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 El Concepto</div>
+              <p>
+                Una <strong>IP (Internet Protocol)</strong> en IPv4 es un
+                conjunto de 4 números (de 0 a 255) separados por puntos.
+                Ejemplo: <code>192.168.1.1</code>.
+              </p>
+              <ul style="margin-left: 20px; font-size: 0.9rem; margin-top: 5px">
+                <li>
+                  <strong>IP Privada:</strong> Usada dentro de una red interna
+                  (casa/empresa). No accesible desde el exterior.
+                </li>
+                <li>
+                  <strong>IP Pública:</strong> Única en todo el mundo, visible
+                  en Internet.
+                </li>
+              </ul>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🏠 La Analogía cotidiana</div>
+              <p>
+                Tu <em>IP Privada</em> es como el número de habitación dentro de
+                un hotel. Tu <em>IP Pública</em> es la dirección postal del
+                edificio del hotel en la calle.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-title">
+                🎮 Ejercicio Interactivo: ¿Pública o Privada?
+              </div>
+              <p>
+                Identifica el tipo de dirección IP (Rangos privados comunes:
+                10.x.x.x, 192.168.x.x, 172.16.x.x - 172.31.x.x):
+              </p>
+              <div
+                style="
+                  background: var(--bg-primary);
+                  padding: 15px;
+                  border-radius: 8px;
+                  text-align: center;
+                  font-size: 1.3rem;
+                  font-family: monospace;
+                  color: var(--aws-orange);
+                  margin: 10px 0;
+                "
+                id="ipDisplay"
+              >
+                10.0.0.15
+              </div>
+              <div style="display: flex; gap: 10px">
+                <button
+                  class="btn-option"
+                  style="flex: 1; text-align: center"
+                  onclick="evaluateIp('privada')"
+                >
+                  🔒 Privada
+                </button>
+                <button
+                  class="btn-option"
+                  style="flex: 1; text-align: center"
+                  onclick="evaluateIp('publica')"
+                >
+                  🌐 Pública
+                </button>
+              </div>
+              <div id="ipFeedback" class="feedback-box"></div>
+            </div>
+
+            <div class="card aws-card">
+              <div class="card-title">☁️ En la nube AWS</div>
+              <p>
+                Una instancia de servidor EC2 puede tener una
+                <strong>IP privada</strong> para comunicarse con otros
+                servidores dentro de su red VPC, y una
+                <strong>IP pública</strong> si necesita ser vista en Internet.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Evite que los alumnos memoricen matemática hexadecimal o binaria.
+            En Cloud Practitioner basta con saber que la IP privada es interna y
+            la pública es para Internet."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Las instancias en AWS se comunican internamente mediante sus IPs
+            privadas sin costo adicional y con mayor seguridad.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 4: DNS (Domain Name System) -->
+      <div class="slide" data-slide="4">
+        <div class="slide-title">
+          <span>4. DNS - El Traductor de Internet</span>
+          <span class="slide-number">4 / 20</span>
+        </div>
+        <p>
+          Los humanos recuerdan nombres fácilmente (<code>google.com</code>),
+          pero las computadoras solo entienden números
+          (<code>142.250.190.46</code>).
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 El Concepto</div>
+              <p>
+                <strong>DNS (Domain Name System)</strong> es un servicio que
+                traduce nombres de dominio legibles por humanos a direcciones IP
+                numéricas.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">📖 La Analogía cotidiana</div>
+              <p>
+                Es la <strong>agenda de contactos</strong> de tu teléfono
+                celular. Buscas "Mamá" en la pantalla, pero el teléfono llama al
+                número numérico correspondiente.
+              </p>
+            </div>
+            <div class="card aws-card">
+              <div class="card-title">☁️ Servicio AWS: Amazon Route 53</div>
+              <p>
+                <strong>Amazon Route 53</strong> es el servicio de DNS
+                administrado y altamente disponible en AWS. Permite registrar
+                dominios y dirigir a los usuarios a la infraestructura adecuada.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <p style="font-size: 0.85rem">Simulación de Resolución DNS:</p>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  margin: 15px 0;
+                "
+              >
+                <input
+                  type="text"
+                  value="mi-tienda.com"
+                  readonly
+                  style="
+                    background: var(--bg-card);
+                    border: 1px solid var(--border-color);
+                    color: white;
+                    padding: 6px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                  "
+                />
+                <button class="btn-tool" onclick="simulateDNS()">
+                  🔍 Resolver DNS
+                </button>
+              </div>
+              <div
+                id="dnsResult"
+                style="
+                  font-family: monospace;
+                  color: var(--aws-green);
+                  font-weight: bold;
+                  min-height: 24px;
+                "
+              ></div>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta rápida</div>
+              <p>
+                Si el servicio DNS de Internet dejara de funcionar por completo,
+                ¿qué pasaría?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'Incorrecto. Los sitios siguen encendidos.',
+                    )
+                  "
+                >
+                  A. Todos los servidores del mundo se apagarían
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Exacto! Podrías entrar si te supieras la IP exacta de memoria, pero no escribiendo los nombres de dominio.',
+                    )
+                  "
+                >
+                  B. No podríamos navegar usando nombres web como amazon.com
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Relacione el número '53' del nombre 'Route 53' con el puerto de red
+            53, que es el que usa DNS técnicamente. A los alumnos les ayuda a
+            fijar el nombre."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            <strong>Amazon Route 53 = Servicio DNS de AWS</strong>. Se encarga
+            de traducir nombres web a direcciones IP y de realizar chequeos de
+            salud de los servidores.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 5: Puertos y Protocolos -->
+      <div class="slide" data-slide="5">
+        <div class="slide-title">
+          <span>5. Puertos y Protocolos</span>
+          <span class="slide-number">5 / 20</span>
+        </div>
+        <p>
+          Una IP identifica la máquina (el edificio). El
+          <strong>puerto</strong> identifica la aplicación o servicio específico
+          dentro de ella (el departamento).
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 El Concepto</div>
+              <p>
+                Un <strong>Puerto</strong> es un número del 0 al 65535 que
+                especifica la puerta de entrada para un servicio particular. Un
+                <strong>Protocolo</strong> son las reglas del lenguaje que
+                hablan.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🏢 La Analogía cotidiana</div>
+              <p>
+                La IP es la dirección de un edificio de oficinas. El Puerto 80
+                es la recepción pública; el Puerto 22 es la puerta trasera de
+                mantenimiento por donde solo entra el personal de servicio.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p style="margin-bottom: 8px; font-weight: bold">
+              Puertos Esenciales para el Examen AWS:
+            </p>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"
+            >
+              <div class="card" style="padding: 10px; text-align: center">
+                <span style="color: var(--aws-orange); font-weight: bold"
+                  >HTTP (Puerto 80)</span
+                ><br />Web estándar (no seguro)
+              </div>
+              <div class="card" style="padding: 10px; text-align: center">
+                <span style="color: var(--aws-green); font-weight: bold"
+                  >HTTPS (Puerto 443)</span
+                ><br />Web Cifrada y segura
+              </div>
+              <div class="card" style="padding: 10px; text-align: center">
+                <span style="color: var(--aws-blue); font-weight: bold"
+                  >SSH (Puerto 22)</span
+                ><br />Acceso seguro a Linux
+              </div>
+              <div class="card" style="padding: 10px; text-align: center">
+                <span style="color: var(--aws-purple); font-weight: bold"
+                  >RDP (Puerto 3389)</span
+                ><br />Acceso remoto a Windows
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 10px">
+              <div class="card-title">❓ Pregunta de Práctica</div>
+              <p>
+                ¿Qué combinación utilizarías para permitir que los usuarios
+                compren en tu tienda online de forma segura?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'SSH es para administrar el servidor por consola, no para clientes finales.',
+                    )
+                  "
+                >
+                  A. SSH / Puerto 22
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! HTTPS (443) cifra los datos sensibles del cliente como tarjetas de crédito.',
+                    )
+                  "
+                >
+                  B. HTTPS / Puerto 443
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Haga énfasis en memorizar estos 4 puertos básicos (80, 443, 22,
+            3389). Aparecen recurrentemente en las preguntas de Security Groups
+            en el examen."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Para administrar un servidor Linux en AWS necesitas abrir el puerto
+            <strong>22 (SSH)</strong>. Para un servidor Windows, el puerto
+            <strong>3389 (RDP)</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 6: El Router y Tablas de Rutas -->
+      <div class="slide" data-slide="6">
+        <div class="slide-title">
+          <span>6. El Router y el Enrutamiento</span>
+          <span class="slide-number">6 / 20</span>
+        </div>
+        <p>
+          Los paquetes no viajan en línea recta a ciegas; necesitan un
+          dispositivo inteligente que dirija el tráfico: el
+          <strong>Router</strong>.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 El Concepto</div>
+              <p>
+                Un <strong>Router</strong> inspecciona el destino de cada
+                paquete y decide cuál es el mejor camino para enviarlo hacia su
+                destino, consultando una
+                <strong>Tabla de Rutas (Route Table)</strong>.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🚦 La Analogía cotidiana</div>
+              <p>
+                Es el oficial de tránsito o la aplicación de GPS (Waze) en un
+                cruce de caminos, indicando a cada vehículo qué salida tomar
+                según su destino.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <p style="font-size: 0.85rem; margin-bottom: 8px">
+                Simulador de Decisión de Ruta:
+              </p>
+              <div
+                style="
+                  font-family: monospace;
+                  font-size: 0.8rem;
+                  background: var(--bg-card);
+                  padding: 8px;
+                  border-radius: 4px;
+                  margin-bottom: 10px;
+                "
+              >
+                <strong>Tabla de Rutas Simplificada:</strong><br />
+                Destino 10.0.0.0/16 ➔ Red Local<br />
+                Destino 0.0.0.0/0 ➔ Internet
+              </div>
+              <button class="btn-tool" onclick="testRouting('10.0.1.50')">
+                Enviar a 10.0.1.50
+              </button>
+              <button
+                class="btn-tool"
+                onclick="testRouting('8.8.8.8')"
+                style="margin-top: 5px"
+              >
+                Enviar a 8.8.8.8 (Google)
+              </button>
+              <div
+                id="routingResult"
+                style="
+                  margin-top: 10px;
+                  font-weight: bold;
+                  font-size: 0.85rem;
+                  color: var(--aws-orange);
+                "
+              ></div>
+            </div>
+
+            <div class="card aws-card" style="margin-top: 15px">
+              <div class="card-title">☁️ En la nube AWS</div>
+              <p>
+                En AWS, la <strong>Route Table</strong> es un recurso
+                configurable donde defines reglas para dirigir el tráfico de tus
+                subredes hacia Internet, hacia otras subredes o hacia una VPN.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Explique que 0.0.0.0/0 representa 'Cualquier destino en el mundo'
+            (Internet) dentro de una tabla de rutas."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Sin una regla de ruta que apunte hacia un Internet Gateway, los
+            recursos dentro de AWS nunca podrán comunicarse con el exterior.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 7: Internet vs Red Privada -->
+      <div class="slide" data-slide="7">
+        <div class="slide-title">
+          <span>7. Internet vs. Red Privada</span>
+          <span class="slide-number">7 / 20</span>
+        </div>
+        <p>
+          No todos los componentes de un sistema informático deben estar
+          expuestos a todo el mundo.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card" style="border-top: 3px solid var(--aws-red)">
+              <div class="card-title">🌐 Internet (Red Pública)</div>
+              <p>
+                Pública, global, accesible por cualquier persona del planeta.
+                Ideal para mostrar la portada de tu sitio web a los clientes.
+              </p>
+            </div>
+            <div class="card" style="border-top: 3px solid var(--aws-green)">
+              <div class="card-title">🔒 Red Privada</div>
+              <p>
+                Aislada, segura, no accesible directamente desde Internet. Ideal
+                para guardar la Base de Datos con los datos sensibles de los
+                clientes.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-title">❓ Escenario Práctico</div>
+              <p>
+                Estás diseñando la arquitectura para un banco. ¿Dónde colocarías
+                el servidor de la <strong>Base de Datos</strong> que contiene
+                los saldos de cuentas?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      '¡Peligro! Cualquiera en Internet podría intentar hackear o leer la base de datos directamente.',
+                    )
+                  "
+                >
+                  A. En una red pública accesible directamente por Internet
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! Debe estar totalmente aislada en una red privada, solo accesible por los servidores web autorizados.',
+                    )
+                  "
+                >
+                  B. En una red privada aislada
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+
+            <div class="card analogia-card">
+              <div class="card-title">🏨 La Analogía cotidiana</div>
+              <p>
+                El mostrador del hotel está en el lobby público (Red Pública).
+                La caja fuerte principal del hotel está en una bóveda cerrada en
+                el sótano (Red Privada).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Inculque la regla de oro de la seguridad en la nube: 'Principio de
+            menor privilegio'. Todo es privado por defecto hasta que sea
+            estrictamente necesario hacerlo público."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Las arquitecturas recomendadas por AWS colocan la capa web en
+            subredes públicas y las bases de datos en subredes privadas.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 8: ¿Qué es una VPC? -->
+      <div class="slide" data-slide="8">
+        <div class="slide-title">
+          <span>8. Amazon VPC (Virtual Private Cloud)</span>
+          <span class="slide-number">8 / 20</span>
+        </div>
+        <p>
+          Llegamos al concepto central de redes en AWS: la <strong>VPC</strong>.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card aws-card">
+              <div class="card-title">☁️ El Concepto AWS</div>
+              <p>
+                Una <strong>Amazon VPC</strong> es tu propio centro de datos
+                virtual aislado lógicamente dentro de la nube de AWS. Tú tienes
+                control total sobre su entorno de red.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🏢 La Analogía cotidiana</div>
+              <p>
+                Es como alquilar un piso completo y privado dentro de un gran
+                edificio corporativo de oficinas. Pones tus propias puertas,
+                cerraduras y divisiones internas.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <div
+                style="
+                  border: 2px dashed var(--aws-orange);
+                  padding: 15px;
+                  border-radius: 8px;
+                  width: 90%;
+                  text-align: center;
+                  background: rgba(255, 153, 0, 0.05);
+                "
+              >
+                <span style="color: var(--aws-orange); font-weight: bold"
+                  >AWS Cloud (Region)</span
+                >
+                <div
+                  style="
+                    border: 2px solid var(--aws-blue);
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin-top: 10px;
+                    background: var(--bg-card);
+                  "
+                >
+                  <strong>Tu Amazon VPC</strong><br />
+                  <span style="font-size: 0.8rem; color: var(--text-muted)"
+                    >(Entorno de red aislado de otros clientes)</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta rápida</div>
+              <p>
+                ¿Puede otra empresa con una cuenta en AWS ver o acceder a tus
+                recursos dentro de tu VPC por defecto?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, la VPC es un límite de aislamiento lógico estricto.',
+                    )
+                  "
+                >
+                  A. Sí, porque comparten el mismo edificio físico
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! Las VPCs son totalmente aisladas e invisibles entre sí por defecto.',
+                    )
+                  "
+                >
+                  B. No, la VPC aísla totalmente el tráfico por defecto
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Recuerde a los alumnos: VPC es gratuita. Solo pagas por los
+            recursos que dentro de ella despliegues (como instancias EC2 o NAT
+            Gateways)."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Una VPC está vinculada regionalmente a una sola
+            <strong>AWS Region</strong>, pero puede extenderse a múltiples
+            <strong>Availability Zones</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 9: Regiones y Availability Zones -->
+      <div class="slide" data-slide="9">
+        <div class="slide-title">
+          <span>9. Regiones y Zonas de Disponibilidad</span>
+          <span class="slide-number">9 / 20</span>
+        </div>
+        <p>
+          La infraestructura física global de AWS se organiza de forma
+          jerárquica para garantizar la alta disponibilidad.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">🌍 Region (Región)</div>
+              <p>
+                Una ubicación geográfica física en el mundo que contiene varios
+                centros de datos (Ej: us-east-1 en N. Virginia).
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">
+                🏢 Availability Zone (AZ - Zona de Disponibilidad)
+              </div>
+              <p>
+                Uno o más centros de datos físicos aislados dentro de una
+                Región, con energía, redes y conectividad independientes.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🏙️ La Analogía cotidiana</div>
+              <p>
+                <strong>Region</strong> = La Ciudad de Santiago.<br /><strong
+                  >AZ</strong
+                >
+                = Edificios situados en comunas diferentes con sus propias
+                plantas de energía independientes.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <p style="font-size: 0.85rem; margin-bottom: 5px">
+                Simulador de Tolerancia a Fallas:
+              </p>
+              <button
+                class="btn-tool"
+                style="background: var(--aws-red); margin-bottom: 10px"
+                onclick="simulateAZFailure()"
+              >
+                💥 Simular Caída de AZ-A
+              </button>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  width: 100%;
+                  justify-content: center;
+                "
+              >
+                <div
+                  id="azA"
+                  style="
+                    border: 1px solid var(--aws-green);
+                    padding: 10px;
+                    border-radius: 6px;
+                    text-align: center;
+                    font-size: 0.8rem;
+                    background: var(--bg-card);
+                    flex: 1;
+                  "
+                >
+                  🏢 AZ-A<br /><span id="statusA">🟢 Operativa</span>
+                </div>
+                <div
+                  id="azB"
+                  style="
+                    border: 1px solid var(--aws-green);
+                    padding: 10px;
+                    border-radius: 6px;
+                    text-align: center;
+                    font-size: 0.8rem;
+                    background: var(--bg-card);
+                    flex: 1;
+                  "
+                >
+                  🏢 AZ-B<br />🟢 Operativa
+                </div>
+              </div>
+              <p
+                id="azFailText"
+                style="
+                  font-size: 0.8rem;
+                  color: var(--aws-orange);
+                  margin-top: 10px;
+                  min-height: 20px;
+                "
+              ></p>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta de Examen</div>
+              <p>
+                ¿Por qué un arquitecto diseña aplicaciones usando múltiples
+                Zonas de Disponibilidad (AZs)?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! Si ocurre un desastre o inundación en una AZ, la aplicación sigue viva en la otra.',
+                    )
+                  "
+                >
+                  A. Para garantizar Alta Disponibilidad y Tolerancia a Fallos
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, las leyes de datos dependen del país (Región).',
+                    )
+                  "
+                >
+                  B. Para reducir impuestos locales
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Pregunte a la clase: ¿Una AZ es un solo servidor? No, es un centro
+            de datos entero (o un grupo de ellos)."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Las AZs en una misma Región están interconectadas mediante enlaces
+            de fibra óptica de ultra alta velocidad y muy baja latencia.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 10: Subnets (Subredes) -->
+      <div class="slide" data-slide="10">
+        <div class="slide-title">
+          <span>10. Subnets Públicas y Privadas</span>
+          <span class="slide-number">10 / 20</span>
+        </div>
+        <p>
+          Una VPC se divide en secciones más pequeñas llamadas
+          <strong>Subnets</strong> (Subredes).
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 El Concepto</div>
+              <p>
+                Una <strong>Subnet</strong> es un rango de direcciones IP dentro
+                de tu VPC. Permite agrupar recursos según sus necesidades de
+                acceso o seguridad.
+              </p>
+              <ul style="margin-left: 20px; font-size: 0.9rem; margin-top: 5px">
+                <li>
+                  <strong style="color: var(--aws-blue)"
+                    >Subnet Pública:</strong
+                  >
+                  Sus recursos tienen ruta directa hacia Internet.
+                </li>
+                <li>
+                  <strong style="color: var(--aws-purple)"
+                    >Subnet Privada:</strong
+                  >
+                  Sus recursos NO están expuestos a Internet.
+                </li>
+              </ul>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🏢 La Analogía cotidiana</div>
+              <p>
+                VPC = El edificio corporativo completo.<br />Subnet Pública =
+                Recepción del edificio.<br />Subnet Privada = Departamento de
+                Contabilidad en el piso 5.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <div
+                style="
+                  border: 2px solid var(--aws-orange);
+                  padding: 10px;
+                  border-radius: 8px;
+                  width: 100%;
+                "
+              >
+                <span
+                  style="
+                    font-size: 0.8rem;
+                    font-weight: bold;
+                    color: var(--aws-orange);
+                  "
+                  >VPC</span
+                >
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                    margin-top: 5px;
+                  "
+                >
+                  <div
+                    style="
+                      background: rgba(0, 164, 228, 0.2);
+                      border: 1px solid var(--aws-blue);
+                      padding: 10px;
+                      border-radius: 4px;
+                      text-align: center;
+                      font-size: 0.8rem;
+                    "
+                  >
+                    🌐 Subnet Pública<br />(Servidor Web)
+                  </div>
+                  <div
+                    style="
+                      background: rgba(139, 92, 246, 0.2);
+                      border: 1px solid var(--aws-purple);
+                      padding: 10px;
+                      border-radius: 4px;
+                      text-align: center;
+                      font-size: 0.8rem;
+                    "
+                  >
+                    🔒 Subnet Privada<br />(Base de Datos)
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta interactiva</div>
+              <p>
+                ¿Cada Subnet en AWS pertenece a una única Zona de Disponibilidad
+                (AZ)?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! REGLA IMPORTANTE: Una subnet habita dentro de UNA sola AZ. No puede cruzar múltiples AZs.',
+                    )
+                  "
+                >
+                  A. Verdadero
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'Incorrecto. Revisa el concepto clave.',
+                    )
+                  "
+                >
+                  B. Falso
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Enfatice este principio de diseño: 1 VPC abarca múltiples AZs, pero
+            1 Subnet pertenece a EXACTAMENTE 1 AZ."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Lo que diferencia técnicamente a una Subnet Pública de una Privada
+            es si su Tabla de Rutas está asociada a un
+            <strong>Internet Gateway</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 11: Nociones de CIDR sin matemática compleja -->
+      <div class="slide" data-slide="11">
+        <div class="slide-title">
+          <span>11. Notación CIDR (Tamaño de Red)</span>
+          <span class="slide-number">11 / 20</span>
+        </div>
+        <p>
+          Al crear una VPC o Subnet verás notaciones como
+          <code>10.0.0.0/16</code> o <code>10.0.1.0/24</code>. Esto se llama
+          <strong>CIDR</strong>.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title">💡 Regla de Oro Simplificada</div>
+              <p>
+                El número después de la barra (<code>/</code>) indica qué tan
+                grande es la red.
+                <strong
+                  >¡Cuanto menor es el número, MÁS IPs tiene la red!</strong
+                >
+              </p>
+              <ul style="margin-left: 20px; font-size: 0.9rem; margin-top: 8px">
+                <li>
+                  <code>/16</code> ➔ Red Gigante (~65,000 IPs) ➔ Ideal para la
+                  VPC entera
+                </li>
+                <li>
+                  <code>/24</code> ➔ Red Mediana (256 IPs) ➔ Ideal para una
+                  Subnet
+                </li>
+                <li><code>/32</code> ➔ Una ÚNICA IP específica</li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-title">🎛️ Calculadora Visor de Tamaño CIDR</div>
+              <label style="font-size: 0.85rem"
+                >Selecciona el prefijo CIDR:</label
+              >
+              <select
+                id="cidrSelect"
+                onchange="updateCidrBar()"
+                style="
+                  width: 100%;
+                  padding: 8px;
+                  background: var(--bg-primary);
+                  color: white;
+                  border: 1px solid var(--border-color);
+                  border-radius: 4px;
+                  margin-top: 5px;
+                "
+              >
+                <option value="16">/16 - Red Grande de VPC (65,536 IPs)</option>
+                <option value="20">/20 - Red Mediana (4,096 IPs)</option>
+                <option value="24" selected>
+                  /24 - Red Normal de Subnet (256 IPs)
+                </option>
+                <option value="32">/32 - Un único dispositivo (1 IP)</option>
+              </select>
+
+              <div class="cidr-bar-container">
+                <div id="cidrBar" class="cidr-fill" style="width: 25%">
+                  256 IPs
+                </div>
+              </div>
+              <p
+                id="cidrDescription"
+                style="font-size: 0.8rem; color: var(--text-muted)"
+              ></p>
+            </div>
+
+            <div class="card" style="margin-top: 10px">
+              <div class="card-title">❓ Pregunta rápida</div>
+              <p>
+                ¿Cuál de las siguientes subredes ofrece una mayor cantidad de
+                direcciones IP disponibles?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! Cuanto menor el número tras el slash, más IPs disponibles tiene.',
+                    )
+                  "
+                >
+                  A. 10.0.0.0/16
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, /28 es una subnet pequeña de solo 16 IPs.',
+                    )
+                  "
+                >
+                  B. 10.0.0.0/28
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "No pida a los alumnos convertir binario a decimal en esta clase. La
+            regla 'número pequeño = red más grande' es suficiente para pasar el
+            examen CCP."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            AWS reserva automáticamente <strong>5 direcciones IP</strong> en
+            cada Subnet para uso interno del sistema (no las puedes asignar a
+            tus instancias).
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 12: Route Table en AWS -->
+      <div class="slide" data-slide="12">
+        <div class="slide-title">
+          <span>12. Tablas de Rutas (Route Tables) en AWS</span>
+          <span class="slide-number">12 / 20</span>
+        </div>
+        <p>
+          Una <strong>Route Table</strong> en AWS contiene un conjunto de reglas
+          (llamadas rutas) que determinan hacia dónde se dirige el tráfico de tu
+          subred.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card aws-card">
+              <div class="card-title">📋 Estructura de una Tabla de Rutas</div>
+              <p>
+                Cada regla tiene dos campos: <strong>Destination</strong> (A
+                dónde quieres ir) y <strong>Target</strong> (Por qué puerta o
+                gateway debes pasar).
+              </p>
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Destination</th>
+                    <th>Target</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>10.0.0.0/16</td>
+                    <td>local (Tráfico dentro de VPC)</td>
+                  </tr>
+                  <tr>
+                    <td>0.0.0.0/0</td>
+                    <td>igw-12345 (Internet Gateway)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <p style="font-size: 0.85rem; margin-bottom: 8px">
+                Simulador de Envío de Paquete por Subnet:
+              </p>
+              <div style="display: flex; gap: 8px; margin-bottom: 10px">
+                <button class="btn-tool" onclick="routeSimulate('local')">
+                  Paquete con destino local (10.0.2.10)
+                </button>
+                <button class="btn-tool" onclick="routeSimulate('internet')">
+                  Paquete a Internet (8.8.8.8)
+                </button>
+              </div>
+              <div
+                id="routeSimResult"
+                style="
+                  font-size: 0.85rem;
+                  padding: 8px;
+                  border-radius: 4px;
+                  background: var(--bg-card);
+                  width: 100%;
+                  text-align: center;
+                  color: var(--aws-orange);
+                "
+              >
+                Haz clic arriba para probar el enrutamiento.
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta de Práctica</div>
+              <p>
+                Si eliminas la ruta <code>0.0.0.0/0 ➔ igw</code> de la tabla de
+                rutas de una subnet, ¿qué sucede?
+              </p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! Los servidores pierden inmediatamente el acceso hacia y desde Internet, convirtiéndose en una Subnet Privada.',
+                    )
+                  "
+                >
+                  A. La subnet pierde todo acceso hacia Internet
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, la comunicación interna local sigue funcionando.',
+                    )
+                  "
+                >
+                  B. Los servidores ya no pueden comunicarse entre sí
+                  internamente
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Refuerce: La regla 'local' no se puede borrar ni modificar.
+            Garantiza que todos los recursos de la VPC siempre puedan hablar
+            entre sí."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Una Subnet sólo puede estar asociada a **una** Tabla de Rutas a la
+            vez.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 13: Internet Gateway (IGW) -->
+      <div class="slide" data-slide="13">
+        <div class="slide-title">
+          <span>13. Internet Gateway (IGW)</span>
+          <span class="slide-number">13 / 20</span>
+        </div>
+        <p>
+          El componente que conecta físicamente tu VPC aislada con el mundo
+          exterior de Internet.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card aws-card">
+              <div class="card-title">☁️ El Concepto</div>
+              <p>
+                Un <strong>Internet Gateway (IGW)</strong> es un componente de
+                AWS altamente disponible que permite la comunicación
+                bidireccional entre recursos de tu VPC e Internet.
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🚪 La Analogía cotidiana</div>
+              <p>
+                Es la puerta principal de acceso a la calle de un edificio
+                cerrado. Permite tanto que la gente salga a la calle como que
+                los visitantes entren.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="diagram-container">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-around;
+                  width: 100%;
+                "
+              >
+                <div style="text-align: center">🌐<br />Internet</div>
+                <div style="font-size: 1.5rem; color: var(--aws-orange)">⇹</div>
+                <div
+                  style="
+                    background: var(--bg-card);
+                    border: 2px solid var(--aws-orange);
+                    padding: 8px;
+                    border-radius: 6px;
+                    text-align: center;
+                    font-size: 0.8rem;
+                  "
+                >
+                  🚪 Internet<br />Gateway
+                </div>
+                <div style="font-size: 1.5rem; color: var(--aws-orange)">⇹</div>
+                <div style="text-align: center">☁️<br />VPC Pública</div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta de Verificación</div>
+              <p>¿Cuántos Internet Gateways puedes conectar a una sola VPC?</p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Correcto! Una VPC solo puede tener como máximo UN (1) Internet Gateway adjunto.',
+                    )
+                  "
+                >
+                  A. Exactamente 1
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'Incorrecto. No se pueden conectar múltiples IGW a la misma VPC.',
+                    )
+                  "
+                >
+                  B. Tantos como subredes tengas
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Pregunte: Si agrego un IGW a la VPC pero no actualizo la Route
+            Table, ¿los servidores salen a Internet? R: No, la Route Table es la
+            que redirige los paquetes hacia el IGW."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            El Internet Gateway no es un cuello de botella ni un servidor único;
+            es un servicio administrado por AWS que se escala automáticamente.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 14: NAT Gateway -->
+      <div class="slide" data-slide="14">
+        <div class="slide-title">
+          <span>14. NAT Gateway</span>
+          <span class="slide-number">14 / 20</span>
+        </div>
+        <p>
+          ¿Cómo puede un servidor privado descargar parches de seguridad de
+          Internet sin volverse accesible a atacantes externos?
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card aws-card">
+              <div class="card-title">☁️ El Concepto</div>
+              <p>
+                Un
+                <strong>NAT Gateway (Network Address Translation)</strong>
+                permite que las instancias en una subred privada se conecten a
+                Internet (solo salida), pero evita que Internet inicie
+                conexiones no solicitadas hacia ellas (entrada bloqueada).
+              </p>
+            </div>
+            <div class="card analogia-card">
+              <div class="card-title">🛡️ La Analogía cotidiana</div>
+              <p>
+                Es un guardaespaldas personal. Sale a buscar las compras que tú
+                pides a la tienda pública, pero no deja que ningún desconocido
+                de la calle entre a tu casa.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Característica</th>
+                  <th>Internet Gateway</th>
+                  <th>NAT Gateway</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Tráfico Entrante</td>
+                  <td>✅ Permitido</td>
+                  <td>❌ Bloqueado</td>
+                </tr>
+                <tr>
+                  <td>Tráfico Saliente</td>
+                  <td>✅ Permitido</td>
+                  <td>✅ Permitido</td>
+                </tr>
+                <tr>
+                  <td>Ubicación</td>
+                  <td>Toda la VPC</td>
+                  <td>Subnet Pública</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="card" style="margin-top: 15px">
+              <div class="card-title">❓ Pregunta Clave de Examen</div>
+              <p>¿En qué subred debe desplegarse físicamente un NAT Gateway?</p>
+              <div class="interactive-options">
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      true,
+                      '¡Exacto! El NAT Gateway debe residir en una Subnet PÚBLICA para poder comunicarse con Internet, aunque sirva a las privadas.',
+                    )
+                  "
+                >
+                  A. En una Subnet Pública
+                </button>
+                <button
+                  class="btn-option"
+                  onclick="
+                    checkAnswer(
+                      this,
+                      false,
+                      'No, si se coloca en una privada no tendría forma de llegar a Internet.',
+                    )
+                  "
+                >
+                  B. En una Subnet Privada
+                </button>
+              </div>
+              <div class="feedback-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Resuma la diferencia en una frase memorable: 'IGW es bidireccional
+            (público); NAT Gateway es unidireccional solo hacia afuera
+            (privado)'."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            Usa NAT Gateway cuando tus servidores de base de datos o backend
+            privado necesiten descargar actualizaciones de software desde
+            Internet de forma segura.
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 15: Security Groups vs Network ACLs -->
+      <div class="slide" data-slide="15">
+        <div class="slide-title">
+          <span>15. Security Group vs. Network ACL (NACL)</span>
+          <span class="slide-number">15 / 20</span>
+        </div>
+        <p>
+          AWS ofrece dos capas principales de seguridad tipo firewall en la red.
+          Esta es una pregunta fija de examen.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <div class="card" style="border-left: 4px solid var(--aws-orange)">
+              <div class="card-title">🛡️ Security Group (SG)</div>
+              <p style="font-size: 0.85rem">
+                • Firewall virtual a nivel de
+                <strong>Instancia/Servidor (ENI)</strong>.<br />
+                • Es <strong>Stateful</strong> (si permites la entrada, la
+                respuesta sale automáticamente).<br />
+                • Solo soporta reglas de
+                <strong>ALLOW (Permitir)</strong>.<br />
+                • Evalúa TODAS las reglas antes de decidir.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="border-left: 4px solid var(--aws-blue)">
+              <div class="card-title">🧱 Network ACL (NACL)</div>
+              <p style="font-size: 0.85rem">
+                • Firewall virtual a nivel de
+                <strong>Subnet (Subred)</strong>.<br />
+                • Es <strong>Stateless</strong> (debes autorizar explícitamente
+                tanto entrada como salida).<br />
+                • Soporta reglas de
+                <strong>ALLOW y DENY (Permitir y Bloquear)</strong>.<br />
+                • Evalúa las reglas en orden numérico estricto.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 10px">
+          <div class="card-title">❓ Caso práctico de Examen</div>
+          <p>
+            Necesitas bloquear explícitamente una dirección IP maliciosa
+            específica (Ej: 203.0.113.5) para que no acceda a tu red. ¿Qué
+            herramienta usas?
+          </p>
+          <div class="interactive-options">
+            <button
+              class="btn-option"
+              onclick="
+                checkAnswer(
+                  this,
+                  false,
+                  'No, los Security Groups no soportan reglas de Deny (bloqueo explícito).',
+                )
+              "
+            >
+              A. Security Group
+            </button>
+            <button
+              class="btn-option"
+              onclick="
+                checkAnswer(
+                  this,
+                  true,
+                  '¡Correcto! Solo Network ACL admite reglas explícitas de DENY (bloqueo) para direcciones IP específicas.',
+                )
+              "
+            >
+              B. Network ACL (NACL)
+            </button>
+          </div>
+          <div class="feedback-box"></div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Analogía rápida: Security Group = El guardia en la puerta de tu
+            departamento personal. NACL = El guardia en la reja principal de la
+            entrada al condominio completo."
+          </p>
+        </div>
+
+        <div class="card exam-card">
+          <div class="card-title">🎯 Lo que debes recordar para el examen</div>
+          <p>
+            <strong
+              >Security Group = Nivel Instancia / Stateful / Solo Allow.</strong
+            ><br /><strong
+              >Network ACL = Nivel Subnet / Stateless / Allow y Deny.</strong
+            >
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 16: Arquitectura Completa Interactiva -->
+      <div class="slide" data-slide="16">
+        <div class="slide-title">
+          <span>16. Arquitectura Completa de Red en AWS</span>
+          <span class="slide-number">16 / 20</span>
+        </div>
+        <p>
+          Haz clic en cada componente del diagrama para descubrir su función en
+          el flujo real de una aplicación web:
+        </p>
+
+        <div
+          class="diagram-container"
+          style="min-height: 320px; align-items: stretch"
+        >
+          <div
+            style="
+              border: 2px solid var(--aws-orange);
+              border-radius: 8px;
+              padding: 12px;
+              background: rgba(255, 153, 0, 0.03);
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+              "
+            >
+              <span
+                style="
+                  font-weight: bold;
+                  color: var(--aws-orange);
+                  font-size: 0.85rem;
+                "
+                >Amazon VPC</span
+              >
+              <button
+                class="btn-tool"
+                onclick="showArchInfo('igw')"
+                style="font-size: 0.75rem"
+              >
+                🌐 Internet Gateway
+              </button>
+            </div>
+
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px"
+            >
+              <!-- Subnet Publica -->
+              <div
+                style="
+                  border: 1px dashed var(--aws-blue);
+                  padding: 10px;
+                  border-radius: 6px;
+                  background: rgba(0, 164, 228, 0.05);
+                "
+              >
+                <span
+                  style="
+                    font-size: 0.8rem;
+                    font-weight: bold;
+                    color: var(--aws-blue);
+                  "
+                  >Subnet Pública</span
+                >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    margin-top: 8px;
+                  "
+                >
+                  <button
+                    class="btn-option"
+                    style="padding: 6px; font-size: 0.8rem"
+                    onclick="showArchInfo('alb')"
+                  >
+                    ⚖️ Load Balancer (ALB)
+                  </button>
+                  <button
+                    class="btn-option"
+                    style="padding: 6px; font-size: 0.8rem"
+                    onclick="showArchInfo('nat')"
+                  >
+                    🛡️ NAT Gateway
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subnet Privada -->
+              <div
+                style="
+                  border: 1px dashed var(--aws-purple);
+                  padding: 10px;
+                  border-radius: 6px;
+                  background: rgba(139, 92, 246, 0.05);
+                "
+              >
+                <span
+                  style="
+                    font-size: 0.8rem;
+                    font-weight: bold;
+                    color: var(--aws-purple);
+                  "
+                  >Subnet Privada</span
+                >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    margin-top: 8px;
+                  "
+                >
+                  <button
+                    class="btn-option"
+                    style="padding: 6px; font-size: 0.8rem"
+                    onclick="showArchInfo('ec2')"
+                  >
+                    💻 Servidor App (EC2)
+                  </button>
+                  <button
+                    class="btn-option"
+                    style="padding: 6px; font-size: 0.8rem"
+                    onclick="showArchInfo('rds')"
+                  >
+                    🗄️ Base de Datos (RDS)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="archInfoBox" class="card aws-card" style="margin-top: 15px">
+          <div class="card-title">🔍 Detalle del Componente</div>
+          <p id="archInfoText">
+            Haz clic en cualquiera de los botones del diagrama de arriba para
+            ver su explicación técnica y su rol en el examen.
+          </p>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Resalte cómo este diagrama representa el diseño estándar de
+            producción de 3 capas recomendado por los arquitectos de AWS."
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 17: Opciones de Conectividad Híbrida -->
+      <div class="slide" data-slide="17">
+        <div class="slide-title">
+          <span>17. Conectividad AWS y Redes Híbridas</span>
+          <span class="slide-number">17 / 20</span>
+        </div>
+        <p>
+          ¿Cómo conectas la red corporativa en las oficinas de tu empresa con la
+          nube de AWS?
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Opción de Conexión</th>
+              <th>Tipo de Enlace</th>
+              <th>Características Principales</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>AWS Site-to-Site VPN</strong></td>
+              <td>Internet Cifrado</td>
+              <td>
+                Rápido de configurar, económico, viaja cifrado por Internet
+                público.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>AWS Direct Connect</strong></td>
+              <td>Cable Físico Dedicado</td>
+              <td>
+                Conexión privada dedicada de alta velocidad, baja latencia
+                constante, no pasa por Internet. Exclusivo y costoso.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>VPC Peering</strong></td>
+              <td>Conexión entre VPCs</td>
+              <td>
+                Conecta 2 VPCs de forma directa para compartir recursos
+                internamente. No es transitivo.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>AWS Transit Gateway</strong></td>
+              <td>Hub Central de Red</td>
+              <td>
+                Funciona como una "estrella central" para interconectar cientos
+                de VPCs y redes locales fácilmente.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="card" style="margin-top: 15px">
+          <div class="card-title">❓ Pregunta Típica de Examen</div>
+          <p>
+            Una empresa requiere una conexión privada de ultra alta velocidad
+            entre sus servidores locales y AWS, que garantice un ancho de banda
+            constante y NO viaje por el Internet público. ¿Qué servicio debe
+            elegir?
+          </p>
+          <div class="interactive-options">
+            <button
+              class="btn-option"
+              onclick="
+                checkAnswer(
+                  this,
+                  false,
+                  'No, la VPN viaja sobre el Internet público.',
+                )
+              "
+            >
+              A. AWS Site-to-Site VPN
+            </button>
+            <button
+              class="btn-option"
+              onclick="
+                checkAnswer(
+                  this,
+                  true,
+                  '¡Correcto! Direct Connect es un cable dedicado privado que no utiliza Internet.',
+                )
+              "
+            >
+              B. AWS Direct Connect
+            </button>
+          </div>
+          <div class="feedback-box"></div>
+        </div>
+
+        <div class="card teacher-card">
+          <div class="card-title">💡 IDEA CLAVE PARA EL DOCENTE</div>
+          <p>
+            "Pista memorística para los alumnos: 'Direct Connect = Cable físico
+            dedicado directo'."
+          </p>
+        </div>
+      </div>
+
+      <!-- ACTO 18: Taller Práctico de Diseño "CloudStore" -->
+      <div class="slide" data-slide="18">
+        <div class="slide-title">
+          <span>18. Taller: Diseña la Red de "CloudStore"</span>
+          <span class="slide-number">18 / 20</span>
+        </div>
+        <p>
+          Ayuda a la startup "CloudStore" a elegir los componentes correctos
+          para su nueva tienda en línea:
+        </p>
+
+        <div class="card">
+          <div style="margin-bottom: 12px">
+            <strong
+              >1. ¿Dónde debemos colocar la Base de Datos con las tarjetas de
+              clientes?</strong
+            ><br />
+            <select
+              id="taller1"
+              style="
+                width: 100%;
+                padding: 6px;
+                background: var(--bg-primary);
+                color: white;
+                border-radius: 4px;
+                margin-top: 4px;
+              "
+            >
+              <option value="wrong">Subnet Pública con Internet Gateway</option>
+              <option value="correct">
+                Subnet Privada protegida por Security Group
+              </option>
+            </select>
+          </div>
+          <div style="margin-bottom: 12px">
+            <strong
+              >2. ¿Qué componente permitirá a nuestro servidor privado descargar
+              parches sin recibir ataques?</strong
+            ><br />
+            <select
+              id="taller2"
+              style="
+                width: 100%;
+                padding: 6px;
+                background: var(--bg-primary);
+                color: white;
+                border-radius: 4px;
+                margin-top: 4px;
+              "
+            >
+              <option value="wrong">Internet Gateway</option>
+              <option value="correct">NAT Gateway en Subnet Pública</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 12px">
+            <strong
+              >3. Queremos un firewall Stateful para proteger las instancias EC2
+              web:</strong
+            ><br />
+            <select
+              id="taller3"
+              style="
+                width: 100%;
+                padding: 6px;
+                background: var(--bg-primary);
+                color: white;
+                border-radius: 4px;
+                margin-top: 4px;
+              "
+            >
+              <option value="correct">Security Group</option>
+              <option value="wrong">Network ACL</option>
+            </select>
+          </div>
+          <button class="btn-nav" style="width: 100%" onclick="evaluarTaller()">
+            Validar Mi Arquitectura 🚀
+          </button>
+          <div
+            id="tallerFeedback"
+            class="feedback-box"
+            style="margin-top: 10px"
+          ></div>
+        </div>
+      </div>
+
+      <!-- ACTO 19: Errores Comunes en el Examen -->
+      <div class="slide" data-slide="19">
+        <div class="slide-title">
+          <span>19. Mitos y Errores Comunes en el Examen</span>
+          <span class="slide-number">19 / 20</span>
+        </div>
+        <p>
+          Haz clic en los mitos para revelar la realidad técnica para el examen:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div class="card" onclick="toggleMito(this)" style="cursor: pointer">
+            <div style="color: var(--aws-red); font-weight: bold">
+              ❌ Mito 1: "Una VPC es Internet."
+            </div>
+            <div
+              class="mito-text"
+              style="
+                display: none;
+                margin-top: 8px;
+                color: var(--text-main);
+                font-size: 0.9rem;
+              "
+            >
+              <strong>Realidad:</strong> Una VPC es una red privada aislada. No
+              tiene acceso a Internet a menos que le adjuntes explícitamente un
+              Internet Gateway y configures las tablas de rutas.
+            </div>
+          </div>
+
+          <div class="card" onclick="toggleMito(this)" style="cursor: pointer">
+            <div style="color: var(--aws-red); font-weight: bold">
+              ❌ Mito 2: "Security Group y NACL son exactamente lo mismo."
+            </div>
+            <div
+              class="mito-text"
+              style="
+                display: none;
+                margin-top: 8px;
+                color: var(--text-main);
+                font-size: 0.9rem;
+              "
+            >
+              <strong>Realidad:</strong> SG opera a nivel de instancia y es
+              Stateful; NACL opera a nivel de subnet y es Stateless.
+            </div>
+          </div>
+
+          <div class="card" onclick="toggleMito(this)" style="cursor: pointer">
+            <div style="color: var(--aws-red); font-weight: bold">
+              ❌ Mito 3: "NAT Gateway permite que usuarios desde Internet se
+              conecten a la Base de Datos."
+            </div>
+            <div
+              class="mito-text"
+              style="
+                display: none;
+                margin-top: 8px;
+                color: var(--text-main);
+                font-size: 0.9rem;
+              "
+            >
+              <strong>Realidad:</strong> Falso. NAT Gateway es estrictamente de
+              SALIDA (outbound-only). Bloquea toda conexión iniciada desde el
+              exterior.
+            </div>
+          </div>
+
+          <div class="card" onclick="toggleMito(this)" style="cursor: pointer">
+            <div style="color: var(--aws-red); font-weight: bold">
+              ❌ Mito 4: "Una Region y una Availability Zone son lo mismo."
+            </div>
+            <div
+              class="mito-text"
+              style="
+                display: none;
+                margin-top: 8px;
+                color: var(--text-main);
+                font-size: 0.9rem;
+              "
+            >
+              <strong>Realidad:</strong> Una Región es una zona geográfica
+              completa. Una AZ es uno o varios data centers independientes
+              dentro de esa región.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTO 20: Mini Examen de Práctica (Cloud Practitioner Style) -->
+      <div class="slide" data-slide="20">
+        <div class="slide-title">
+          <span>20. Mini Examen Cloud Practitioner</span>
+          <span class="slide-number">20 / 20</span>
+        </div>
+        <p>
+          Demuestra tu aprendizaje resolviendo estas preguntas de práctica
+          estilo oficial:
+        </p>
+
+        <div id="quizContainer">
+          <div
+            id="quizQuestion"
+            style="
+              font-weight: bold;
+              margin-bottom: 15px;
+              font-size: 1.1rem;
+              color: var(--aws-orange);
+            "
+          ></div>
+          <div id="quizOptions" class="interactive-options"></div>
+          <div id="quizFeedback" class="feedback-box"></div>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 15px;
+            "
+          >
+            <span
+              id="quizProgress"
+              style="font-size: 0.85rem; color: var(--text-muted)"
+              >Pregunta 1 de 10</span
+            >
+            <button
+              id="btnNextQuiz"
+              class="btn-nav"
+              style="display: none"
+              onclick="nextQuizQuestion()"
+            >
+              Siguiente Pregunta ➔
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="quizResults"
+          style="display: none; text-align: center; padding: 20px"
+        >
+          <h2>🎉 ¡Examen Finalizado!</h2>
+          <p style="font-size: 1.3rem; margin: 15px 0">
+            Puntuación:
+            <span
+              id="quizScore"
+              style="color: var(--aws-orange); font-weight: bold"
+              >0</span
+            >
+            / 10
+          </p>
+          <button class="btn-nav" onclick="restartQuiz()">
+            🔄 Reintentar Examen
+          </button>
+          <button
+            class="btn-tool"
+            style="margin: 0 auto; margin-top: 10px"
+            onclick="showMindmapModal()"
+          >
+            📌 Ver Mapa Mental Final
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+    <footer>
+      <button class="btn-nav" id="btnPrev" onclick="changeSlide(-1)">
+        ← Anterior
+      </button>
+      <span
+        id="slideIndicator"
+        style="font-size: 0.9rem; color: var(--text-muted)"
+        >Slide 1 de 20</span
+      >
+      <button class="btn-nav" id="btnNext" onclick="changeSlide(1)">
+        Siguiente →
+      </button>
+    </footer>
+
+    <!-- MODAL GLOSARIO -->
+    <div class="modal" id="glossaryModal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="toggleGlossary()">&times;</span>
+        <h2 style="color: var(--aws-orange); margin-bottom: 10px">
+          📖 Glosario Interactivo de Redes AWS
+        </h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted)">
+          Los términos esenciales explicados de forma simple:
+        </p>
+        <div class="glossary-grid" id="glossaryGrid"></div>
+      </div>
+    </div>
+
+    <!-- MODAL MODO REPASO -->
+    <div class="modal" id="reviewModal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="toggleReviewMode()">&times;</span>
+        <h2 style="color: var(--aws-orange); margin-bottom: 10px">
+          ⚡ Modo Repaso Rápido (Flashcards)
+        </h2>
+        <div
+          id="flashcard"
+          class="card"
+          style="
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+          "
+          onclick="flipFlashcard()"
+        >
+          <div id="flashQuestion" style="font-size: 1.2rem; font-weight: bold">
+            ¿Qué es una VPC?
+          </div>
+          <div
+            id="flashAnswer"
+            style="display: none; color: var(--aws-green); margin-top: 15px"
+          >
+            Tu red privada virtual aislada dentro de la nube de AWS.
+          </div>
+          <p
+            style="
+              font-size: 0.75rem;
+              color: var(--text-muted);
+              margin-top: 20px;
+            "
+          >
+            (Haz clic para voltear)
+          </p>
+        </div>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+          "
+        >
+          <button class="btn-tool" onclick="prevFlashcard()">← Anterior</button>
+          <button class="btn-tool" onclick="nextFlashcard()">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL MAPA MENTAL -->
+    <div class="modal" id="mindmapModal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeMindmapModal()">&times;</span>
+        <h2 style="color: var(--aws-orange); margin-bottom: 15px">
+          📌 Redes AWS en 1 Minuto
+        </h2>
+        <div
+          style="
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+          "
+        >
+          <div style="margin-bottom: 10px">
+            <strong>🌐 Conceptos Básicos:</strong><br />
+            <span class="mindmap-node">DNS ➔ Nombres a IPs</span>
+            <span class="mindmap-node">IP ➔ Dirección del dispositivo</span>
+            <span class="mindmap-node">Puerto ➔ Servicio (80, 443, 22)</span>
+            <span class="mindmap-node">Router ➔ Decide el camino</span>
+          </div>
+          <div style="margin-bottom: 10px">
+            <strong>☁️ VPC Componentes:</strong><br />
+            <span class="mindmap-node">Subnet Pública ➔ Con IGW</span>
+            <span class="mindmap-node">Subnet Privada ➔ Sin IGW (Usa NAT)</span>
+            <span class="mindmap-node">Route Table ➔ Mapa de tráfico</span>
+          </div>
+          <div>
+            <strong>🛡️ Seguridad:</strong><br />
+            <span class="mindmap-node"
+              >Security Group ➔ Nivel Instancia (Stateful)</span
+            >
+            <span class="mindmap-node"
+              >Network ACL ➔ Nivel Subnet (Stateless)</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+      // ESTADO DE LA APLICACIÓN
+      let currentSlide = 1;
+      const totalSlides = 20;
+
+      // INICIALIZACIÓN
+      document.addEventListener("DOMContentLoaded", () => {
+        updateSlideView();
+        initGlossary();
+        initQuiz();
+
+        // Navegación por teclado
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight") changeSlide(1);
+          if (e.key === "ArrowLeft") changeSlide(-1);
+        });
+      });
+
+      // CONTROL DE SLIDES
+      function changeSlide(direction) {
+        const newSlide = currentSlide + direction;
+        if (newSlide >= 1 && newSlide <= totalSlides) {
+          currentSlide = newSlide;
+          updateSlideView();
+        }
+      }
+
+      function updateSlideView() {
+        document.querySelectorAll(".slide").forEach((slide) => {
+          slide.classList.remove("active");
+        });
+        const activeSlide = document.querySelector(
+          `.slide[data-slide="${currentSlide}"]`,
+        );
+        if (activeSlide) activeSlide.classList.add("active");
+
+        // Actualizar botones
+        document.getElementById("btnPrev").disabled = currentSlide === 1;
+        document.getElementById("btnNext").disabled =
+          currentSlide === totalSlides;
+        document.getElementById("slideIndicator").textContent =
+          `Slide ${currentSlide} de ${totalSlides}`;
+
+        // Actualizar Barra de Progreso
+        const progressPercent = (currentSlide / totalSlides) * 100;
+        document.getElementById("progressBar").style.width =
+          `${progressPercent}%`;
+
+        window.scrollTo(0, 0);
+      }
+
+      // CONTROL DE RESPUESTAS INTERACTIVAS
+      function checkAnswer(btn, isCorrect, feedbackText) {
+        const parentContainer = btn.closest(".card, .slide");
+        const feedbackBox = parentContainer.querySelector(".feedback-box");
+        const options = parentContainer.querySelectorAll(".btn-option");
+
+        options.forEach((opt) => {
+          opt.disabled = true;
+          opt.style.opacity = "0.7";
+        });
+
+        btn.style.opacity = "1";
+        if (isCorrect) {
+          btn.classList.add("correct");
+          feedbackBox.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+          feedbackBox.style.color = "#10b981";
+          feedbackBox.style.border = "1px solid #10b981";
+          feedbackBox.innerHTML = `<strong>¡Correcto!</strong> ${feedbackText}`;
+        } else {
+          btn.classList.add("incorrect");
+          feedbackBox.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+          feedbackBox.style.color = "#ef4444";
+          feedbackBox.style.border = "1px solid #ef4444";
+          feedbackBox.innerHTML = `<strong>Incorrecto.</strong> ${feedbackText}`;
+        }
+        feedbackBox.style.display = "block";
+      }
+
+      // ACTO 2: INSPECCIÓN DE PAQUETE
+      function inspectPacket() {
+        const details = document.getElementById("packetDetails");
+        details.style.display =
+          details.style.display === "none" ? "block" : "none";
+      }
+
+      // ACTO 3: EJERCICIO IP
+      const ipList = [
+        { ip: "10.0.0.15", type: "privada" },
+        { ip: "54.239.25.200", type: "publica" },
+        { ip: "192.168.1.100", type: "privada" },
+        { ip: "142.250.190.46", type: "publica" },
+        { ip: "172.16.5.4", type: "privada" },
+      ];
+      let currentIpIndex = 0;
+
+      function evaluateIp(selectedType) {
+        const currentItem = ipList[currentIpIndex];
+        const feedback = document.getElementById("ipFeedback");
+        feedback.style.display = "block";
+
+        if (selectedType === currentItem.type) {
+          feedback.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+          feedback.style.color = "#10b981";
+          feedback.innerHTML = `¡Correcto! ${currentItem.ip} es una IP ${currentItem.type}.`;
+        } else {
+          feedback.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+          feedback.style.color = "#ef4444";
+          feedback.innerHTML = `Incorrecto. ${currentItem.ip} es una IP ${currentItem.type}.`;
+        }
+
+        setTimeout(() => {
+          currentIpIndex = (currentIpIndex + 1) % ipList.length;
+          document.getElementById("ipDisplay").textContent =
+            ipList[currentIpIndex].ip;
+          feedback.style.display = "none";
+        }, 1800);
+      }
+
+      // ACTO 4: SIMULAR DNS
+      function simulateDNS() {
+        const result = document.getElementById("dnsResult");
+        result.textContent = "Buscando en la agenda DNS...";
+        setTimeout(() => {
+          result.textContent = "mi-tienda.com ➔ 54.210.12.88";
+        }, 800);
+      }
+
+      // ACTO 6: SIMULAR ENRUTAMIENTO
+      function testRouting(ip) {
+        const res = document.getElementById("routingResult");
+        if (ip.startsWith("10.0")) {
+          res.textContent = `Paquete a ${ip} ➔ Dirigido internamente (Local VPC)`;
+        } else {
+          res.textContent = `Paquete a ${ip} ➔ Dirigido hacia la ruta por defecto (Internet Gateway)`;
+        }
+      }
+
+      // ACTO 9: CAÍDA DE AZ
+      function simulateAZFailure() {
+        const statusA = document.getElementById("statusA");
+        const azA = document.getElementById("azA");
+        const text = document.getElementById("azFailText");
+
+        statusA.textContent = "🔴 FUERA DE SERVICIO";
+        azA.style.borderColor = "var(--aws-red)";
+        azA.style.opacity = "0.6";
+        text.textContent =
+          "¡AZ-A ha caído! Pero la aplicación sigue respondiendo gracias a AZ-B en alta disponibilidad.";
+      }
+
+      // ACTO 11: CAMBIO DE BARRA CIDR
+      function updateCidrBar() {
+        const val = document.getElementById("cidrSelect").value;
+        const bar = document.getElementById("cidrBar");
+        const desc = document.getElementById("cidrDescription");
+
+        if (val === "16") {
+          bar.style.width = "100%";
+          bar.textContent = "65,536 IPs";
+          desc.textContent = "Red masiva. Tamaño típico para toda una VPC.";
+        } else if (val === "20") {
+          bar.style.width = "60%";
+          bar.textContent = "4,096 IPs";
+          desc.textContent = "Red de tamaño mediano.";
+        } else if (val === "24") {
+          bar.style.width = "25%";
+          bar.textContent = "256 IPs";
+          desc.textContent =
+            "Tamaño estándar para una Subnet dentro de una VPC.";
+        } else if (val === "32") {
+          bar.style.width = "5%";
+          bar.textContent = "1 IP";
+          desc.textContent = "Representa una única máquina exacta.";
+        }
+      }
+
+      // ACTO 12: ROUTE SIMULATOR
+      function routeSimulate(target) {
+        const res = document.getElementById("routeSimResult");
+        if (target === "local") {
+          res.textContent =
+            "Coincide con 10.0.0.0/16 ➔ El paquete se queda DENTRO de la VPC.";
+          res.style.color = "var(--aws-blue)";
+        } else {
+          res.textContent =
+            "Coincide con 0.0.0.0/0 ➔ El paquete se envía al Internet Gateway (Público).";
+          res.style.color = "var(--aws-green)";
+        }
+      }
+
+      // ACTO 16: ARQUITECTURA INFO
+      const archData = {
+        igw: {
+          title: "🌐 Internet Gateway (IGW)",
+          text: "Componente que conecta la VPC con Internet. Es necesario para que las subredes públicas tengan tráfico de entrada y salida.",
+        },
+        alb: {
+          title: "⚖️ Application Load Balancer (ALB)",
+          text: "Distribuye automáticamente el tráfico web entrante de los clientes entre múltiples servidores EC2 en varias AZs.",
+        },
+        nat: {
+          title: "🛡️ NAT Gateway",
+          text: "Permite que las instancias en subredes privadas accedan a Internet para actualizaciones, bloqueando conexiones entrantes no solicitadas.",
+        },
+        ec2: {
+          title: "💻 Servidores de Aplicación (EC2)",
+          text: "Máquinas virtuales ejecutando el código de la aplicación. Ubicadas en subred privada por seguridad.",
+        },
+        rds: {
+          title: "🗄️ Base de Datos (Amazon RDS)",
+          text: "Guarda los datos persistentes. Ubicada en la capa más profunda (Subred Privada) sin acceso a Internet.",
+        },
+      };
+
+      function showArchInfo(key) {
+        const item = archData[key];
+        const box = document.getElementById("archInfoBox");
+        box.querySelector(".card-title").textContent = item.title;
+        document.getElementById("archInfoText").textContent = item.text;
+      }
+
+      // ACTO 18: TALLER PRÁCTICO
+      function evaluarTaller() {
+        const q1 = document.getElementById("taller1").value;
+        const q2 = document.getElementById("taller2").value;
+        const q3 = document.getElementById("taller3").value;
+        const feedback = document.getElementById("tallerFeedback");
+
+        if (q1 === "correct" && q2 === "correct" && q3 === "correct") {
+          feedback.style.display = "block";
+          feedback.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+          feedback.style.color = "#10b981";
+          feedback.innerHTML =
+            "🏆 ¡Excelente trabajo de arquitectura! Tu diseño es seguro, escalable y sigue las mejores prácticas de AWS.";
+        } else {
+          feedback.style.display = "block";
+          feedback.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+          feedback.style.color = "#ef4444";
+          feedback.innerHTML =
+            "⚠️ Hay algunos errores de seguridad en tu diseño. Revisa dónde poner los componentes privados.";
+        }
+      }
+
+      // ACTO 19: REVELAR MITOS
+      function toggleMito(card) {
+        const text = card.querySelector(".mito-text");
+        text.style.display = text.style.display === "none" ? "block" : "none";
+      }
+
+      // GLOSARIO INTERACTIVO
+      const glossaryTerms = [
+        {
+          term: "VPC",
+          def: "Virtual Private Cloud. Tu red privada aislada en la nube de AWS.",
+        },
+        {
+          term: "Subnet",
+          def: "Subdivisión dentro de una VPC. Puede ser pública o privada.",
+        },
+        {
+          term: "IP Address",
+          def: "Identificador numérico único de un dispositivo en una red.",
+        },
+        {
+          term: "DNS",
+          def: "Sistema que traduce nombres web (amazon.com) a direcciones IP.",
+        },
+        {
+          term: "Internet Gateway",
+          def: "Puerta de enlace que conecta tu VPC con el Internet público.",
+        },
+        {
+          term: "NAT Gateway",
+          def: "Permite acceso a Internet de solo salida a recursos privados.",
+        },
+        {
+          term: "Security Group",
+          def: "Firewall virtual a nivel de servidor (Stateful).",
+        },
+        {
+          term: "Network ACL",
+          def: "Firewall virtual a nivel de subred (Stateless).",
+        },
+        {
+          term: "Route Table",
+          def: "Reglas que determinan hacia dónde se dirige el tráfico de red.",
+        },
+        {
+          term: "CIDR",
+          def: "Notación que especifica el tamaño del rango de direcciones IP.",
+        },
+      ];
+
+      function initGlossary() {
+        const grid = document.getElementById("glossaryGrid");
+        grid.innerHTML = glossaryTerms
+          .map(
+            (item) => `
+                <div class="glossary-item">
+                    <h4>${item.term}</h4>
+                    <p style="font-size:0.8rem; color:var(--text-main);">${item.def}</p>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      function toggleGlossary() {
+        const modal = document.getElementById("glossaryModal");
+        modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+      }
+
+      // MODO REPASO (FLASHCARDS)
+      const flashcards = [
+        { q: "¿Qué es una VPC?", a: "Tu red privada virtual aislada en AWS." },
+        {
+          q: "¿Qué diferencia a una subnet pública de una privada?",
+          a: "La pública tiene ruta hacia un Internet Gateway; la privada no.",
+        },
+        {
+          q: "¿Security Group es Stateful o Stateless?",
+          a: "Es Stateful (si entra el tráfico, la respuesta sale automáticamente).",
+        },
+        {
+          q: "¿Para qué sirve un NAT Gateway?",
+          a: "Para permitir que recursos en subredes privadas salgan a Internet sin exponerse a conexiones entrantes.",
+        },
+        { q: "¿Qué puerto usa SSH?", a: "El puerto 22." },
+      ];
+      let flashIndex = 0;
+
+      function toggleReviewMode() {
+        const modal = document.getElementById("reviewModal");
+        modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+        if (modal.style.display === "flex") showFlashcard();
+      }
+
+      function showFlashcard() {
+        document.getElementById("flashQuestion").textContent =
+          flashcards[flashIndex].q;
+        document.getElementById("flashAnswer").textContent =
+          flashcards[flashIndex].a;
+        document.getElementById("flashAnswer").style.display = "none";
+      }
+
+      function flipFlashcard() {
+        const ans = document.getElementById("flashAnswer");
+        ans.style.display = ans.style.display === "none" ? "block" : "none";
+      }
+
+      function nextFlashcard() {
+        flashIndex = (flashIndex + 1) % flashcards.length;
+        showFlashcard();
+      }
+
+      function prevFlashcard() {
+        flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length;
+        showFlashcard();
+      }
+
+      // MAPA MENTAL MODAL
+      function showMindmapModal() {
+        document.getElementById("mindmapModal").style.display = "flex";
+      }
+      function closeMindmapModal() {
+        document.getElementById("mindmapModal").style.display = "none";
+      }
+
+      // ACTO 20: QUIZ
+      const quizQuestions = [
+        {
+          q: "1. ¿Qué servicio de AWS proporciona un entorno de red lógicamente aislado en la nube?",
+          opts: [
+            "Amazon EC2",
+            "Amazon VPC",
+            "Amazon Route 53",
+            "AWS Direct Connect",
+          ],
+          ans: 1,
+          exp: "Amazon VPC te permite aprovisionar una sección lógicamente aislada de la nube de AWS.",
+        },
+        {
+          q: "2. Necesitas permitir que las instancias de una subred privada descarguen actualizaciones de seguridad desde Internet, pero impedir que Internet inicie conexiones con ellas. ¿Qué componente debes usar?",
+          opts: [
+            "Internet Gateway",
+            "NAT Gateway",
+            "Egress-Only Internet Gateway",
+            "VPC Peering",
+          ],
+          ans: 1,
+          exp: "El NAT Gateway permite tráfico saliente hacia Internet para instancias privadas pero bloquea el tráfico entrante iniciado desde fuera.",
+        },
+        {
+          q: "3. ¿Cuál es la función principal de Amazon Route 53?",
+          opts: [
+            "Proteger la red contra ataques DDoS",
+            "Traducir nombres de dominio a direcciones IP (DNS)",
+            "Almacenar archivos estáticos",
+            "Monitorear el rendimiento de la red",
+          ],
+          ans: 1,
+          exp: "Route 53 es el servicio DNS administrado de AWS para resolver nombres de dominio a direcciones IP.",
+        },
+        {
+          q: "4. Un arquitecto de seguridad desea crear un conjunto de reglas para bloquear explícitamente una dirección IP maliciosa específica a nivel de subred. ¿Qué herramienta debe utilizar?",
+          opts: [
+            "Security Group",
+            "Network ACL (NACL)",
+            "AWS WAF",
+            "Internet Gateway",
+          ],
+          ans: 1,
+          exp: "Network ACL (NACL) opera a nivel de subred y admite reglas de bloqueo explícito (DENY).",
+        },
+        {
+          q: "5. ¿Qué afirmación describe correctamente a los Security Groups?",
+          opts: [
+            "Son Stateless y operan a nivel de Subnet",
+            "Son Stateful y operan a nivel de Instancia",
+            "Admiten reglas explícitas de Deny",
+            "Requieren una tabla de rutas propia",
+          ],
+          ans: 1,
+          exp: "Los Security Groups operan como un firewall a nivel de instancia y son Stateful (las respuestas al tráfico permitido se autorizan automáticamente).",
+        },
+        {
+          q: "6. ¿Qué puerto estándar utiliza el protocolo HTTPS para la comunicación cifrada segura en la web?",
+          opts: ["Puerto 80", "Puerto 22", "Puerto 443", "Puerto 3389"],
+          ans: 2,
+          exp: "HTTPS utiliza el puerto 443. (HTTP usa el 80, SSH el 22 y RDP el 3389).",
+        },
+        {
+          q: "7. ¿Qué opción de conectividad ofrece una conexión de red dedicada y privada desde las instalaciones físicas de una empresa hacia AWS sin pasar por el Internet público?",
+          opts: [
+            "AWS Site-to-Site VPN",
+            "AWS Direct Connect",
+            "VPC Peering",
+            "Amazon CloudFront",
+          ],
+          ans: 1,
+          exp: "AWS Direct Connect proporciona un enlace privado y dedicado entre tu centro de datos y AWS.",
+        },
+        {
+          q: "8. ¿Cuántas Zonas de Disponibilidad (AZs) puede abarcar una sola Subnet de AWS?",
+          opts: [
+            "Exactamente una (1)",
+            "Hasta 3",
+            "Todas las de la Región",
+            "Cualquier cantidad configurada en el CIDR",
+          ],
+          ans: 0,
+          exp: "Cada subnet habita exclusivamente dentro de una única Zona de Disponibilidad (AZ).",
+        },
+        {
+          q: "9. ¿Qué notación CIDR representa un rango de red más GRANDE con mayor cantidad de direcciones IP disponibles?",
+          opts: ["10.0.0.0/28", "10.0.0.0/24", "10.0.0.0/16", "10.0.0.0/32"],
+          ans: 2,
+          exp: "/16 ofrece la mayor cantidad de IPs (~65,536). Cuanto menor es el número del prefijo, más grande es la red.",
+        },
+        {
+          q: "10. ¿Qué elemento de red debe asociarse a la tabla de rutas de una subnet para convertirla en una Subnet Pública?",
+          opts: [
+            "NAT Gateway",
+            "Internet Gateway (IGW)",
+            "Virtual Private Gateway",
+            "Customer Gateway",
+          ],
+          ans: 1,
+          exp: "Una subnet es pública si su tabla de rutas incluye una ruta por defecto (0.0.0.0/0) apuntando a un Internet Gateway.",
+        },
+      ];
+
+      let quizIndex = 0;
+      let quizScore = 0;
+
+      function initQuiz() {
+        quizIndex = 0;
+        quizScore = 0;
+        showQuizQuestion();
+      }
+
+      function showQuizQuestion() {
+        const q = quizQuestions[quizIndex];
+        document.getElementById("quizQuestion").textContent = q.q;
+        document.getElementById("quizProgress").textContent =
+          `Pregunta ${quizIndex + 1} de ${quizQuestions.length}`;
+        document.getElementById("quizFeedback").style.display = "none";
+        document.getElementById("btnNextQuiz").style.display = "none";
+
+        const optsBox = document.getElementById("quizOptions");
+        optsBox.innerHTML = q.opts
+          .map(
+            (opt, i) => `
+                <button class="btn-option" onclick="answerQuiz(${i})">${opt}</button>
+            `,
+          )
+          .join("");
+      }
+
+      function answerQuiz(selected) {
+        const q = quizQuestions[quizIndex];
+        const feedback = document.getElementById("quizFeedback");
+        const btns = document.querySelectorAll("#quizOptions .btn-option");
+
+        btns.forEach((b) => (b.disabled = true));
+
+        if (selected === q.ans) {
+          quizScore++;
+          btns[selected].classList.add("correct");
+          feedback.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+          feedback.style.color = "#10b981";
+          feedback.innerHTML = `<strong>¡Correcto!</strong> ${q.exp}`;
+        } else {
+          btns[selected].classList.add("incorrect");
+          btns[q.ans].classList.add("correct");
+          feedback.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+          feedback.style.color = "#ef4444";
+          feedback.innerHTML = `<strong>Incorrecto.</strong> ${q.exp}`;
+        }
+
+        feedback.style.display = "block";
+        document.getElementById("btnNextQuiz").style.display = "block";
+      }
+
+      function nextQuizQuestion() {
+        quizIndex++;
+        if (quizIndex < quizQuestions.length) {
+          showQuizQuestion();
+        } else {
+          document.getElementById("quizContainer").style.display = "none";
+          document.getElementById("quizResults").style.display = "block";
+          document.getElementById("quizScore").textContent = quizScore;
+        }
+      }
+
+      function restartQuiz() {
+        document.getElementById("quizContainer").style.display = "block";
+        document.getElementById("quizResults").style.display = "none";
+        initQuiz();
+      }
+    </script>
+  </body>
+</html>

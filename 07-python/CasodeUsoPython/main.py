@@ -144,7 +144,7 @@ def generar_informe(resumen, ruta_salida):
 
 
 def main():
-    archivo_entrada = "logs.txt"
+    archivo_entrada = "07-python/CasodeUsoPython/logs.txt"
     archivo_salida = "results.txt"
     
     print("Iniciando procesamiento de registros...")

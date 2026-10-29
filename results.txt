@@ -1,0 +1,36 @@
+====================================================
+INFORME DE ANÁLISIS DE REGISTROS DE APLICACIÓN
+====================================================
+
+1. RESUMEN GENERAL DE EVENTOS
+----------------------------------------------------
+Total de registros válidos procesados: 13
+Total de registros mal formados:       1
+
+2. DESGLOSE POR SEVERIDAD
+----------------------------------------------------
+- INFO: 4
+- WARNING: 3
+- ERROR: 6
+
+3. ERRORES POR COMPONENTE
+----------------------------------------------------
+- payment_gateway: 4 error(es)
+- inventory: 2 error(es)
+
+4. MENSAJES DE ERROR MÁS FRECUENTES
+----------------------------------------------------
+- "Fallo en la conexion con la pasarela de pagos.": 3 ocurrencia(s)
+- "Error al actualizar la base de datos de inventario.": 2 ocurrencia(s)
+- "Timeout en la respuesta de la pasarela de pagos.": 1 ocurrencia(s)
+
+5. CONCLUSIÓN TÉCNICA Y DIAGNÓSTICO
+----------------------------------------------------
+Hecho verificado: El componente 'payment_gateway' concentra la mayor
+cantidad de eventos de nivel ERROR (4 en total), siendo el fallo en la
+conexión con la pasarela el mensaje de error más recurrente.
+
+Interpretación sugerida: Los fallos recurrentes de timeout y conexión
+en la pasarela de pagos indican posibles problemas de latencia o conectividad
+de red con el proveedor externo, requiriendo revisión prioritaria.
+====================================================
