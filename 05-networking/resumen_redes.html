@@ -1,0 +1,2669 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      AWS Cloud Practitioner (CLF-C02) — Repaso Interactivo de Redes
+    </title>
+    <style>
+      :root {
+        --bg-main: #090b14;
+        --bg-card: #111526;
+        --bg-card-hover: #171c33;
+        --bg-elevated: #1c223d;
+        --border: rgba(139, 92, 246, 0.22);
+        --border-strong: rgba(99, 102, 241, 0.5);
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --accent-purple: #8b5cf6;
+        --accent-blue: #3b82f6;
+        --accent-cyan: #06b6d4;
+        --accent-emerald: #10b981;
+        --accent-amber: #f59e0b;
+        --accent-rose: #f43f5e;
+        --gradient-main: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+        --gradient-soft: linear-gradient(
+          135deg,
+          rgba(139, 92, 246, 0.14) 0%,
+          rgba(59, 130, 246, 0.14) 100%
+        );
+        --shadow-glow: 0 0 30px rgba(139, 92, 246, 0.16);
+        --radius: 14px;
+        --radius-sm: 9px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter,
+          Helvetica, Arial, sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        line-height: 1.55;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-image:
+          radial-gradient(
+            circle at 15% 15%,
+            rgba(139, 92, 246, 0.08) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 85% 80%,
+            rgba(59, 130, 246, 0.08) 0%,
+            transparent 40%
+          );
+      }
+
+      /* Top Header & Progress */
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(9, 11, 20, 0.88);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .header-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .brand-badge {
+        background: var(--gradient-main);
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 7px;
+        letter-spacing: 0.05em;
+      }
+
+      .brand-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      .brand-sub {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+      }
+
+      .progress-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 210px;
+      }
+
+      .progress-bar-bg {
+        flex: 1;
+        height: 8px;
+        background: var(--bg-elevated);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        width: 12.5%;
+        background: var(--gradient-main);
+        border-radius: 999px;
+        transition: width 0.35s ease;
+      }
+
+      .progress-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--accent-cyan);
+        white-space: nowrap;
+      }
+
+      /* Navigation Pills */
+      nav.section-nav {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0.5rem 1.25rem 0.75rem;
+        display: flex;
+        gap: 0.45rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      nav.section-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-pill {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 0.42rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .nav-pill:hover {
+        border-color: var(--accent-purple);
+        color: var(--text-primary);
+      }
+
+      .nav-pill.active {
+        background: var(--gradient-main);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+      }
+
+      .nav-pill.completed:not(.active) {
+        border-color: rgba(16, 185, 129, 0.45);
+        color: #a7f3d0;
+      }
+
+      /* Main Container */
+      main {
+        flex: 1;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 3rem;
+      }
+
+      .module-section {
+        display: none;
+        animation: fadeSlide 0.35s ease;
+      }
+
+      .module-section.active {
+        display: block;
+      }
+
+      @keyframes fadeSlide {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .section-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .section-tag {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent-cyan);
+        background: rgba(6, 182, 212, 0.12);
+        border: 1px solid rgba(6, 182, 212, 0.3);
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+      }
+
+      h1 {
+        font-size: clamp(1.45rem, 2.5vw, 2rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.4rem;
+      }
+
+      .section-lead {
+        color: var(--text-secondary);
+        font-size: 0.98rem;
+        max-width: 780px;
+      }
+
+      /* Grid & Cards */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        transition: var(--transition);
+      }
+
+      .card:hover {
+        border-color: var(--border-strong);
+        background: var(--bg-card-hover);
+      }
+
+      .card-title {
+        font-size: 1.02rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .icon-box {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--gradient-soft);
+        border: 1px solid var(--border-strong);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+      }
+
+      .text-sm {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.2rem 0.55rem;
+        border-radius: 6px;
+      }
+
+      .badge-purple {
+        background: rgba(139, 92, 246, 0.18);
+        color: #c4b5fd;
+        border: 1px solid rgba(139, 92, 246, 0.35);
+      }
+      .badge-blue {
+        background: rgba(59, 130, 246, 0.18);
+        color: #93c5fd;
+        border: 1px solid rgba(59, 130, 246, 0.35);
+      }
+      .badge-cyan {
+        background: rgba(6, 182, 212, 0.18);
+        color: #67e8f9;
+        border: 1px solid rgba(6, 182, 212, 0.35);
+      }
+      .badge-emerald {
+        background: rgba(16, 185, 129, 0.18);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+      }
+      .badge-amber {
+        background: rgba(245, 158, 11, 0.18);
+        color: #fcd34d;
+        border: 1px solid rgba(245, 158, 11, 0.35);
+      }
+
+      /* Section 1: Visual Hierarchy Diagram */
+      .hierarchy-box {
+        margin-top: 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-glow);
+      }
+
+      .flow-chain {
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 1.1rem;
+        flex-wrap: wrap;
+      }
+
+      .flow-node {
+        flex: 1;
+        min-width: 185px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+      }
+
+      .flow-node:hover,
+      .flow-node.selected {
+        transform: translateY(-3px);
+        border-color: var(--accent-cyan);
+        box-shadow: 0 8px 20px rgba(6, 182, 212, 0.2);
+      }
+
+      .flow-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: var(--accent-purple);
+        font-weight: 800;
+      }
+
+      .node-detail-banner {
+        margin-top: 1rem;
+        padding: 1rem 1.2rem;
+        border-radius: var(--radius-sm);
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 4px solid var(--accent-blue);
+        font-size: 0.92rem;
+      }
+
+      /* Section 2: Fundamentals Accordion/Flip Cards & CIDR Visualizer */
+      .concept-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.1rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .concept-card:hover {
+        border-color: var(--accent-purple);
+      }
+
+      .concept-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .concept-name {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #fff;
+      }
+
+      .concept-short {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.35rem;
+      }
+
+      .concept-body {
+        display: none;
+        margin-top: 0.85rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.86rem;
+        color: var(--text-secondary);
+      }
+
+      .concept-card.open .concept-body {
+        display: block;
+      }
+
+      .concept-card.open .toggle-ind {
+        transform: rotate(180deg);
+      }
+
+      .toggle-ind {
+        color: var(--accent-purple);
+        font-weight: 700;
+        transition: transform 0.2s ease;
+      }
+
+      .detail-row {
+        margin-bottom: 0.45rem;
+      }
+
+      .detail-row strong {
+        color: var(--text-primary);
+      }
+
+      /* CIDR Visualizer */
+      .cidr-box {
+        margin-top: 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        padding: 1.35rem;
+      }
+
+      .cidr-tabs {
+        display: flex;
+        gap: 0.6rem;
+        margin: 0.9rem 0;
+        flex-wrap: wrap;
+      }
+
+      .cidr-btn {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+        padding: 0.45rem 0.9rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 0.92rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .cidr-btn.active {
+        background: var(--gradient-main);
+        border-color: transparent;
+      }
+
+      .octets-visual {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.6rem;
+        margin: 1rem 0;
+      }
+
+      .octet-cell {
+        padding: 0.75rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid var(--border);
+      }
+
+      .octet-locked {
+        background: rgba(139, 92, 246, 0.16);
+        border-color: rgba(139, 92, 246, 0.5);
+      }
+
+      .octet-free {
+        background: rgba(6, 182, 212, 0.14);
+        border-color: rgba(6, 182, 212, 0.45);
+      }
+
+      .octet-num {
+        font-family: monospace;
+        font-size: 1.25rem;
+        font-weight: 800;
+      }
+
+      .octet-tag {
+        font-size: 0.72rem;
+        margin-top: 0.25rem;
+        color: var(--text-secondary);
+      }
+
+      /* Section 3: Interactive VPC Diagram */
+      .vpc-canvas {
+        margin-top: 1.25rem;
+        border: 2px dashed var(--accent-purple);
+        border-radius: var(--radius);
+        padding: 1.25rem;
+        background: rgba(17, 21, 38, 0.9);
+        position: relative;
+      }
+
+      .vpc-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+      }
+
+      .vpc-clickable {
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .vpc-clickable:hover {
+        filter: brightness(1.15);
+      }
+
+      .vpc-clickable.active-comp {
+        outline: 2px solid var(--accent-cyan);
+        box-shadow: 0 0 18px rgba(6, 182, 212, 0.35);
+      }
+
+      .az-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 1rem;
+        margin-top: 0.9rem;
+      }
+
+      .az-box {
+        border: 1px dashed var(--accent-blue);
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+        background: rgba(59, 130, 246, 0.05);
+      }
+
+      .subnet-box {
+        margin-top: 0.75rem;
+        padding: 0.85rem;
+        border-radius: 8px;
+        border: 1px solid;
+      }
+
+      .subnet-pub {
+        background: rgba(16, 185, 129, 0.09);
+        border-color: rgba(16, 185, 129, 0.45);
+      }
+
+      .subnet-priv {
+        background: rgba(245, 158, 11, 0.09);
+        border-color: rgba(245, 158, 11, 0.45);
+      }
+
+      .resource-chip {
+        display: inline-block;
+        margin-top: 0.45rem;
+        margin-right: 0.35rem;
+        padding: 0.25rem 0.55rem;
+        font-size: 0.78rem;
+        border-radius: 6px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+      }
+
+      .vpc-inspector {
+        margin-top: 1rem;
+        padding: 1.1rem;
+        background: var(--bg-elevated);
+        border-radius: var(--radius-sm);
+        border-left: 4px solid var(--accent-cyan);
+      }
+
+      /* Section 4: Traffic Flows & SG vs NACL */
+      .flow-sim-tabs {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+
+      .sim-tab {
+        padding: 0.5rem 0.95rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.86rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .sim-tab.active {
+        background: var(--gradient-main);
+        color: #fff;
+        border-color: transparent;
+      }
+
+      .traffic-pipeline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        padding: 1.1rem;
+        background: var(--bg-elevated);
+        border-radius: var(--radius-sm);
+        margin-bottom: 0.9rem;
+      }
+
+      .pipe-step {
+        flex: 1;
+        min-width: 135px;
+        text-align: center;
+        padding: 0.7rem 0.5rem;
+        border-radius: 8px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-strong);
+        font-size: 0.84rem;
+        font-weight: 600;
+      }
+
+      .pipe-step small {
+        display: block;
+        font-weight: 400;
+        font-size: 0.74rem;
+        color: var(--text-secondary);
+        margin-top: 0.2rem;
+      }
+
+      table.clean-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.75rem;
+        font-size: 0.88rem;
+      }
+
+      table.clean-table th,
+      table.clean-table td {
+        text-align: left;
+        padding: 0.75rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      table.clean-table th {
+        background: var(--bg-elevated);
+        color: var(--accent-cyan);
+        font-weight: 700;
+      }
+
+      /* Section 5: AWS Services Flashcards */
+      .filter-bar {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+
+      .service-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.15rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: var(--transition);
+      }
+
+      .service-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--accent-purple);
+        box-shadow: var(--shadow-glow);
+      }
+
+      .kw-box {
+        margin-top: 0.85rem;
+        padding: 0.55rem 0.75rem;
+        border-radius: 7px;
+        background: rgba(139, 92, 246, 0.13);
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        font-size: 0.82rem;
+        color: #ddd6fe;
+      }
+
+      /* Section 6: Key Exam Comparisons */
+      .comp-selector {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.25rem;
+      }
+
+      .comp-pill {
+        padding: 0.5rem 0.85rem;
+        border-radius: 8px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .comp-pill.active {
+        background: var(--gradient-main);
+        color: #fff;
+        border-color: transparent;
+      }
+
+      .comp-arena {
+        background: var(--bg-card);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius);
+        padding: 1.35rem;
+      }
+
+      .versus-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .versus-col {
+        background: var(--bg-elevated);
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+        border-top: 3px solid var(--accent-purple);
+      }
+
+      .versus-col.right {
+        border-top-color: var(--accent-cyan);
+      }
+
+      .exam-tip-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 0.85rem;
+        margin-top: 0.85rem;
+      }
+
+      .tip-box {
+        padding: 0.85rem;
+        border-radius: 8px;
+        font-size: 0.86rem;
+      }
+
+      .tip-trap {
+        background: rgba(244, 63, 94, 0.1);
+        border: 1px solid rgba(244, 63, 94, 0.35);
+      }
+
+      .tip-clue {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+      }
+
+      /* Section 7 & 8: Scenarios & Final Quiz */
+      .scenario-card,
+      .quiz-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.35rem;
+        margin-bottom: 1rem;
+      }
+
+      .options-list {
+        display: grid;
+        gap: 0.55rem;
+        margin-top: 0.9rem;
+      }
+
+      .opt-btn {
+        text-align: left;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+      }
+
+      .opt-btn:hover:not(:disabled) {
+        border-color: var(--accent-purple);
+        background: #232a4b;
+      }
+
+      .opt-btn.correct {
+        background: rgba(16, 185, 129, 0.16);
+        border-color: var(--accent-emerald);
+        color: #ecfdf5;
+      }
+
+      .opt-btn.wrong {
+        background: rgba(244, 63, 94, 0.16);
+        border-color: var(--accent-rose);
+        color: #ffe4e6;
+      }
+
+      .opt-btn.selected-neutral {
+        border-color: var(--accent-cyan);
+        background: rgba(6, 182, 212, 0.15);
+      }
+
+      .feedback-panel {
+        margin-top: 0.9rem;
+        padding: 0.95rem 1.1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        background: var(--bg-elevated);
+        border-left: 4px solid var(--accent-purple);
+        display: none;
+      }
+
+      .feedback-panel.show {
+        display: block;
+      }
+
+      /* Buttons */
+      .btn {
+        background: var(--gradient-main);
+        color: #fff;
+        border: none;
+        padding: 0.65rem 1.25rem;
+        border-radius: 9px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+
+      .btn:hover:not(:disabled) {
+        opacity: 0.92;
+        transform: translateY(-1px);
+      }
+
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .btn-secondary {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-strong);
+        color: var(--text-primary);
+      }
+
+      .bottom-nav {
+        margin-top: 2.25rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      /* Quiz Results */
+      .score-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--gradient-soft);
+        border: 3px solid var(--accent-cyan);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+      }
+
+      .score-num {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #fff;
+      }
+
+      .study-tag {
+        display: inline-block;
+        margin: 0.25rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 6px;
+        background: rgba(245, 158, 11, 0.16);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        color: #fde68a;
+        font-size: 0.83rem;
+        font-weight: 600;
+      }
+
+      @media (max-width: 640px) {
+        .flow-arrow {
+          transform: rotate(90deg);
+          width: 100%;
+        }
+        .octets-visual {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-badge">CLF-C02</span>
+          <div>
+            <div class="brand-title">
+              AWS Networking — Guía Interactiva de Examen
+            </div>
+            <div class="brand-sub">
+              Repaso práctico enfocado en AWS Certified Cloud Practitioner
+            </div>
+          </div>
+        </div>
+        <div class="progress-wrapper">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+          <span class="progress-label" id="progressText">Sección 1 de 8</span>
+        </div>
+      </div>
+      <nav class="section-nav" id="sectionNav"></nav>
+    </header>
+
+    <main>
+      <!-- ==================== SECCIÓN 1 ==================== -->
+      <section class="module-section active" id="sec-0">
+        <div class="section-header">
+          <span class="section-tag">Módulo 1 · Panorama General</span>
+          <h1>Introducción y Mapa de Redes en AWS</h1>
+          <p class="section-lead">
+            Antes de memorizar servicios, comprende cómo se organizan y
+            comunican los recursos dentro de la nube de AWS.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">☁️</span> ¿Qué significa networking en la
+              nube?
+            </div>
+            <p class="text-sm">
+              Es la infraestructura virtual que permite que tus servidores,
+              bases de datos y aplicaciones se conecten entre sí, con tu oficina
+              local y con usuarios en Internet de forma segura y controlada por
+              software.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🛡️</span> ¿Por qué necesitamos redes en
+              AWS?
+            </div>
+            <p class="text-sm">
+              En AWS compartes infraestructura física con millones de clientes.
+              Las redes virtuales garantizan <strong>aislamiento</strong>,
+              definen qué es público y qué es privado, y controlan exactamente
+              quién puede entrar o salir.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🔗</span> ¿Cómo se comunican los recursos?
+            </div>
+            <p class="text-sm">
+              Mediante direcciones IP privadas (dentro de AWS) o públicas (hacia
+              Internet), guiadas por tablas de enrutamiento y filtradas por
+              firewalls virtuales antes de llegar a cada recurso.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🏰</span> ¿Qué papel cumple una VPC?
+            </div>
+            <p class="text-sm">
+              <strong>Amazon VPC</strong> es tu red privada y aislada dentro de
+              AWS. Es el contenedor lógico donde despliegas tus recursos (como
+              instancias EC2 o bases de datos RDS) con total control sobre sus
+              rangos IP y seguridad.
+            </p>
+          </div>
+        </div>
+
+        <div class="hierarchy-box">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 0.5rem;
+            "
+          >
+            <h3 style="font-size: 1.05rem">
+              Mapa de Jerarquía: Haz clic en cada nivel para explorar su rol
+            </h3>
+            <span class="badge badge-cyan">Diagrama Interactivo</span>
+          </div>
+
+          <div class="flow-chain" id="hierarchyChain">
+            <div class="flow-node selected" data-node="internet">
+              <div class="badge badge-blue" style="margin-bottom: 0.4rem">
+                Nivel 1 · Exterior
+              </div>
+              <div style="font-weight: 800; font-size: 1rem">
+                🌐 Internet / On-Premises
+              </div>
+              <div class="text-sm" style="margin-top: 0.3rem">
+                Usuarios finales y redes corporativas externas.
+              </div>
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" data-node="vpc">
+              <div class="badge badge-purple" style="margin-bottom: 0.4rem">
+                Nivel 2 · Región AWS
+              </div>
+              <div style="font-weight: 800; font-size: 1rem">🏰 Amazon VPC</div>
+              <div class="text-sm" style="margin-top: 0.3rem">
+                Tu red virtual aislada con rango IP propio.
+              </div>
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" data-node="subnet">
+              <div class="badge badge-emerald" style="margin-bottom: 0.4rem">
+                Nivel 3 · Availability Zone
+              </div>
+              <div style="font-weight: 800; font-size: 1rem">
+                📦 Subnets (Pública / Privada)
+              </div>
+              <div class="text-sm" style="margin-top: 0.3rem">
+                Segmentos internos que separan exposición.
+              </div>
+            </div>
+            <div class="flow-arrow">➔</div>
+            <div class="flow-node" data-node="resource">
+              <div class="badge badge-amber" style="margin-bottom: 0.4rem">
+                Nivel 4 · Cargas de trabajo
+              </div>
+              <div style="font-weight: 800; font-size: 1rem">
+                ⚙️ Recursos AWS
+              </div>
+              <div class="text-sm" style="margin-top: 0.3rem">
+                Instancias EC2, RDS, Load Balancers, etc.
+              </div>
+            </div>
+          </div>
+
+          <div class="node-detail-banner" id="hierarchyDetail">
+            <strong>🌐 Internet / On-Premises:</strong> Es el mundo externo a tu
+            VPC. Para que el tráfico cruce desde aquí hacia tu VPC necesitas una
+            puerta de enlace controlada (como un <em>Internet Gateway</em> para
+            tráfico público o <em>VPN / Direct Connect</em> para tu oficina).
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SECCIÓN 2 ==================== -->
+      <section class="module-section" id="sec-1">
+        <div class="section-header">
+          <span class="section-tag">Módulo 2 · Bases Técnicas</span>
+          <h1>Fundamentos de Networking Aplicados a AWS</h1>
+          <p class="section-lead">
+            Haz clic sobre cada tarjeta para desplegar su utilidad, ejemplo
+            práctico y su relación directa con el examen CLF-C02.
+          </p>
+        </div>
+
+        <div class="grid-2" id="fundamentalsGrid"></div>
+
+        <div class="cidr-box">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 0.5rem;
+            "
+          >
+            <div>
+              <h3 style="font-size: 1.05rem">
+                Visualizador de Bloques CIDR (Sin matemáticas complejas)
+              </h3>
+              <p class="text-sm">
+                La barra <code>/N</code> indica cuántos bits quedan fijos (red)
+                y cuántos quedan libres para asignar IPs a tus recursos.
+              </p>
+            </div>
+            <div class="cidr-tabs">
+              <button class="cidr-btn active" data-cidr="16">
+                10.0.0.0/16 (VPC típica)
+              </button>
+              <button class="cidr-btn" data-cidr="24">
+                10.0.1.0/24 (Subnet típica)
+              </button>
+            </div>
+          </div>
+
+          <div class="octets-visual" id="cidrOctets"></div>
+          <div class="node-detail-banner" id="cidrExplanation"></div>
+        </div>
+      </section>
+
+      <!-- ==================== SECCIÓN 3 ==================== -->
+      <section class="module-section" id="sec-2">
+        <div class="section-header">
+          <span class="section-tag">Módulo 3 · Arquitectura Base</span>
+          <h1>Amazon VPC y su Anatomía</h1>
+          <p class="section-lead">
+            Una <strong>Amazon Virtual Private Cloud (VPC)</strong> es tu red
+            privada y lógicamente aislada dentro de una Región de AWS. Tú
+            decides su rango IP, cómo se divide y cómo se conecta.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🔒</span> Red Aislada y Controlada
+            </div>
+            <p class="text-sm">
+              Ningún otro cliente de AWS puede ver o acceder a tu red por
+              defecto. Tú controlas el tráfico entrante y saliente mediante
+              reglas explícitas.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🌍</span> Alcance Regional + Multi-AZ
+            </div>
+            <p class="text-sm">
+              Una VPC vive dentro de <strong>una sola Región</strong>, pero
+              abarca todas sus <strong>Availability Zones (AZ)</strong> para
+              lograr alta disponibilidad.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🚦</span> Subnet Pública vs. Privada
+            </div>
+            <p class="text-sm">
+              <strong>Pública:</strong> Tiene ruta directa a un
+              <em>Internet Gateway</em> (ideal para servidores web).<br /><strong
+                >Privada:</strong
+              >
+              Sin ruta directa a Internet (ideal para bases de datos).
+            </p>
+          </div>
+        </div>
+
+        <div class="vpc-canvas">
+          <div class="vpc-top-bar">
+            <div>
+              <span class="badge badge-purple">Región: us-east-1</span>
+              <strong style="margin-left: 0.5rem"
+                >Amazon VPC (CIDR: 10.0.0.0/16)</strong
+              >
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+              <button
+                class="badge badge-blue vpc-clickable active-comp"
+                data-comp="vpc"
+              >
+                VPC 10.0.0.0/16
+              </button>
+              <button class="badge badge-cyan vpc-clickable" data-comp="igw">
+                🌐 Internet Gateway
+              </button>
+              <button class="badge badge-purple vpc-clickable" data-comp="rt">
+                🗺️ Route Tables
+              </button>
+            </div>
+          </div>
+
+          <div class="az-grid">
+            <div class="az-box vpc-clickable" data-comp="az1">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <strong>Availability Zone A (us-east-1a)</strong>
+                <span class="badge badge-blue">AZ 1</span>
+              </div>
+
+              <div class="subnet-box subnet-pub vpc-clickable" data-comp="pub1">
+                <div style="display: flex; justify-content: space-between">
+                  <strong>🟢 Subnet Pública A</strong>
+                  <code>10.0.1.0/24</code>
+                </div>
+                <div class="text-sm" style="margin-top: 0.25rem">
+                  Con ruta hacia Internet Gateway
+                </div>
+                <div>
+                  <span class="resource-chip">🖥️ EC2 Web Server</span>
+                  <span class="resource-chip">🔄 NAT Gateway</span>
+                </div>
+              </div>
+
+              <div
+                class="subnet-box subnet-priv vpc-clickable"
+                data-comp="priv1"
+              >
+                <div style="display: flex; justify-content: space-between">
+                  <strong>🟠 Subnet Privada A</strong>
+                  <code>10.0.2.0/24</code>
+                </div>
+                <div class="text-sm" style="margin-top: 0.25rem">
+                  Aislada de conexiones entrantes de Internet
+                </div>
+                <div>
+                  <span class="resource-chip">🗄️ Amazon RDS (Primaria)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="az-box vpc-clickable" data-comp="az2">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <strong>Availability Zone B (us-east-1b)</strong>
+                <span class="badge badge-blue">AZ 2</span>
+              </div>
+
+              <div class="subnet-box subnet-pub vpc-clickable" data-comp="pub2">
+                <div style="display: flex; justify-content: space-between">
+                  <strong>🟢 Subnet Pública B</strong>
+                  <code>10.0.3.0/24</code>
+                </div>
+                <div class="text-sm" style="margin-top: 0.25rem">
+                  Alta disponibilidad frente a fallos de AZ
+                </div>
+                <div>
+                  <span class="resource-chip">🖥️ EC2 Web Server</span>
+                </div>
+              </div>
+
+              <div
+                class="subnet-box subnet-priv vpc-clickable"
+                data-comp="priv2"
+              >
+                <div style="display: flex; justify-content: space-between">
+                  <strong>🟠 Subnet Privada B</strong>
+                  <code>10.0.4.0/24</code>
+                </div>
+                <div class="text-sm" style="margin-top: 0.25rem">
+                  Respaldo en segunda zona física
+                </div>
+                <div>
+                  <span class="resource-chip">🗄️ Amazon RDS (Standby)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vpc-inspector" id="vpcInspector">
+            <strong>🏰 Amazon VPC (10.0.0.0/16):</strong> Haz clic en cualquier
+            elemento del diagrama (VPC, AZ, Subnet Pública, Subnet Privada,
+            Internet Gateway o Route Tables) para inspeccionar su función
+            exacta.
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SECCIÓN 4 ==================== -->
+      <section class="module-section" id="sec-3">
+        <div class="section-header">
+          <span class="section-tag">Módulo 4 · Enrutamiento y Seguridad</span>
+          <h1>Conectividad y Control de Acceso</h1>
+          <p class="section-lead">
+            Domina cómo entra y sale el tráfico de tu VPC y qué capas de
+            seguridad filtran cada paquete.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.25rem">
+          <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem">
+            Simulador de Flujo de Tráfico: Selecciona un escenario
+          </h3>
+          <div class="flow-sim-tabs">
+            <button class="sim-tab active" data-flow="public">
+              1. Instancia Pública ↔ Internet
+            </button>
+            <button class="sim-tab" data-flow="nat">
+              2. Instancia Privada ➔ Internet (NAT)
+            </button>
+            <button class="sim-tab" data-flow="inbound-blocked">
+              3. Internet ➔ Instancia Privada (Bloqueado)
+            </button>
+          </div>
+          <div class="traffic-pipeline" id="trafficPipeline"></div>
+          <div class="node-detail-banner" id="trafficExplanation"></div>
+        </div>
+
+        <div class="grid-3" style="margin-bottom: 1.25rem">
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🌐</span> Internet Gateway (IGW)
+            </div>
+            <p class="text-sm">
+              Puerta de enlace bidireccional que conecta tu VPC con Internet.
+              Permite que recursos con IP pública reciban y envíen tráfico
+              externo.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🔄</span> NAT Gateway
+            </div>
+            <p class="text-sm">
+              Se ubica en una <strong>subnet pública</strong> y permite que
+              instancias en subnets privadas salgan a Internet (ej. descargar
+              parches) sin permitir conexiones entrantes desde Internet.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">
+              <span class="icon-box">🗺️</span> Route Tables
+            </div>
+            <p class="text-sm">
+              Conjunto de reglas que indican hacia dónde dirigir el tráfico de
+              red de cada subnet (ej. enviar tráfico
+              <code>0.0.0.0/0</code> hacia el IGW o hacia un NAT Gateway).
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size: 1.05rem; margin-bottom: 0.35rem">
+            Firewalls en VPC: Security Groups vs. Network ACLs (NACL)
+          </h3>
+          <p class="text-sm">
+            Ambos controlan tráfico, pero operan a distinto nivel y con
+            comportamientos opuestos respecto al estado de la conexión:
+          </p>
+          <div style="overflow-x: auto">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th>Característica</th>
+                  <th>Security Group (SG)</th>
+                  <th>Network ACL (NACL)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Nivel donde actúa</strong></td>
+                  <td>Nivel de <strong>Instancia</strong> (ej. EC2)</td>
+                  <td>
+                    Nivel de <strong>Subnet</strong> (frontera de la subred)
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Tipo de reglas</strong></td>
+                  <td>
+                    Solo reglas de <strong>Permitir (Allow)</strong>. Todo lo
+                    demás se deniega por defecto.
+                  </td>
+                  <td>
+                    Reglas de
+                    <strong>Permitir (Allow) y Denegar (Deny)</strong>
+                    explícitas.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Estado (Stateful vs Stateless)</strong></td>
+                  <td>
+                    <strong>Stateful:</strong> Si permites tráfico entrante, la
+                    respuesta saliente se permite automáticamente.
+                  </td>
+                  <td>
+                    <strong>Stateless:</strong> El tráfico entrante y saliente
+                    se evalúa por separado (debes permitir ambos).
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Caso de uso típico</strong></td>
+                  <td>
+                    Permitir tráfico web HTTPS (puerto 443) hacia tus servidores
+                    EC2.
+                  </td>
+                  <td>
+                    Bloquear explícitamente una dirección IP maliciosa antes de
+                    que entre a la subnet.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SECCIÓN 5 ==================== -->
+      <section class="module-section" id="sec-4">
+        <div class="section-header">
+          <span class="section-tag">Módulo 5 · Catálogo CLF-C02</span>
+          <h1>Servicios de Networking Clave para el Examen</h1>
+          <p class="section-lead">
+            Identifica rápidamente qué hace cada servicio, qué problema resuelve
+            y cuál es su palabra clave en las preguntas de certificación.
+          </p>
+        </div>
+
+        <div class="filter-bar" id="serviceFilters">
+          <button class="sim-tab active" data-cat="all">Todos (10)</button>
+          <button class="sim-tab" data-cat="core">
+            VPC y Conexión Interna
+          </button>
+          <button class="sim-tab" data-cat="hybrid">
+            Conexión Híbrida (On-Premises)
+          </button>
+          <button class="sim-tab" data-cat="edge">
+            Entrega Global, DNS y Tráfico
+          </button>
+        </div>
+
+        <div class="grid-2" id="servicesGrid"></div>
+      </section>
+
+      <!-- ==================== SECCIÓN 6 ==================== -->
+      <section class="module-section" id="sec-5">
+        <div class="section-header">
+          <span class="section-tag">Módulo 6 · Desempate en el Examen</span>
+          <h1>Comparaciones Clave para No Confundirte</h1>
+          <p class="section-lead">
+            El examen CLF-C02 suele poner dos servicios parecidos entre las
+            opciones. Selecciona cada duelo para dominar la diferencia exacta.
+          </p>
+        </div>
+
+        <div class="comp-selector" id="compSelector"></div>
+        <div class="comp-arena" id="compArena"></div>
+      </section>
+
+      <!-- ==================== SECCIÓN 7 ==================== -->
+      <section class="module-section" id="sec-6">
+        <div class="section-header">
+          <span class="section-tag">Módulo 7 · Entrenamiento Práctico</span>
+          <h1>Escenarios Prácticos Tipo Examen</h1>
+          <p class="section-lead">
+            Lee cada situación empresarial y elige la solución de AWS más
+            adecuada. Recibirás retroalimentación inmediata sobre por qué cada
+            opción es correcta o incorrecta.
+          </p>
+        </div>
+
+        <div id="scenariosContainer"></div>
+      </section>
+
+      <!-- ==================== SECCIÓN 8 ==================== -->
+      <section class="module-section" id="sec-7">
+        <div class="section-header">
+          <span class="section-tag">Módulo 8 · Evaluación Final</span>
+          <h1>Simulacro de Examen: Networking CLF-C02 (15 Preguntas)</h1>
+          <p class="section-lead">
+            Pon a prueba tu criterio con preguntas de escenario similares al
+            examen oficial. Al finalizar verás tu puntaje y los temas exactos
+            que debes reforzar.
+          </p>
+        </div>
+
+        <div id="quizContainer"></div>
+        <div id="quizResults" style="display: none"></div>
+      </section>
+
+      <div class="bottom-nav">
+        <button
+          class="btn btn-secondary"
+          id="prevBtn"
+          onclick="changeSection(-1)"
+        >
+          ← Anterior
+        </button>
+        <span class="text-sm" id="footerStepInfo">Módulo 1 de 8</span>
+        <button class="btn" id="nextBtn" onclick="changeSection(1)">
+          Siguiente módulo →
+        </button>
+      </div>
+    </main>
+
+    <script>
+      // ==================== DATA ====================
+      const SECTIONS = [
+        "1. Mapa AWS",
+        "2. Fundamentos",
+        "3. Amazon VPC",
+        "4. Conectividad",
+        "5. Servicios AWS",
+        "6. Comparaciones",
+        "7. Escenarios",
+        "8. Quiz Final",
+      ];
+
+      const HIERARCHY_INFO = {
+        internet:
+          "<strong>🌐 Internet / On-Premises:</strong> Es el exterior de tu nube. Los usuarios acceden desde sus navegadores o dispositivos, y tu oficina corporativa puede conectarse mediante túneles cifrados (VPN) o enlaces dedicados (Direct Connect).",
+        vpc: "<strong>🏰 Amazon VPC:</strong> Tu red virtual privada dentro de una Región de AWS. Define el perímetro general de tus direcciones IP privadas (por ejemplo, 10.0.0.0/16) y aísla tus recursos de otros clientes.",
+        subnet:
+          "<strong>📦 Subnets (Subredes):</strong> Divisiones más pequeñas dentro de una VPC. Cada subnet pertenece a una única Availability Zone y puede ser pública (con acceso a Internet Gateway) o privada (sin acceso entrante directo desde Internet).",
+        resource:
+          "<strong>⚙️ Recursos AWS:</strong> Las máquinas y servicios que ejecutan tu negocio (instancias EC2, bases de datos RDS, contenedores, balanceadores de carga) alojados dentro de las subnets y protegidos por Security Groups.",
+      };
+
+      const FUNDAMENTALS = [
+        {
+          name: "IP Address (Dirección IP)",
+          short:
+            "Etiqueta numérica única que identifica a un dispositivo en una red.",
+          what: "Es la dirección postal de un servidor o dispositivo para que los datos sepan adónde ir y desde dónde responden.",
+          why: "Permite localizar y enrutar paquetes de información entre origen y destino.",
+          example: "192.0.2.15 identifica a un servidor web específico.",
+          aws: "Cada instancia EC2 recibe una IP privada dentro de su VPC y, opcionalmente, una IP pública.",
+        },
+        {
+          name: "IPv4",
+          short:
+            "Formato clásico de direcciones IP compuesto por 4 números separados por puntos.",
+          what: "Estándar de 32 bits expresado en cuatro bloques (octetos) del 0 al 255.",
+          why: "Es el formato principal utilizado para diseñar bloques de red en Amazon VPC.",
+          example: "10.0.1.25 es una dirección IPv4 válida.",
+          aws: "Al crear una VPC asignas un bloque IPv4 CIDR (y opcionalmente también puedes habilitar IPv6).",
+        },
+        {
+          name: "IP Pública vs. IP Privada",
+          short:
+            "Alcance global en Internet frente a comunicación exclusiva dentro de tu red interna.",
+          what: "La IP privada solo funciona dentro de tu red local o VPC; la IP pública es alcanzable desde cualquier lugar de Internet.",
+          why: "Permite mantener bases de datos ocultas al público mientras expones solo lo necesario.",
+          example:
+            "Tu laptop usa una IP privada en el Wi-Fi de casa (ej. 192.168.1.10) y sale a Internet con la IP pública de tu router.",
+          aws: "Una base de datos RDS usa solo IP privada; un servidor web en subnet pública requiere IP pública (o Elastic IP).",
+        },
+        {
+          name: "CIDR (Classless Inter-Domain Routing)",
+          short:
+            "Notación compacta para definir un rango o bloque completo de direcciones IP.",
+          what: "Combina una IP base con un prefijo (/16, /24) que indica el tamaño del bloque de direcciones.",
+          why: "Permite asignar rangos ordenados de IPs a redes completas y subdividirlas sin desperdiciar direcciones.",
+          example:
+            "10.0.1.0/24 representa las 256 direcciones desde 10.0.1.0 hasta 10.0.1.255.",
+          aws: "Se usa al definir el rango de una VPC, el rango de cada Subnet y las reglas de firewall.",
+        },
+        {
+          name: "Subnet (Subred)",
+          short: "Segmento más pequeño creado al dividir una red grande.",
+          what: "Una subdivisión del bloque CIDR de la red principal.",
+          why: "Organiza los recursos por función y nivel de seguridad (separando capas web de bases de datos).",
+          example:
+            "Dividir el edificio 10.0.0.0/16 en pisos separados como 10.0.1.0/24 y 10.0.2.0/24.",
+          aws: "En AWS, cada subnet vive en una única Availability Zone y es pública o privada según su Route Table.",
+        },
+        {
+          name: "DNS (Domain Name System)",
+          short:
+            "La agenda telefónica de Internet: traduce nombres legibles en direcciones IP.",
+          what: "Sistema que convierte nombres de dominio humanos en direcciones IP numéricas que entienden las máquinas.",
+          why: "Evita que los usuarios tengan que memorizar números como 54.239.28.85 para entrar a una web.",
+          example:
+            "Escribir ejemplo.com en el navegador y que el DNS lo resuelva a 93.184.216.34.",
+          aws: "Amazon Route 53 es el servicio de DNS gestionado y altamente disponible de AWS.",
+        },
+        {
+          name: "Routing (Enrutamiento)",
+          short:
+            "El proceso de decidir qué camino deben tomar los datos para llegar a su destino.",
+          what: "Conjunto de reglas que indican a qué puerta de enlace enviar el tráfico según su IP de destino.",
+          why: "Sin rutas definidas, los paquetes no sabrían cómo salir de una subred hacia otra red o Internet.",
+          example:
+            "Un GPS que indica: 'si vas al centro, toma la autopista norte; si vas al aeropuerto, toma el túnel'.",
+          aws: "Las VPC Route Tables definen si el tráfico va localmente dentro de la VPC, al Internet Gateway o a un NAT Gateway.",
+        },
+        {
+          name: "TCP vs. UDP",
+          short:
+            "Entrega garantizada y ordenada (TCP) frente a envío rápido sin confirmación (UDP).",
+          what: "TCP verifica que cada paquete llegue completo y en orden; UDP envía paquetes a máxima velocidad sin esperar acuse de recibo.",
+          why: "Permite elegir entre fiabilidad total o mínima latencia según la aplicación.",
+          example:
+            "TCP para páginas web y transferencias bancarias; UDP para videollamadas en vivo o gaming.",
+          aws: "Los Security Groups y NACLs permiten filtrar tráfico especificando el protocolo (TCP, UDP o ICMP).",
+        },
+        {
+          name: "Puertos (Ports)",
+          short:
+            "Puertas numeradas dentro de un mismo servidor para distinguir distintos servicios.",
+          what: "Identificadores numéricos (del 0 al 65535) asociados a una IP para dirigir el tráfico a la aplicación correcta.",
+          why: "Un mismo servidor puede atender tráfico web, conexiones administrativas y bases de datos sin mezclarlos.",
+          example:
+            "Puerto 80 (HTTP), Puerto 443 (HTTPS), Puerto 22 (SSH Linux), Puerto 3389 (RDP Windows).",
+          aws: "En un Security Group debes abrir explícitamente puertos como el 443 para permitir tráfico web seguro.",
+        },
+        {
+          name: "HTTP vs. HTTPS",
+          short:
+            "Comunicación web en texto plano (HTTP) frente a comunicación cifrada (HTTPS).",
+          what: "HTTP transmite datos sin cifrar; HTTPS usa certificados SSL/TLS para cifrar la información en tránsito.",
+          why: "Protege contraseñas, datos personales y tarjetas de crédito frente a interceptaciones en la red.",
+          example:
+            "El candado en la barra del navegador indica HTTPS (puerto 443) en lugar de HTTP (puerto 80).",
+          aws: "AWS Certificate Manager (ACM) emite certificados SSL/TLS gratuitos para habilitar HTTPS en CloudFront y Load Balancers.",
+        },
+      ];
+
+      const VPC_DETAILS = {
+        vpc: "<strong>🏰 Amazon VPC (10.0.0.0/16):</strong> Es tu red privada virtual aislada dentro de una Región de AWS. Tiene hasta 65,536 direcciones IP disponibles y ningún tráfico externo entra a menos que tú lo autorices.",
+        igw: "<strong>🌐 Internet Gateway (IGW):</strong> Componente escalable y altamente disponible que se adjunta a la VPC para permitir la comunicación bidireccional entre tus subnets públicas e Internet.",
+        rt: "<strong>🗺️ Route Tables (Tablas de Enrutamiento):</strong> Controlan adónde va el tráfico saliente de cada subnet. La Route Table de la subnet pública apunta <code>0.0.0.0/0 ➔ Internet Gateway</code>; la de la subnet privada apunta <code>0.0.0.0/0 ➔ NAT Gateway</code> (o no tiene ruta a Internet).",
+        az1: "<strong>🏢 Availability Zone A (us-east-1a):</strong> Uno o más centros de datos físicos aislados con energía y red independientes. Desplegar en múltiples AZ protege tu aplicación contra fallos de hardware o energía.",
+        az2: "<strong>🏢 Availability Zone B (us-east-1b):</strong> Segunda zona física independiente dentro de la misma Región. Permite mantener copias activas o de respaldo de tus servidores y bases de datos.",
+        pub1: "<strong>🟢 Subnet Pública A (10.0.1.0/24):</strong> Subred asociada a una Route Table con ruta directa hacia el Internet Gateway. Aquí viven recursos que deben ser accesibles desde Internet (como servidores web o un NAT Gateway).",
+        pub2: "<strong>🟢 Subnet Pública B (10.0.3.0/24):</strong> Segunda subnet pública en otra Availability Zone para balancear tráfico web entre dos zonas físicas.",
+        priv1:
+          "<strong>🟠 Subnet Privada A (10.0.2.0/24):</strong> Subred sin ruta directa desde Internet. Nadie en Internet puede iniciar una conexión hacia aquí. Ideal para bases de datos (RDS) y lógica interna.",
+        priv2:
+          "<strong>🟠 Subnet Privada B (10.0.4.0/24):</strong> Segunda subnet privada en la AZ B, perfecta para alojar la réplica standby de una base de datos Multi-AZ.",
+      };
+
+      const TRAFFIC_FLOWS = {
+        public: {
+          steps: [
+            { title: "👤 Usuario en Internet", sub: "Solicita HTTPS (443)" },
+            { title: "🌐 Internet Gateway", sub: "Entrada pública de VPC" },
+            { title: "🗺️ Route Table Pública", sub: "Ruta 0.0.0.0/0 ➔ IGW" },
+            { title: "🛡️ NACL + Security Group", sub: "Permiten puerto 443" },
+            {
+              title: "🖥️ EC2 en Subnet Pública",
+              sub: "Con IP Pública asignada",
+            },
+          ],
+          desc: "<strong>Conectividad bidireccional con Internet:</strong> Para que una instancia EC2 en una subnet pública hable con Internet necesita 4 cosas: (1) Un <strong>Internet Gateway</strong> adjunto a la VPC, (2) Una <strong>Route Table</strong> en su subnet apuntando <code>0.0.0.0/0</code> al IGW, (3) Una <strong>IP pública</strong>, y (4) Reglas en <strong>Security Group y NACL</strong> que permitan el tráfico.",
+        },
+        nat: {
+          steps: [
+            {
+              title: "🗄️ Instancia Privada",
+              sub: "Solo IP Privada (sin IP pública)",
+            },
+            { title: "🗺️ Route Table Privada", sub: "Ruta 0.0.0.0/0 ➔ NAT GW" },
+            { title: "🔄 NAT Gateway", sub: "Ubicado en Subnet Pública" },
+            { title: "🌐 Internet Gateway", sub: "Sale hacia Internet" },
+            {
+              title: "📦 Repositorio Externo",
+              sub: "Descarga actualizaciones",
+            },
+          ],
+          desc: "<strong>Salida controlada desde Subnet Privada:</strong> La instancia privada envía su petición al <strong>NAT Gateway</strong> (que vive en una subnet pública y tiene IP pública). El NAT traduce la dirección, sale por el Internet Gateway, recibe la respuesta y la devuelve a la instancia privada. Si alguien en Internet intenta iniciar una conexión hacia la instancia privada, el NAT Gateway la bloquea.",
+        },
+        "inbound-blocked": {
+          steps: [
+            {
+              title: "⚠️ Atacante en Internet",
+              sub: "Intenta conectar a DB (3306)",
+            },
+            { title: "🌐 Internet Gateway", sub: "Llega al borde de VPC" },
+            {
+              title: "🚫 Sin IP Pública ni Ruta",
+              sub: "Subnet privada aislada",
+            },
+            { title: "🛡️ NACL / Security Group", sub: "Bloqueo por defecto" },
+            { title: "🗄️ RDS en Subnet Privada", sub: "Totalmente protegida" },
+          ],
+          desc: "<strong>Protección por diseño:</strong> Las instancias en una subnet privada carecen de IP pública y su tabla de enrutamiento no acepta tráfico entrante directo desde el Internet Gateway. Incluso si alguien conociera su IP privada, no es enrutable desde Internet.",
+        },
+      };
+
+      const AWS_SERVICES = [
+        {
+          name: "Amazon VPC",
+          cat: "core",
+          badge: "Base de Red",
+          what: "Red virtual privada y lógicamente aislada dentro de una Región de AWS.",
+          solves:
+            "Evita que tus recursos compartan red con otros clientes y te da control total sobre IPs, subnets y firewalls.",
+          when: "Siempre que despliegues infraestructura de red en AWS (EC2, RDS, EKS, etc.).",
+          keyword:
+            "Red virtual aislada, control de subredes, rangos IP propios.",
+        },
+        {
+          name: "Amazon Route 53",
+          cat: "edge",
+          badge: "DNS Global",
+          what: "Servicio de Sistema de Nombres de Dominio (DNS) en la nube altamente disponible y escalable.",
+          solves:
+            "Traduce nombres de dominio (ej. miempresa.com) a direcciones IP de recursos AWS o externos y realiza health checks.",
+          when: "Cuando necesitas registrar un dominio, enrutar usuarios por latencia/geolocalización o redirigir tráfico ante fallos.",
+          keyword:
+            "DNS, traducción de nombres de dominio, health checks, enrutamiento geográfico.",
+        },
+        {
+          name: "Amazon CloudFront",
+          cat: "edge",
+          badge: "CDN / Edge",
+          what: "Red de entrega de contenido (CDN) que almacena en caché contenido estático y dinámico en ubicaciones de borde (Edge Locations).",
+          solves:
+            "Elimina la lentitud provocada por la distancia física entre los usuarios globales y tu servidor origen.",
+          when: "Cuando deseas entregar videos, imágenes, APIs o sitios web con baja latencia a usuarios en todo el mundo.",
+          keyword:
+            "CDN, caché, Edge Locations, baja latencia global, entrega de contenido.",
+        },
+        {
+          name: "Elastic Load Balancing (ELB)",
+          cat: "core",
+          badge: "Distribución de Carga",
+          what: "Servicio que distribuye automáticamente el tráfico entrante entre múltiples destinos (como instancias EC2) en varias AZ.",
+          solves:
+            "Evita que un solo servidor se sature o que la aplicación caiga si una instancia falla.",
+          when: "Cuando necesitas alta disponibilidad, tolerancia a fallos y escalabilidad para recibir tráfico de aplicaciones.",
+          keyword:
+            "Distribuir tráfico entrante, múltiples instancias EC2, alta disponibilidad.",
+        },
+        {
+          name: "AWS Direct Connect",
+          cat: "hybrid",
+          badge: "Conexión Física Dedicada",
+          what: "Conexión de red física y privada dedicada entre tu centro de datos on-premises y AWS.",
+          solves:
+            "Elimina la variabilidad, congestión y costos de ancho de banda de usar el Internet público.",
+          when: "Cuando una empresa requiere conexión privada, predecible, de alto rendimiento y que NO pase por Internet.",
+          keyword:
+            "Conexión física dedicada, privada, sin pasar por Internet, ancho de banda constante.",
+        },
+        {
+          name: "AWS Site-to-Site VPN",
+          cat: "hybrid",
+          badge: "Túnel Cifrado",
+          what: "Conexión cifrada (IPsec) a través del Internet público entre tu red corporativa local y tu Amazon VPC.",
+          solves:
+            "Conecta tu oficina con AWS de forma segura y rápida sin instalar cables físicos dedicados.",
+          when: "Cuando necesitas conectar tu oficina con AWS en minutos/horas usando Internet de forma cifrada y económica.",
+          keyword:
+            "Conexión cifrada a través de Internet, implementación rápida, túnel IPsec.",
+        },
+        {
+          name: "AWS Transit Gateway",
+          cat: "core",
+          badge: "Hub Central",
+          what: "Enrutador central en la nube (arquitectura hub-and-spoke) que interconecta decenas o miles de VPCs y redes on-premises.",
+          solves:
+            "Evita crear una malla caótica e inmanejable de conexiones punto a punto cuando crecen tus VPCs.",
+          when: "Cuando tienes múltiples VPCs y oficinas que necesitan comunicarse de forma centralizada y escalable.",
+          keyword:
+            "Conectar múltiples VPCs de manera centralizada, hub central, simplificar topología.",
+        },
+        {
+          name: "AWS Global Accelerator",
+          cat: "edge",
+          badge: "Aceleración de Red",
+          what: "Servicio que mejora el rendimiento del tráfico global enrutándolo a través de la red troncal privada de AWS usando IPs estáticas Anycast.",
+          solves:
+            "Evita saltos lentos del Internet público para aplicaciones en tiempo real (gaming, VoIP, trading) que no usan caché.",
+          when: "Cuando necesitas mejorar velocidad/disponibilidad con direcciones IP estáticas globales sin depender de caché HTTP.",
+          keyword:
+            "IPs estáticas globales, red troncal de AWS, baja latencia sin caché, failover rápido.",
+        },
+        {
+          name: "VPC Peering",
+          cat: "core",
+          badge: "Conexión 1 a 1",
+          what: "Conexión de red privada directa punto a punto entre dos VPCs para que se comuniquen usando IPs privadas.",
+          solves:
+            "Permite que dos VPCs compartan datos sin salir a Internet ni usar gateways externos.",
+          when: "Cuando solo necesitas conectar dos VPCs específicas entre sí (sin enrutamiento transitivo ni hub central).",
+          keyword:
+            "Conectar dos VPC directamente, comunicación privada punto a punto.",
+        },
+        {
+          name: "Amazon API Gateway",
+          cat: "edge",
+          badge: "Puerta de APIs",
+          what: "Servicio totalmente gestionado para crear, publicar, mantener, monitorear y proteger APIs REST y WebSocket a cualquier escala.",
+          solves:
+            "Gestiona autenticación, control de tráfico (throttling) y versionado frente a backends como AWS Lambda.",
+          when: "Cuando expones microservicios o funciones serverless (Lambda) como APIs hacia aplicaciones móviles o web.",
+          keyword:
+            "Crear y gestionar APIs, puerta de entrada para AWS Lambda, throttling.",
+        },
+      ];
+
+      const COMPARISONS = [
+        {
+          label: "Subnet Pública vs. Privada",
+          leftTitle: "🟢 Subnet Pública",
+          leftPoints: [
+            "Su Route Table tiene una ruta hacia un <strong>Internet Gateway</strong>.",
+            "Los recursos necesitan IP pública para comunicarse directamente con Internet.",
+            "Uso: Servidores web front-end, Load Balancers públicos, NAT Gateways.",
+          ],
+          rightTitle: "🟠 Subnet Privada",
+          rightPoints: [
+            "Su Route Table <strong>NO</strong> tiene ruta directa hacia el Internet Gateway.",
+            "Aislada de conexiones iniciadas desde Internet.",
+            "Uso: Bases de datos (RDS), servidores de aplicaciones internos.",
+          ],
+          diff: "Lo que convierte a una subnet en pública o privada es su <strong>Route Table</strong> (si apunta o no a un Internet Gateway), no su nombre.",
+          trap: "Creer que poner una instancia en una subnet pública basta para darle Internet: también necesita IP pública y reglas de Security Group.",
+          clue: "Si el escenario pide alojar una base de datos protegida del acceso directo desde Internet ➔ <strong>Subnet Privada</strong>.",
+        },
+        {
+          label: "Internet Gateway vs. NAT Gateway",
+          leftTitle: "🌐 Internet Gateway (IGW)",
+          leftPoints: [
+            "Permite tráfico <strong>bidireccional</strong> (entrante y saliente) con Internet.",
+            "Se adjunta a nivel de toda la VPC.",
+            "Sirve para recursos en subnets públicas.",
+          ],
+          rightTitle: "🔄 NAT Gateway",
+          rightPoints: [
+            "Permite tráfico <strong>unidireccional</strong>: solo salida desde subnet privada hacia Internet.",
+            "Bloquea cualquier conexión iniciada desde Internet.",
+            "Se despliega dentro de una subnet pública.",
+          ],
+          diff: "IGW abre la puerta en ambos sentidos para recursos públicos; NAT Gateway permite que recursos privados salgan a descargar actualizaciones sin quedar expuestos.",
+          trap: "Colocar el NAT Gateway dentro de la subnet privada. ¡Error! El NAT Gateway siempre vive en la subnet pública.",
+          clue: "'Instancia privada necesita descargar parches/actualizaciones desde Internet sin recibir tráfico entrante' ➔ <strong>NAT Gateway</strong>.",
+        },
+        {
+          label: "Security Group vs. Network ACL",
+          leftTitle: "🛡️ Security Group (SG)",
+          leftPoints: [
+            "Actúa a nivel de <strong>instancia</strong> (EC2).",
+            "<strong>Stateful</strong> (recuerda la conexión y permite la respuesta automáticamente).",
+            "Solo permite reglas <strong>Allow</strong> (no puedes crear reglas Deny).",
+          ],
+          rightTitle: "🚧 Network ACL (NACL)",
+          rightPoints: [
+            "Actúa a nivel de <strong>subnet</strong>.",
+            "<strong>Stateless</strong> (debes configurar reglas tanto de entrada como de salida).",
+            "Permite reglas <strong>Allow y Deny</strong> explícitas.",
+          ],
+          diff: "SG es un guardia personal de cada instancia (stateful, solo Allow); NACL es el guardia del perímetro de la subnet (stateless, Allow y Deny).",
+          trap: "Intentar bloquear una IP atacante específica usando un Security Group (no tiene reglas Deny; debes usar NACL).",
+          clue: "'Bloquear una dirección IP específica a nivel de subred' ➔ <strong>Network ACL</strong>. 'Firewall stateful a nivel de instancia' ➔ <strong>Security Group</strong>.",
+        },
+        {
+          label: "VPC Peering vs. Transit Gateway",
+          leftTitle: "🔗 VPC Peering",
+          leftPoints: [
+            "Conexión directa <strong>1 a 1</strong> entre dos VPCs.",
+            "Sin costo fijo por hora de gateway (pagas transferencia de datos).",
+            "No es transitivo (si A conecta con B y B con C, A no habla con C).",
+          ],
+          rightTitle: "hub AWS Transit Gateway",
+          rightPoints: [
+            "Concentrador central (<strong>Hub-and-Spoke</strong>) para conectar múltiples VPCs y on-premises.",
+            "Simplifica redes grandes evitando decenas de conexiones cruzadas.",
+            "Enrutamiento centralizado.",
+          ],
+          diff: "VPC Peering une un par de VPCs; Transit Gateway actúa como estación central para docenas o cientos de VPCs.",
+          trap: "Elegir VPC Peering cuando la pregunta habla de 20 o 50 VPCs que necesitan conectarse entre sí.",
+          clue: "'Conectar dos VPC directamente' ➔ <strong>VPC Peering</strong>. 'Conectar múltiples VPC de forma centralizada' ➔ <strong>Transit Gateway</strong>.",
+        },
+        {
+          label: "VPN vs. Direct Connect",
+          leftTitle: "🔐 AWS Site-to-Site VPN",
+          leftPoints: [
+            "Viaja cifrado a través del <strong>Internet público</strong>.",
+            "Se configura rápidamente (en minutos).",
+            "Bajo costo inicial, pero sujeto a la latencia variable de Internet.",
+          ],
+          rightTitle: "⚡ AWS Direct Connect",
+          rightPoints: [
+            "Conexión de fibra óptica <strong>física y dedicada</strong>.",
+            "<strong>NO</strong> pasa por el Internet público.",
+            "Ancho de banda constante y predecible; tarda semanas/meses en instalarse.",
+          ],
+          diff: "VPN es un túnel cifrado sobre Internet (rápido y económico); Direct Connect es un cable privado dedicado (máxima estabilidad y ancho de banda).",
+          trap: "Confundir 'conexión cifrada por Internet' con Direct Connect.",
+          clue: "'Conexión cifrada rápida sobre Internet' ➔ <strong>Site-to-Site VPN</strong>. 'Conexión privada dedicada sin pasar por Internet' ➔ <strong>Direct Connect</strong>.",
+        },
+        {
+          label: "Route 53 vs. CloudFront",
+          leftTitle: "🧭 Amazon Route 53",
+          leftPoints: [
+            "Servicio de <strong>DNS</strong> (traduce dominios a direcciones IP).",
+            "Dirige al usuario hacia el servidor o región adecuada.",
+            "No almacena ni entrega archivos web.",
+          ],
+          rightTitle: "🚀 Amazon CloudFront",
+          rightPoints: [
+            "Servicio de <strong>CDN</strong> (entrega contenido en caché).",
+            "Guarda copias de imágenes, videos y HTML en Edge Locations cercanas al usuario.",
+            "Reduce drásticamente los tiempos de carga.",
+          ],
+          diff: "Route 53 dice dónde está el servidor (como un GPS); CloudFront entrega el contenido desde una sucursal cercana en caché.",
+          trap: "Pensar que Route 53 almacena imágenes o videos en caché.",
+          clue: "'Traducir dominio a IP' ➔ <strong>Route 53</strong>. 'Almacenar contenido estático en caché cerca de usuarios globales' ➔ <strong>CloudFront</strong>.",
+        },
+        {
+          label: "Load Balancer vs. Global Accelerator",
+          leftTitle: "⚖️ Elastic Load Balancing (ELB)",
+          leftPoints: [
+            "Reparte tráfico entre instancias dentro de <strong>una Región</strong>.",
+            "Realiza health checks a instancias EC2 o contenedores.",
+            "Trabaja sobre tráfico HTTP/HTTPS/TCP regional.",
+          ],
+          rightTitle: "🌍 AWS Global Accelerator",
+          rightPoints: [
+            "Optimiza el tráfico <strong>global</strong> hacia una o varias Regiones usando la red troncal de AWS.",
+            "Proporciona <strong>2 direcciones IP estáticas Anycast</strong>.",
+            "Conmutación por error (failover) regional instantánea.",
+          ],
+          diff: "ELB balancea carga entre servidores de una misma región; Global Accelerator acelera el viaje del usuario desde cualquier país hacia tu aplicación usando IPs estáticas.",
+          trap: "Confundir Global Accelerator con CloudFront: CloudFront cachea contenido; Global Accelerator acelera tráfico de red sin caché con IPs estáticas.",
+          clue: "'Distribuir tráfico entre varias EC2' ➔ <strong>ELB</strong>. 'IPs estáticas globales y red troncal de AWS para baja latencia sin caché' ➔ <strong>Global Accelerator</strong>.",
+        },
+      ];
+
+      const SCENARIOS = [
+        {
+          prompt:
+            "Una startup necesita conectar su oficina corporativa con su Amazon VPC de manera urgente hoy mismo mediante una conexión cifrada que utilice su conexión actual a Internet.",
+          options: [
+            "AWS Direct Connect",
+            "AWS Site-to-Site VPN",
+            "VPC Peering",
+            "AWS Transit Gateway",
+          ],
+          correct: 1,
+          why: "<strong>AWS Site-to-Site VPN</strong> crea un túnel cifrado IPsec sobre el Internet público y puede desplegarse en minutos.",
+          others:
+            "Direct Connect requiere instalación física dedicada (tarda semanas y no usa Internet); VPC Peering solo une dos VPCs entre sí; Transit Gateway es un concentrador para múltiples redes.",
+        },
+        {
+          prompt:
+            "Una institución financiera requiere una conexión privada, de alta velocidad y rendimiento predecible entre su centro de datos local y AWS, evitando por completo el Internet público.",
+          options: [
+            "AWS Direct Connect",
+            "AWS Site-to-Site VPN",
+            "Internet Gateway",
+            "AWS Global Accelerator",
+          ],
+          correct: 0,
+          why: "<strong>AWS Direct Connect</strong> establece un enlace físico dedicado que evita el Internet público y garantiza ancho de banda constante.",
+          others:
+            "Site-to-Site VPN viaja por Internet público; Internet Gateway conecta una VPC con Internet; Global Accelerator optimiza acceso de usuarios externos.",
+        },
+        {
+          prompt:
+            "Una tienda en línea experimenta picos de visitas y necesita distribuir automáticamente el tráfico web entrante entre múltiples instancias EC2 ubicadas en dos Availability Zones.",
+          options: [
+            "Amazon Route 53",
+            "NAT Gateway",
+            "Elastic Load Balancing (ELB)",
+            "VPC Peering",
+          ],
+          correct: 2,
+          why: "<strong>Elastic Load Balancing (ELB)</strong> reparte el tráfico entrante entre múltiples instancias EC2 saludables a través de distintas AZ.",
+          others:
+            "Route 53 resuelve nombres DNS pero no balancea directamente cargas entre instancias como un ELB; NAT Gateway es para salida a Internet desde subnets privadas.",
+        },
+        {
+          prompt:
+            "Un servidor de aplicaciones alojado en una subnet privada necesita descargar parches de seguridad desde Internet, pero ninguna conexión externa debe poder iniciarse hacia él.",
+          options: [
+            "Internet Gateway",
+            "NAT Gateway",
+            "AWS Direct Connect",
+            "Network ACL",
+          ],
+          correct: 1,
+          why: "<strong>NAT Gateway</strong> (ubicado en una subnet pública) permite tráfico saliente desde instancias privadas hacia Internet bloqueando conexiones entrantes no solicitadas.",
+          others:
+            "Un Internet Gateway permitiría conectividad bidireccional pública; Direct Connect conecta con oficinas físicas; NACL solo filtra paquetes.",
+        },
+        {
+          prompt:
+            "Una corporación ha adquirido varias empresas y ahora administra 35 VPCs distintas que necesitan comunicarse entre sí y con la oficina central sin crear cientos de enlaces individuales.",
+          options: [
+            "VPC Peering",
+            "AWS Transit Gateway",
+            "Elastic Load Balancing",
+            "Amazon CloudFront",
+          ],
+          correct: 1,
+          why: "<strong>AWS Transit Gateway</strong> actúa como un enrutador central (hub-and-spoke) que conecta múltiples VPCs y redes on-premises desde un solo punto.",
+          others:
+            "VPC Peering requiere conexiones 1 a 1 que se vuelven inmanejables con 35 VPCs; ELB balancea tráfico de aplicaciones; CloudFront es una CDN.",
+        },
+        {
+          prompt:
+            "Una plataforma de streaming educativo tiene estudiantes en América, Europa y Asia y quiere reducir la latencia al entregar videos e imágenes almacenándolos en caché cerca de los usuarios.",
+          options: [
+            "Amazon CloudFront",
+            "Amazon VPC",
+            "AWS Site-to-Site VPN",
+            "NAT Gateway",
+          ],
+          correct: 0,
+          why: "<strong>Amazon CloudFront</strong> es la CDN de AWS que almacena contenido en caché en Edge Locations globales para entregarlo con mínima latencia.",
+          others:
+            "VPC es una red regional aislada; VPN y NAT Gateway no almacenan contenido en caché ni aceleran entregas globales.",
+        },
+        {
+          prompt:
+            "Una empresa acaba de lanzar su portal web y necesita que cuando los usuarios escriban 'www.tiendaejemplo.com' sean dirigidos hacia la dirección de su Load Balancer en AWS.",
+          options: [
+            "Amazon API Gateway",
+            "Amazon Route 53",
+            "Security Groups",
+            "AWS Direct Connect",
+          ],
+          correct: 1,
+          why: "<strong>Amazon Route 53</strong> es el servicio DNS de AWS encargado de traducir nombres de dominio legibles en direcciones de recursos AWS.",
+          others:
+            "API Gateway gestiona APIs REST/WebSocket; Security Groups son firewalls de instancia; Direct Connect es un enlace físico on-premises.",
+        },
+        {
+          prompt:
+            "El equipo de facturación y el equipo de inventario tienen cada uno su propia VPC y necesitan intercambiar datos directamente de forma privada entre esas dos únicas VPCs.",
+          options: [
+            "VPC Peering",
+            "Internet Gateway",
+            "Amazon CloudFront",
+            "AWS Global Accelerator",
+          ],
+          correct: 0,
+          why: "<strong>VPC Peering</strong> permite conectar directamente dos VPCs mediante direcciones IP privadas sin necesidad de hardware ni gateways intermedios.",
+          others:
+            "Internet Gateway expone recursos a Internet; CloudFront y Global Accelerator son servicios orientados a usuarios finales externos.",
+        },
+      ];
+
+      const QUIZ_QUESTIONS = [
+        {
+          topic: "Amazon VPC y Subnets",
+          q: "¿Qué determina técnicamente si una subnet dentro de una Amazon VPC es pública o privada?",
+          options: [
+            "El tamaño del bloque CIDR asignado a la subnet",
+            "Si la Route Table asociada a la subnet tiene una ruta hacia un Internet Gateway",
+            "Si las instancias dentro de la subnet tienen un Security Group",
+            "La Availability Zone en la que fue creada la subnet",
+          ],
+          correct: 1,
+          exp: "Una subnet es pública únicamente cuando su Route Table enruta el tráfico saliente (0.0.0.0/0) hacia un Internet Gateway.",
+        },
+        {
+          topic: "Security Groups vs. Network ACLs",
+          q: "Un administrador necesita bloquear de inmediato una dirección IP maliciosa específica para que no pueda ingresar a ninguna instancia dentro de una subnet. ¿Qué componente debe utilizar?",
+          options: [
+            "Security Group, añadiendo una regla de denegación (Deny)",
+            "Network ACL (NACL), añadiendo una regla explícita de denegación (Deny)",
+            "NAT Gateway en la subnet privada",
+            "Amazon Route 53 con health checks",
+          ],
+          correct: 1,
+          exp: "Los Security Groups solo soportan reglas Allow. Para crear reglas explícitas de denegación (Deny) a nivel de subnet se utilizan Network ACLs.",
+        },
+        {
+          topic: "NAT Gateway vs. Internet Gateway",
+          q: "Una instancia EC2 en una subnet privada necesita conectarse a una API externa en Internet para enviar reportes, pero nadie en Internet debe poder iniciar conexiones hacia la EC2. ¿Qué arquitectura cumple esto?",
+          options: [
+            "Asignar una IP pública a la EC2 y conectarla a un Internet Gateway",
+            "Colocar un NAT Gateway en la subnet pública y actualizar la Route Table de la subnet privada",
+            "Colocar un NAT Gateway dentro de la misma subnet privada",
+            "Crear una conexión de VPC Peering hacia Internet",
+          ],
+          correct: 1,
+          exp: "El NAT Gateway debe alojarse en una subnet pública (con ruta al IGW) y la subnet privada debe enrutar su tráfico saliente hacia dicho NAT Gateway.",
+        },
+        {
+          topic: "Direct Connect vs. Site-to-Site VPN",
+          q: "¿Cuál es una ventaja clave de AWS Site-to-Site VPN frente a AWS Direct Connect?",
+          options: [
+            "No utiliza el Internet público en ningún tramo",
+            "Ofrece un enlace físico dedicado con latencia garantizada",
+            "Puede implementarse rápidamente en cuestión de minutos con bajo costo inicial",
+            "Almacena datos en caché en Edge Locations globales",
+          ],
+          correct: 2,
+          exp: "Site-to-Site VPN utiliza Internet de forma cifrada, lo que permite desplegarlo en minutos sin esperar instalaciones físicas.",
+        },
+        {
+          topic: "Direct Connect vs. Site-to-Site VPN",
+          q: "Una empresa procesa grandes volúmenes de datos científicos entre su laboratorio local y AWS y requiere una conexión privada dedicada que evite la congestión de Internet. ¿Qué servicio debe elegir?",
+          options: [
+            "AWS Direct Connect",
+            "AWS Site-to-Site VPN",
+            "Amazon CloudFront",
+            "AWS Transit Gateway",
+          ],
+          correct: 0,
+          exp: "AWS Direct Connect proporciona una conexión de red física y privada dedicada entre las instalaciones del cliente y AWS.",
+        },
+        {
+          topic: "CloudFront vs. Route 53",
+          q: "Una aplicación web sufre tiempos de carga lentos porque sus imágenes y archivos estáticos están en una sola Región de AWS mientras sus usuarios están repartidos por todo el mundo. ¿Qué servicio resuelve este problema?",
+          options: [
+            "Amazon Route 53",
+            "Amazon CloudFront",
+            "Elastic Load Balancing",
+            "VPC Peering",
+          ],
+          correct: 1,
+          exp: "Amazon CloudFront es la CDN de AWS que almacena contenido en caché en Edge Locations cercanas a los usuarios finales.",
+        },
+        {
+          topic: "Transit Gateway vs. VPC Peering",
+          q: "¿Cuándo es preferible utilizar AWS Transit Gateway en lugar de VPC Peering?",
+          options: [
+            "Cuando solo se desea conectar dos VPCs en la misma región",
+            "Cuando se necesita interconectar decenas de VPCs y redes locales mediante un concentrador centralizado",
+            "Cuando se desea distribuir tráfico HTTP entre servidores EC2",
+            "Cuando se requiere traducir nombres de dominio a direcciones IP",
+          ],
+          correct: 1,
+          exp: "Transit Gateway simplifica topologías complejas actuando como hub central entre múltiples VPCs y conexiones on-premises.",
+        },
+        {
+          topic: "Security Groups vs. Network ACLs",
+          q: "¿Qué significa que un Security Group sea 'stateful' (con estado)?",
+          options: [
+            "Que aplica automáticamente a todas las subnets de la VPC",
+            "Que si permites tráfico entrante hacia una instancia, el tráfico de respuesta saliente se permite automáticamente",
+            "Que evalúa reglas de entrada y salida de forma totalmente independiente",
+            "Que guarda copias de seguridad de los paquetes de red",
+          ],
+          correct: 1,
+          exp: "Al ser stateful, el Security Group recuerda la sesión iniciada y deja salir la respuesta sin requerir una regla saliente adicional.",
+        },
+        {
+          topic: "Fundamentos de Networking (CIDR / IP)",
+          q: "Al diseñar tu Amazon VPC eliges el bloque CIDR 10.0.0.0/16 y creas dos subnets: 10.0.1.0/24 y 10.0.2.0/24. ¿Qué afirmación es correcta?",
+          options: [
+            "El bloque /24 contiene más direcciones IP que el bloque /16",
+            "Ambas subnets son subdivisiones válidas que caben dentro del bloque de la VPC",
+            "Las direcciones 10.0.x.x son direcciones públicas enrutables en Internet",
+            "Un bloque CIDR solo puede usarse en AWS Direct Connect",
+          ],
+          correct: 1,
+          exp: "10.0.0.0/16 fija los dos primeros octetos (10.0), por lo que 10.0.1.0/24 y 10.0.2.0/24 son subredes internas válidas de esa VPC.",
+        },
+        {
+          topic: "Elastic Load Balancing (ELB)",
+          q: "¿Cuál es la función principal de Elastic Load Balancing (ELB) en una arquitectura de AWS?",
+          options: [
+            "Almacenar contenido estático en ubicaciones de borde",
+            "Distribuir automáticamente el tráfico entrante entre múltiples destinos saludables en varias Availability Zones",
+            "Cifrar el tráfico entre la oficina local y la VPC",
+            "Asignar nombres de dominio personalizados a instancias EC2",
+          ],
+          correct: 1,
+          exp: "ELB reparte el tráfico entrante entre múltiples instancias EC2 u otros destinos, mejorando la disponibilidad y tolerancia a fallos.",
+        },
+        {
+          topic: "Global Accelerator vs. CloudFront",
+          q: "Una empresa de videojuegos multijugador en tiempo real (tráfico UDP no cacheable) necesita reducir la latencia global y ofrecer dos direcciones IP estáticas fijas a sus jugadores. ¿Qué servicio de AWS es el más adecuado?",
+          options: [
+            "AWS Global Accelerator",
+            "Amazon CloudFront",
+            "NAT Gateway",
+            "Amazon API Gateway",
+          ],
+          correct: 0,
+          exp: "AWS Global Accelerator proporciona IPs estáticas Anycast y dirige el tráfico por la red troncal privada de AWS, ideal para tráfico en tiempo real sin caché.",
+        },
+        {
+          topic: "Fundamentos de Networking (Puertos y Protocolos)",
+          q: "Quieres permitir que los usuarios accedan de forma segura y cifrada a tu sitio web alojado en una instancia EC2. ¿Qué protocolo y puerto debes permitir en tu Security Group?",
+          options: [
+            "HTTP en el puerto 80",
+            "HTTPS en el puerto 443",
+            "SSH en el puerto 22",
+            "RDP en el puerto 3389",
+          ],
+          correct: 1,
+          exp: "HTTPS utiliza el puerto 443 y cifra la comunicación web en tránsito.",
+        },
+        {
+          topic: "Amazon Route 53",
+          q: "¿Qué servicio de AWS funciona como sistema DNS altamente disponible para dirigir a los usuarios hacia los recursos de tu aplicación mediante nombres de dominio?",
+          options: [
+            "Amazon Route 53",
+            "Amazon API Gateway",
+            "AWS Transit Gateway",
+            "Internet Gateway",
+          ],
+          correct: 0,
+          exp: "Amazon Route 53 es el servicio DNS gestionado de AWS.",
+        },
+        {
+          topic: "Amazon API Gateway",
+          q: "Un equipo de desarrollo construyó funciones serverless en AWS Lambda y necesita un servicio gestionado para exponerlas como APIs REST con control de acceso y límites de peticiones. ¿Qué servicio debe usar?",
+          options: [
+            "Amazon API Gateway",
+            "VPC Peering",
+            "AWS Direct Connect",
+            "Network ACL",
+          ],
+          correct: 0,
+          exp: "Amazon API Gateway actúa como puerta de entrada gestionada para crear, publicar y proteger APIs conectadas a servicios como AWS Lambda.",
+        },
+        {
+          topic: "Arquitectura VPC y Alta Disponibilidad",
+          q: "¿Por qué se recomienda desplegar subnets en al menos dos Availability Zones dentro de una misma VPC?",
+          options: [
+            "Porque una VPC no puede crearse si solo tiene una subnet",
+            "Para lograr alta disponibilidad y tolerancia a fallos ante la caída de un centro de datos físico",
+            "Porque el Internet Gateway solo funciona cuando hay dos subnets",
+            "Para duplicar automáticamente el tamaño del bloque CIDR",
+          ],
+          correct: 1,
+          exp: "Las Availability Zones están físicamente aisladas; usar al menos dos garantiza continuidad operativa si una zona sufre una interrupción.",
+        },
+      ];
+
+      // ==================== STATE ====================
+      let currentSection = 0;
+      const visitedSections = new Set([0]);
+      const quizAnswers = new Array(QUIZ_QUESTIONS.length).fill(null);
+      let quizSubmitted = false;
+
+      // ==================== NAVIGATION & PROGRESS ====================
+      function renderNav() {
+        const nav = document.getElementById("sectionNav");
+        nav.innerHTML = SECTIONS.map((label, idx) => {
+          const activeCls = idx === currentSection ? "active" : "";
+          const compCls = visitedSections.has(idx) ? "completed" : "";
+          return `<button class="nav-pill ${activeCls} ${compCls}" onclick="goToSection(${idx})">${label}</button>`;
+        }).join("");
+
+        const pct = ((currentSection + 1) / SECTIONS.length) * 100;
+        document.getElementById("progressFill").style.width = `${pct}%`;
+        document.getElementById("progressText").textContent =
+          `Sección ${currentSection + 1} de ${SECTIONS.length}`;
+        document.getElementById("footerStepInfo").textContent =
+          `Módulo ${currentSection + 1} de ${SECTIONS.length} · ${SECTIONS[currentSection]}`;
+
+        document.getElementById("prevBtn").disabled = currentSection === 0;
+        const nextBtn = document.getElementById("nextBtn");
+        if (currentSection === SECTIONS.length - 1) {
+          nextBtn.style.display = "none";
+        } else {
+          nextBtn.style.display = "inline-flex";
+        }
+      }
+
+      function goToSection(idx) {
+        if (idx < 0 || idx >= SECTIONS.length) return;
+        document.querySelectorAll(".module-section").forEach((sec, i) => {
+          sec.classList.toggle("active", i === idx);
+        });
+        currentSection = idx;
+        visitedSections.add(idx);
+        renderNav();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function changeSection(delta) {
+        goToSection(currentSection + delta);
+      }
+
+      // ==================== SECTION 1: HIERARCHY ====================
+      document
+        .querySelectorAll("#hierarchyChain .flow-node")
+        .forEach((node) => {
+          node.addEventListener("click", () => {
+            document
+              .querySelectorAll("#hierarchyChain .flow-node")
+              .forEach((n) => n.classList.remove("selected"));
+            node.classList.add("selected");
+            document.getElementById("hierarchyDetail").innerHTML =
+              HIERARCHY_INFO[node.dataset.node];
+          });
+        });
+
+      // ==================== SECTION 2: FUNDAMENTALS & CIDR ====================
+      function renderFundamentals() {
+        const grid = document.getElementById("fundamentalsGrid");
+        grid.innerHTML = FUNDAMENTALS.map(
+          (item, i) => `
+      <div class="concept-card" onclick="this.classList.toggle('open')">
+        <div class="concept-header">
+          <span class="concept-name">${i + 1}. ${item.name}</span>
+          <span class="toggle-ind">▼</span>
+        </div>
+        <div class="concept-short">${item.short}</div>
+        <div class="concept-body">
+          <div class="detail-row"><strong>¿Qué es?:</strong> ${item.what}</div>
+          <div class="detail-row"><strong>¿Para qué sirve?:</strong> ${item.why}</div>
+          <div class="detail-row"><strong>Ejemplo práctico:</strong> ${item.example}</div>
+          <div class="detail-row" style="color:#a5f3fc;"><strong>En AWS:</strong> ${item.aws}</div>
+        </div>
+      </div>
+    `,
+        ).join("");
+      }
+
+      function renderCIDR(prefix) {
+        const octetsEl = document.getElementById("cidrOctets");
+        const expEl = document.getElementById("cidrExplanation");
+        if (prefix === "16") {
+          octetsEl.innerHTML = `
+        <div class="octet-cell octet-locked"><div class="octet-num">10</div><div class="octet-tag">🔒 Red fija (8 bits)</div></div>
+        <div class="octet-cell octet-locked"><div class="octet-num">0</div><div class="octet-tag">🔒 Red fija (8 bits)</div></div>
+        <div class="octet-cell octet-free"><div class="octet-num">0–255</div><div class="octet-tag">✨ Libre para subnets</div></div>
+        <div class="octet-cell octet-free"><div class="octet-num">0–255</div><div class="octet-tag">✨ Libre para hosts</div></div>
+      `;
+          expEl.innerHTML = `<strong>10.0.0.0/16 (Tamaño máximo recomendado para una VPC):</strong> Los primeros 16 bits (<code>10.0</code>) quedan fijos para identificar tu VPC. Los dos últimos bloques quedan libres, dándote <strong>65,536 direcciones IP</strong> para dividirlas en múltiples subnets.`;
+        } else {
+          octetsEl.innerHTML = `
+        <div class="octet-cell octet-locked"><div class="octet-num">10</div><div class="octet-tag">🔒 Fijo (8 bits)</div></div>
+        <div class="octet-cell octet-locked"><div class="octet-num">0</div><div class="octet-tag">🔒 Fijo (8 bits)</div></div>
+        <div class="octet-cell octet-locked"><div class="octet-num">1</div><div class="octet-tag">🔒 Subnet fija (8 bits)</div></div>
+        <div class="octet-cell octet-free"><div class="octet-num">0–255</div><div class="octet-tag">✨ Libre para recursos</div></div>
+      `;
+          expEl.innerHTML = `<strong>10.0.1.0/24 (Tamaño clásico para una Subnet):</strong> Los primeros 24 bits (<code>10.0.1</code>) quedan fijos. Solo varía el último número (del 0 al 255), ofreciendo <strong>256 direcciones IP</strong> (AWS reserva 5 para gestión interna, quedando 251 utilizables para tus instancias).`;
+        }
+      }
+
+      document.querySelectorAll(".cidr-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".cidr-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderCIDR(btn.dataset.cidr);
+        });
+      });
+
+      // ==================== SECTION 3: VPC INSPECTOR ====================
+      document.querySelectorAll(".vpc-clickable").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          document
+            .querySelectorAll(".vpc-clickable")
+            .forEach((c) => c.classList.remove("active-comp"));
+          el.classList.add("active-comp");
+          document.getElementById("vpcInspector").innerHTML =
+            VPC_DETAILS[el.dataset.comp];
+        });
+      });
+
+      // ==================== SECTION 4: TRAFFIC SIMULATOR ====================
+      function renderTrafficFlow(key) {
+        const data = TRAFFIC_FLOWS[key];
+        document.getElementById("trafficPipeline").innerHTML = data.steps
+          .map(
+            (s, idx) => `
+      <div class="pipe-step">${s.title}<small>${s.sub}</small></div>
+      ${idx < data.steps.length - 1 ? '<div style="color:var(--accent-cyan); font-weight:800;">➔</div>' : ""}
+    `,
+          )
+          .join("");
+        document.getElementById("trafficExplanation").innerHTML = data.desc;
+      }
+
+      document.querySelectorAll("[data-flow]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll("[data-flow]")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderTrafficFlow(btn.dataset.flow);
+        });
+      });
+
+      // ==================== SECTION 5: AWS SERVICES ====================
+      function renderServices(filter = "all") {
+        const list =
+          filter === "all"
+            ? AWS_SERVICES
+            : AWS_SERVICES.filter((s) => s.cat === filter);
+        document.getElementById("servicesGrid").innerHTML = list
+          .map(
+            (s) => `
+      <div class="service-card">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; gap:0.5rem;">
+            <strong style="font-size:1.05rem;">${s.name}</strong>
+            <span class="badge badge-purple">${s.badge}</span>
+          </div>
+          <div class="detail-row text-sm"><strong>¿Qué es?:</strong> ${s.what}</div>
+          <div class="detail-row text-sm"><strong>Problema que resuelve:</strong> ${s.solves}</div>
+          <div class="detail-row text-sm"><strong>¿Cuándo utilizarlo?:</strong> ${s.when}</div>
+        </div>
+        <div class="kw-box">🔑 <strong>Palabra clave de examen:</strong> ${s.keyword}</div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      document.querySelectorAll("#serviceFilters .sim-tab").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll("#serviceFilters .sim-tab")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderServices(btn.dataset.cat);
+        });
+      });
+
+      // ==================== SECTION 6: COMPARISONS ====================
+      function renderComparison(idx) {
+        const c = COMPARISONS[idx];
+        document
+          .querySelectorAll(".comp-pill")
+          .forEach((p, i) => p.classList.toggle("active", i === idx));
+        document.getElementById("compArena").innerHTML = `
+      <div class="versus-grid">
+        <div class="versus-col">
+          <h3 style="font-size:1rem; margin-bottom:0.55rem;">${c.leftTitle}</h3>
+          <ul style="padding-left:1.15rem; font-size:0.88rem; color:var(--text-secondary); display:grid; gap:0.4rem;">
+            ${c.leftPoints.map((pt) => `<li>${pt}</li>`).join("")}
+          </ul>
+        </div>
+        <div class="versus-col right">
+          <h3 style="font-size:1rem; margin-bottom:0.55rem;">${c.rightTitle}</h3>
+          <ul style="padding-left:1.15rem; font-size:0.88rem; color:var(--text-secondary); display:grid; gap:0.4rem;">
+            ${c.rightPoints.map((pt) => `<li>${pt}</li>`).join("")}
+          </ul>
+        </div>
+      </div>
+      <div class="node-detail-banner"><strong>Diferencia fundamental:</strong> ${c.diff}</div>
+      <div class="exam-tip-strip">
+        <div class="tip-box tip-trap"><strong>⚠️ Error común:</strong> ${c.trap}</div>
+        <div class="tip-box tip-clue"><strong>🎯 Pista de examen:</strong> ${c.clue}</div>
+      </div>
+    `;
+      }
+
+      function initComparisons() {
+        document.getElementById("compSelector").innerHTML = COMPARISONS.map(
+          (c, idx) =>
+            `<button class="comp-pill ${idx === 0 ? "active" : ""}" onclick="renderComparison(${idx})">${c.label}</button>`,
+        ).join("");
+        renderComparison(0);
+      }
+
+      // ==================== SECTION 7: PRACTICE SCENARIOS ====================
+      function renderScenarios() {
+        const container = document.getElementById("scenariosContainer");
+        container.innerHTML = SCENARIOS.map(
+          (sc, sIdx) => `
+      <div class="scenario-card" id="scen-${sIdx}">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <span class="badge badge-blue">Caso Práctico #${sIdx + 1}</span>
+        </div>
+        <p style="font-weight:600; font-size:0.96rem;">${sc.prompt}</p>
+        <div class="options-list">
+          ${sc.options
+            .map(
+              (opt, oIdx) => `
+            <button class="opt-btn" onclick="answerScenario(${sIdx}, ${oIdx})">
+              <strong>${String.fromCharCode(65 + oIdx)}.</strong> <span>${opt}</span>
+            </button>
+          `,
+            )
+            .join("")}
+        </div>
+        <div class="feedback-panel" id="scen-fb-${sIdx}"></div>
+      </div>
+    `,
+        ).join("");
+      }
+
+      function answerScenario(sIdx, chosenIdx) {
+        const sc = SCENARIOS[sIdx];
+        const card = document.getElementById(`scen-${sIdx}`);
+        const buttons = card.querySelectorAll(".opt-btn");
+        buttons.forEach((btn, idx) => {
+          btn.disabled = true;
+          if (idx === sc.correct) btn.classList.add("correct");
+          else if (idx === chosenIdx) btn.classList.add("wrong");
+        });
+
+        const isRight = chosenIdx === sc.correct;
+        const fb = document.getElementById(`scen-fb-${sIdx}`);
+        fb.style.borderLeftColor = isRight
+          ? "var(--accent-emerald)"
+          : "var(--accent-rose)";
+        fb.innerHTML = `
+      <div style="font-weight:800; margin-bottom:0.35rem; color:${isRight ? "#6ee7b7" : "#fda4af"};">
+        ${isRight ? "✅ ¡Correcto!" : "❌ Respuesta incorrecta"} — Opción correcta: ${sc.options[sc.correct]}
+      </div>
+      <div style="margin-bottom:0.35rem;"><strong>¿Por qué es la mejor opción?:</strong> ${sc.why}</div>
+      <div class="text-sm"><strong>¿Por qué descartar las demás?:</strong> ${sc.others}</div>
+    `;
+        fb.classList.add("show");
+      }
+
+      // ==================== SECTION 8: FINAL QUIZ ====================
+      function renderQuiz() {
+        const container = document.getElementById("quizContainer");
+        const answeredCount = quizAnswers.filter((a) => a !== null).length;
+
+        container.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1rem; padding:0.9rem 1.1rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm);">
+        <span><strong>Progreso del simulacro:</strong> ${answeredCount} de ${QUIZ_QUESTIONS.length} respondidas</span>
+        <button class="btn" id="submitQuizBtn" onclick="gradeQuiz()" ${answeredCount < QUIZ_QUESTIONS.length ? "disabled" : ""}>
+          Finalizar y calcular puntaje
+        </button>
+      </div>
+      ${QUIZ_QUESTIONS.map(
+        (item, qIdx) => `
+        <div class="quiz-box" id="qbox-${qIdx}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem;">
+            <span class="badge badge-purple">Pregunta ${qIdx + 1} de ${QUIZ_QUESTIONS.length}</span>
+            <span class="text-sm">${item.topic}</span>
+          </div>
+          <p style="font-weight:600; font-size:0.96rem;">${item.q}</p>
+          <div class="options-list">
+            ${item.options
+              .map((opt, oIdx) => {
+                let cls = "";
+                if (quizSubmitted) {
+                  if (oIdx === item.correct) cls = "correct";
+                  else if (quizAnswers[qIdx] === oIdx) cls = "wrong";
+                } else if (quizAnswers[qIdx] === oIdx) {
+                  cls = "selected-neutral";
+                }
+                return `
+                <button class="opt-btn ${cls}" ${quizSubmitted ? "disabled" : ""} onclick="selectQuizAnswer(${qIdx}, ${oIdx})">
+                  <strong>${String.fromCharCode(65 + oIdx)}.</strong> <span>${opt}</span>
+                </button>
+              `;
+              })
+              .join("")}
+          </div>
+          <div class="feedback-panel ${quizSubmitted ? "show" : ""}" style="border-left-color:${quizAnswers[qIdx] === item.correct ? "var(--accent-emerald)" : "var(--accent-rose)"};">
+            <strong>${quizAnswers[qIdx] === item.correct ? "✅ Correcto:" : "❌ Incorrecto:"}</strong> ${item.exp}
+          </div>
+        </div>
+      `,
+      ).join("")}
+    `;
+      }
+
+      function selectQuizAnswer(qIdx, oIdx) {
+        if (quizSubmitted) return;
+        quizAnswers[qIdx] = oIdx;
+        renderQuiz();
+      }
+
+      function gradeQuiz() {
+        quizSubmitted = true;
+        renderQuiz();
+
+        let score = 0;
+        const weakTopics = new Set();
+
+        QUIZ_QUESTIONS.forEach((item, idx) => {
+          if (quizAnswers[idx] === item.correct) {
+            score++;
+          } else {
+            weakTopics.add(item.topic);
+          }
+        });
+
+        const pct = Math.round((score / QUIZ_QUESTIONS.length) * 100);
+        const passed = pct >= 70;
+        const resultsEl = document.getElementById("quizResults");
+        resultsEl.style.display = "block";
+        resultsEl.innerHTML = `
+      <div class="card" style="border-color:var(--accent-cyan); text-align:center; margin-top:1.25rem;">
+        <div class="score-circle">
+          <div class="score-num">${pct}%</div>
+          <div class="text-sm">${score}/${QUIZ_QUESTIONS.length}</div>
+        </div>
+        <h2 style="margin-bottom:0.4rem;">${passed ? "🎉 ¡Excelente nivel para el examen!" : "📚 Buen intento, sigue reforzando"}</h2>
+        <p class="text-sm" style="max-width:600px; margin:0 auto 1rem;">
+          ${
+            passed
+              ? "Has superado el umbral referencial del examen AWS Cloud Practitioner (70%). Revisa las explicaciones arriba para consolidar cada detalle."
+              : "En el examen oficial se requiere aproximadamente un 70% para aprobar. Repasa los temas señalados abajo y vuelve a intentarlo."
+          }
+        </p>
+        ${
+          weakTopics.size > 0
+            ? `
+          <div style="margin-bottom:1.2rem;">
+            <div style="font-weight:700; font-size:0.9rem; margin-bottom:0.4rem;">Temas recomendados para volver a estudiar según tus errores:</div>
+            ${Array.from(weakTopics)
+              .map((t) => `<span class="study-tag">📌 ${t}</span>`)
+              .join("")}
+          </div>
+        `
+            : `<div style="margin-bottom:1.2rem; color:#6ee7b7; font-weight:700;">¡Dominaste todas las áreas evaluadas sin errores!</div>`
+        }
+        <button class="btn" onclick="resetQuiz()">🔄 Reiniciar evaluación</button>
+      </div>
+    `;
+        resultsEl.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function resetQuiz() {
+        quizAnswers.fill(null);
+        quizSubmitted = false;
+        document.getElementById("quizResults").style.display = "none";
+        renderQuiz();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // ==================== INIT ====================
+      renderNav();
+      renderFundamentals();
+      renderCIDR("16");
+      renderTrafficFlow("public");
+      renderServices("all");
+      initComparisons();
+      renderScenarios();
+      renderQuiz();
+    </script>
+  </body>
+</html>

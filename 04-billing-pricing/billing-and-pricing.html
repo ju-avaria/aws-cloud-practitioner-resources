@@ -1,0 +1,2705 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      AWS Certified Cloud Practitioner (CLF-C02) — Billing, Pricing & Cost
+      Management
+    </title>
+    <style>
+      :root {
+        --bg-base: #0b0f17;
+        --bg-surface: #131926;
+        --bg-card: #1a2234;
+        --bg-card-hover: #212b42;
+        --border-subtle: rgba(255, 255, 255, 0.09);
+        --border-accent: rgba(255, 153, 0, 0.45);
+        --aws-orange: #ff9900;
+        --aws-orange-soft: rgba(255, 153, 0, 0.14);
+        --aws-blue: #38bdf8;
+        --aws-blue-soft: rgba(56, 189, 248, 0.14);
+        --aws-emerald: #10b981;
+        --aws-emerald-soft: rgba(16, 185, 129, 0.15);
+        --aws-rose: #f43f5e;
+        --aws-rose-soft: rgba(244, 63, 94, 0.15);
+        --aws-purple: #a78bfa;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.45);
+        --radius-md: 12px;
+        --radius-lg: 18px;
+        --transition: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        background-color: var(--bg-base);
+        color: var(--text-primary);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter,
+          Helvetica, Arial, sans-serif;
+        overflow: hidden;
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Ambient Background */
+      .ambient-bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            circle at 12% 18%,
+            rgba(255, 153, 0, 0.07),
+            transparent 36%
+          ),
+          radial-gradient(
+            circle at 88% 82%,
+            rgba(56, 189, 248, 0.07),
+            transparent 40%
+          );
+        z-index: 0;
+      }
+
+      /* App Shell using dynamic viewport height for mobile/desktop browsers */
+      .app-shell {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      /* Top Header & Progress */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: clamp(8px, 1.4vh, 14px) clamp(14px, 3vw, 32px);
+        background: rgba(11, 15, 23, 0.88);
+        border-bottom: 1px solid var(--border-subtle);
+        backdrop-filter: blur(10px);
+        flex-shrink: 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: clamp(0.82rem, 1.2vw, 0.95rem);
+        letter-spacing: 0.02em;
+        min-width: 0;
+      }
+
+      .brand span:last-child {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .brand-badge {
+        background: linear-gradient(135deg, var(--aws-orange), #e67e00);
+        color: #0b0f17;
+        font-weight: 800;
+        font-size: 0.74rem;
+        padding: 4px 9px;
+        border-radius: 6px;
+        letter-spacing: 0.04em;
+        flex-shrink: 0;
+      }
+
+      .block-pill {
+        font-size: 0.8rem;
+        color: var(--aws-blue);
+        background: var(--aws-blue-soft);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      .slide-counter {
+        font-variant-numeric: tabular-nums;
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        background: var(--bg-surface);
+        padding: 4px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        white-space: nowrap;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .btn-ghost:hover {
+        border-color: var(--aws-orange);
+        color: var(--text-primary);
+        background: var(--aws-orange-soft);
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.06);
+        flex-shrink: 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--aws-orange), var(--aws-blue));
+        transition: width 0.35s ease;
+      }
+
+      /* Slide Viewport: centers vertically when content fits, scrolls cleanly when tall */
+      .stage {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: clamp(12px, 2.2vh, 24px) clamp(14px, 3vw, 36px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 153, 0, 0.35) transparent;
+      }
+
+      .stage::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .stage::-webkit-scrollbar-thumb {
+        background: rgba(255, 153, 0, 0.35);
+        border-radius: 999px;
+      }
+
+      .slide {
+        display: none;
+        width: 100%;
+        max-width: 1180px;
+        margin: auto 0;
+        animation: slideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      .slide.active {
+        display: block;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Slide Typography (Fluid scaling for laptops, desktops, and mobile) */
+      .slide-header {
+        margin-bottom: clamp(12px, 2vh, 20px);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: clamp(0.72rem, 0.95vw, 0.8rem);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--aws-orange);
+        margin-bottom: 4px;
+      }
+
+      .slide-title {
+        font-size: clamp(1.3rem, 2.4vw, 2.15rem);
+        font-weight: 800;
+        line-height: 1.18;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+      }
+
+      .slide-subtitle {
+        font-size: clamp(0.88rem, 1.15vw, 1rem);
+        color: var(--text-secondary);
+        margin-top: 5px;
+        max-width: 860px;
+      }
+
+      /* Responsive Layouts & Cards */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: clamp(12px, 1.8vw, 20px);
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(12px, 1.6vw, 18px);
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: clamp(10px, 1.4vw, 16px);
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        padding: clamp(14px, 1.8vw, 20px) clamp(15px, 2vw, 22px);
+        transition: var(--transition);
+        min-width: 0;
+      }
+
+      .card:hover {
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+
+      .card-accent-orange {
+        border-top: 3px solid var(--aws-orange);
+      }
+      .card-accent-blue {
+        border-top: 3px solid var(--aws-blue);
+      }
+      .card-accent-emerald {
+        border-top: 3px solid var(--aws-emerald);
+      }
+
+      .card-title {
+        font-size: clamp(0.96rem, 1.25vw, 1.08rem);
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .card p,
+      .card li {
+        font-size: clamp(0.84rem, 1.05vw, 0.93rem);
+        color: var(--text-secondary);
+      }
+
+      .analogy-box {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 153, 0, 0.08);
+        border-left: 3px solid var(--aws-orange);
+        font-size: clamp(0.8rem, 0.98vw, 0.87rem);
+        color: var(--text-primary);
+      }
+
+      .exam-tip {
+        margin-top: clamp(12px, 1.8vh, 16px);
+        padding: 11px 14px;
+        border-radius: var(--radius-md);
+        background: rgba(56, 189, 248, 0.09);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: clamp(0.82rem, 1vw, 0.89rem);
+      }
+
+      .exam-tip strong {
+        color: var(--aws-blue);
+      }
+
+      /* Interactive Expandable Cards */
+      .expand-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: clamp(12px, 1.5vw, 16px) clamp(14px, 1.6vw, 18px);
+        cursor: pointer;
+        transition: var(--transition);
+        user-select: none;
+        min-width: 0;
+      }
+
+      .expand-card:hover {
+        background: var(--bg-card-hover);
+        border-color: var(--border-accent);
+      }
+
+      .expand-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-weight: 700;
+        font-size: clamp(0.9rem, 1.15vw, 0.98rem);
+      }
+
+      .expand-icon {
+        color: var(--aws-orange);
+        font-weight: 800;
+        transition: transform 0.25s ease;
+        flex-shrink: 0;
+      }
+
+      .expand-card.open .expand-icon {
+        transform: rotate(45deg);
+      }
+
+      .expand-body {
+        display: none;
+        margin-top: 9px;
+        padding-top: 9px;
+        border-top: 1px solid var(--border-subtle);
+        font-size: clamp(0.82rem, 1vw, 0.89rem);
+        color: var(--text-secondary);
+      }
+
+      .expand-card.open .expand-body {
+        display: block;
+      }
+
+      /* Tabs & Selectors */
+      .tab-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .tab-btn {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        padding: 8px 13px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: clamp(0.78rem, 1vw, 0.88rem);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .tab-btn:hover {
+        color: var(--text-primary);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .tab-btn.active {
+        background: var(--aws-orange);
+        color: #0b0f17;
+        border-color: var(--aws-orange);
+      }
+
+      /* Responsive Table Wrapper */
+      .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-card);
+      }
+
+      .data-table {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        font-size: clamp(0.8rem, 0.98vw, 0.89rem);
+      }
+
+      .data-table th {
+        background: rgba(255, 255, 255, 0.05);
+        text-align: left;
+        padding: 11px 14px;
+        color: var(--aws-orange);
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-subtle);
+        white-space: nowrap;
+      }
+
+      .data-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+      }
+
+      .data-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .badge-orange {
+        background: var(--aws-orange-soft);
+        color: var(--aws-orange);
+      }
+      .badge-blue {
+        background: var(--aws-blue-soft);
+        color: var(--aws-blue);
+      }
+      .badge-emerald {
+        background: var(--aws-emerald-soft);
+        color: var(--aws-emerald);
+      }
+      .badge-rose {
+        background: var(--aws-rose-soft);
+        color: var(--aws-rose);
+      }
+
+      /* Interactive Controls (Sliders, Buttons) */
+      .control-group {
+        margin-bottom: 12px;
+      }
+
+      .control-label {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-secondary);
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--aws-orange);
+        cursor: pointer;
+      }
+
+      select.styled-select {
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: 8px;
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        border: 1px solid var(--border-subtle);
+        font-size: 0.88rem;
+        outline: none;
+      }
+
+      /* Interactive Scenarios & Quiz */
+      .option-btn {
+        width: 100%;
+        text-align: left;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        padding: 11px 14px;
+        border-radius: 10px;
+        font-size: clamp(0.84rem, 1vw, 0.91rem);
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 9px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--aws-orange);
+        background: var(--bg-card-hover);
+      }
+
+      .option-btn.correct {
+        border-color: var(--aws-emerald);
+        background: var(--aws-emerald-soft);
+      }
+
+      .option-btn.incorrect {
+        border-color: var(--aws-rose);
+        background: var(--aws-rose-soft);
+      }
+
+      .feedback-panel {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: clamp(0.82rem, 0.98vw, 0.89rem);
+        display: none;
+      }
+
+      .feedback-panel.show {
+        display: block;
+      }
+
+      /* Hero / Start Slide */
+      .hero-box {
+        text-align: center;
+        max-width: 880px;
+        margin: 0 auto;
+        padding: clamp(10px, 2vh, 24px) 8px;
+      }
+
+      .hero-tag {
+        display: inline-block;
+        background: var(--aws-orange-soft);
+        color: var(--aws-orange);
+        border: 1px solid var(--border-accent);
+        padding: 5px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: clamp(0.76rem, 1vw, 0.84rem);
+        margin-bottom: 14px;
+      }
+
+      .hero-title {
+        font-size: clamp(1.65rem, 3.6vw, 3rem);
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 14px;
+        letter-spacing: -0.03em;
+      }
+
+      .hero-title span {
+        color: var(--aws-orange);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--aws-orange), #e67e00);
+        color: #0b0f17;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: clamp(0.9rem, 1.1vw, 1rem);
+        font-weight: 800;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 8px 24px rgba(255, 153, 0, 0.28);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(255, 153, 0, 0.4);
+      }
+
+      /* Footer Controls */
+      .footer-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: clamp(8px, 1.3vh, 12px) clamp(14px, 3vw, 32px);
+        background: rgba(11, 15, 23, 0.92);
+        border-top: 1px solid var(--border-subtle);
+        flex-shrink: 0;
+      }
+
+      .nav-hint {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-nav {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.86rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-nav:hover:not(:disabled) {
+        border-color: var(--aws-orange);
+        background: var(--bg-card-hover);
+      }
+
+      .btn-nav.next {
+        background: var(--aws-orange);
+        color: #0b0f17;
+        border-color: var(--aws-orange);
+      }
+
+      .btn-nav.next:hover:not(:disabled) {
+        background: #ffad33;
+      }
+
+      .btn-nav:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      /* Tablet Breakpoint (768px - 1024px) */
+      @media (max-width: 1024px) {
+        .grid-4 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .block-pill {
+          display: none;
+        }
+      }
+
+      /* Mobile & Small Screen Breakpoint (< 768px) */
+      @media (max-width: 767px) {
+        .grid-2,
+        .grid-3,
+        .grid-4 {
+          grid-template-columns: 1fr;
+        }
+
+        .brand span:last-child {
+          display: none;
+        }
+
+        .nav-hint {
+          display: none;
+        }
+
+        .footer-nav {
+          justify-content: center;
+        }
+
+        .nav-buttons {
+          width: 100%;
+        }
+
+        .btn-nav {
+          flex: 1;
+          text-align: center;
+        }
+
+        .tab-bar {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          padding-bottom: 4px;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+          flex-shrink: 0;
+        }
+      }
+
+      /* Short Viewport Height Optimization (e.g., 13" laptops at 125% scaling) */
+      @media (max-height: 740px) and (min-width: 768px) {
+        .slide-header {
+          margin-bottom: 10px;
+        }
+        .slide-title {
+          font-size: 1.45rem;
+        }
+        .card {
+          padding: 12px 16px;
+        }
+        .analogy-box,
+        .exam-tip {
+          margin-top: 8px;
+          padding: 8px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ambient-bg"></div>
+
+    <div class="app-shell">
+      <!-- Top Header -->
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-badge">AWS CLF-C02</span>
+          <span>Billing, Pricing &amp; Cost Management</span>
+        </div>
+        <div id="blockIndicator" class="block-pill">Inicio</div>
+        <div class="topbar-actions">
+          <span id="slideCounter" class="slide-counter">1 / 18</span>
+          <button
+            class="btn-ghost"
+            onclick="goToSlide(0)"
+            title="Volver al inicio"
+          >
+            ↺ Inicio
+          </button>
+        </div>
+      </header>
+
+      <!-- Progress Bar -->
+      <div class="progress-track">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <!-- Main Slide Stage -->
+      <main class="stage" id="stage">
+        <!-- SLIDE 1: PORTADA -->
+        <section class="slide active" data-block="Inicio">
+          <div class="hero-box">
+            <div class="hero-tag">
+              Dominio 4 · AWS Certified Cloud Practitioner (CLF-C02)
+            </div>
+            <h1 class="hero-title">
+              Dominando <span>Billing, Pricing</span> y Gestión de Costos en AWS
+            </h1>
+            <p class="slide-subtitle" style="margin: 0 auto 22px">
+              Una guía visual e interactiva diseñada desde cero para entender
+              cómo cobra AWS, cómo estimar presupuestos y cómo identificar
+              exactamente qué herramienta pide cada pregunta del examen.
+            </p>
+
+            <div class="grid-3" style="text-align: left; margin-bottom: 24px">
+              <div class="card card-accent-orange">
+                <div class="card-title">💡 100% Conceptual</div>
+                <p>
+                  Analogías cotidianas antes de términos técnicos. Ideal si
+                  estás dando tus primeros pasos en la nube.
+                </p>
+              </div>
+              <div class="card card-accent-blue">
+                <div class="card-title">🎛️ Práctica Interactiva</div>
+                <p>
+                  Simuladores de costos, comparadores de planes y mini-desafíos
+                  de toma de decisiones en vivo.
+                </p>
+              </div>
+              <div class="card card-accent-emerald">
+                <div class="card-title">🎯 Enfoque CLF-C02</div>
+                <p>
+                  Palabras clave, trampas frecuentes del examen y quiz final
+                  basado en escenarios reales.
+                </p>
+              </div>
+            </div>
+
+            <button class="btn-primary" onclick="nextSlide()">
+              Comenzar la clase →
+            </button>
+          </div>
+        </section>
+
+        <!-- SLIDE 2: BLOQUE 1 - PAY AS YOU GO -->
+        <section class="slide" data-block="Bloque 1 · Modelo de Precios">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 1 · ¿Cómo cobra AWS?</div>
+            <h2 class="slide-title">
+              El principio fundamental: Pay-As-You-Go (Pago por uso)
+            </h2>
+            <p class="slide-subtitle">
+              En AWS no compras servidores físicos; alquilas capacidad
+              tecnológica bajo demanda y pagas solo por lo que realmente
+              consumes.
+            </p>
+          </div>
+
+          <div class="grid-3">
+            <div class="card card-accent-orange">
+              <div class="card-title">⚡ Sin contratos forzosos</div>
+              <p>
+                Enciendes un servidor por 3 horas y pagas exactamente por esas 3
+                horas. Cuando lo apagas, dejas de pagar por cómputo.
+              </p>
+              <div class="analogy-box">
+                <strong>Analogía:</strong> Como la cuenta de electricidad de tu
+                casa. Si apagas la luz al salir de una habitación, el medidor
+                deja de sumar.
+              </div>
+            </div>
+
+            <div class="card card-accent-blue">
+              <div class="card-title">📉 Economías de escala</div>
+              <p>
+                AWS compra millones de servidores para miles de clientes. Ese
+                volumen reduce sus costos y AWS traslada ese ahorro bajando
+                precios.
+              </p>
+              <div class="analogy-box">
+                <strong>Analogía:</strong> Comprar al por mayor siempre es más
+                barato que fabricar un solo producto en casa.
+              </div>
+            </div>
+
+            <div class="card card-accent-emerald">
+              <div class="card-title">🚀 Velocidad y agilidad</div>
+              <p>
+                No esperas semanas para comprar hardware. Despliegas recursos en
+                minutos y ajustas el gasto según el tráfico real.
+              </p>
+              <div class="analogy-box">
+                <strong>Analogía:</strong> Pedir un Uber para un viaje puntual
+                en lugar de comprar, asegurar y mantener un auto propio.
+              </div>
+            </div>
+          </div>
+
+          <div class="exam-tip">
+            <span>🎯</span>
+            <div>
+              <strong>Clave para el examen:</strong> Si una pregunta menciona
+              <em
+                >"pagar solo por los recursos consumidos sin compromisos a largo
+                plazo"</em
+              >, la respuesta apunta al modelo <strong>Pay-as-you-go</strong>.
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 3: BLOQUE 1 - CAPEX VS OPEX -->
+        <section class="slide" data-block="Bloque 1 · Modelo de Precios">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 1 · Economía de la Nube</div>
+            <h2 class="slide-title">
+              CapEx vs. OpEx: Cambiar inversión fija por gasto variable
+            </h2>
+            <p class="slide-subtitle">
+              Uno de los mayores beneficios financieros de migrar a AWS es
+              transformar la forma en que una empresa gasta su dinero.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card" style="border-left: 4px solid var(--aws-rose)">
+              <div class="card-title">
+                <span class="badge badge-rose">TRADICIONAL (ON-PREMISES)</span>
+                CapEx — Gasto de Capital
+              </div>
+              <p style="margin-bottom: 10px">
+                Inversión inicial fuerte antes de siquiera saber si tu proyecto
+                tendrá éxito.
+              </p>
+              <ul style="padding-left: 18px; display: grid; gap: 7px">
+                <li>
+                  Compras servidores físicos, aire acondicionado y espacio en un
+                  centro de datos.
+                </li>
+                <li>
+                  El dinero queda atrapado en equipos que pierden valor con el
+                  tiempo.
+                </li>
+                <li>Si calculas mal y compras de más, desperdicias dinero.</li>
+              </ul>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--aws-emerald)">
+              <div class="card-title">
+                <span class="badge badge-emerald">NUBE AWS</span> OpEx — Gasto
+                Operativo
+              </div>
+              <p style="margin-bottom: 10px">
+                Pagas mes a mes únicamente por la operación y los recursos
+                utilizados.
+              </p>
+              <ul style="padding-left: 18px; display: grid; gap: 7px">
+                <li>
+                  <strong>Cero inversión inicial (Upfront):</strong> Empiezas
+                  con $0 en hardware.
+                </li>
+                <li>
+                  <strong>Costo variable:</strong> Si tu tienda vende más en
+                  Navidad, escalas y pagas más; en enero bajas recursos y pagas
+                  menos.
+                </li>
+                <li>Liberas capital para innovar en tu negocio.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="exam-tip">
+            <span>💡</span>
+            <div>
+              <strong>Frase típica de AWS:</strong>
+              <em
+                >"Trade capital expense (CapEx) for variable expense (OpEx)"</em
+              >
+              es uno de los 6 pilares oficiales de ventajas del Cloud Computing
+              en el examen.
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 4: BLOQUE 2 - FACTORES DE COSTO -->
+        <section class="slide" data-block="Bloque 2 · Factores de Costo">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 2 · ¿Qué hace que la factura suba?</div>
+            <h2 class="slide-title">
+              Los 3 pilares que determinan cuánto pagas en AWS
+            </h2>
+            <p class="slide-subtitle">
+              Haz clic en cada pilar y en los factores adicionales para
+              descubrir cómo AWS calcula el cobro de sus servicios.
+            </p>
+          </div>
+
+          <div class="grid-3" style="margin-bottom: 14px">
+            <div class="expand-card open" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>1. Cómputo (Compute)</span>
+                <span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                Pagas por <strong>tiempo de ejecución</strong> (por hora o por
+                segundo) y por el <strong>tamaño/capacidad</strong> (CPU y
+                memoria RAM). Un servidor grande cuesta más que uno pequeño.
+              </div>
+            </div>
+
+            <div class="expand-card open" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>2. Almacenamiento (Storage)</span>
+                <span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                Pagas por la cantidad de <strong>GB o TB almacenados</strong> al
+                mes y por la <strong>clase de almacenamiento</strong> (acceso
+                rápido cuesta más que archivo histórico frío).
+              </div>
+            </div>
+
+            <div class="expand-card open" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>3. Transferencia de Datos</span>
+                <span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                <strong>Regla de oro de AWS:</strong> Subir datos a AWS (<em
+                  >Data Transfer IN</em
+                >) casi siempre es <strong>GRATIS</strong>. Sacar datos de AWS
+                hacia Internet (<em>Data Transfer OUT</em>) tiene costo por GB.
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-4">
+            <div class="expand-card" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>📍 Región AWS</span><span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                Los precios varían según el país/región debido a impuestos,
+                energía e infraestructura local (ej. Virginia suele ser más
+                barato que São Paulo).
+              </div>
+            </div>
+            <div class="expand-card" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>🔁 Solicitudes</span><span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                Servicios como S3 o Lambda cobran por cada petición (ej. cada
+                millón de lecturas o ejecuciones de código).
+              </div>
+            </div>
+            <div class="expand-card" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>⚙️ Tipo de Servicio</span
+                ><span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                Un servicio administrado (donde AWS hace el mantenimiento) tiene
+                una tarifa distinta a un servidor básico sin gestionar.
+              </div>
+            </div>
+            <div class="expand-card" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>🏷️ Modelo de Compra</span
+                ><span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                Comprometerse a 1 o 3 años reduce drásticamente el precio por
+                hora frente al pago bajo demanda.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 5: BLOQUE 2 - COMPARADOR DE ARQUITECTURAS -->
+        <section class="slide" data-block="Bloque 2 · Factores de Costo">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 2 · Impacto en el Mundo Real</div>
+            <h2 class="slide-title">
+              Misma función, distinto costo: ¿Por qué varía la factura?
+            </h2>
+            <p class="slide-subtitle">
+              Dos empresas crean la misma aplicación web, pero sus decisiones de
+              arquitectura generan facturas muy distintas.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card" style="border-top: 3px solid var(--aws-rose)">
+              <div class="card-title">
+                🏢 Arquitectura A: Sobredimensionada y 24/7
+              </div>
+              <ul
+                style="
+                  padding-left: 18px;
+                  display: grid;
+                  gap: 7px;
+                  margin-bottom: 12px;
+                "
+              >
+                <li>
+                  Servidor gigante encendido
+                  <strong>730 horas/mes</strong> (aunque nadie lo usa de noche).
+                </li>
+                <li>
+                  Guarda respaldos antiguos de hace 5 años en almacenamiento
+                  rápido de alto costo.
+                </li>
+                <li>
+                  Desplegada en una región con tarifas más altas sin
+                  necesitarlo.
+                </li>
+              </ul>
+              <div
+                style="
+                  padding: 9px 12px;
+                  background: var(--aws-rose-soft);
+                  border-radius: 8px;
+                  color: #fda4af;
+                  font-weight: 700;
+                  font-size: 0.9rem;
+                "
+              >
+                Costo estimado: ~$420 USD / mes
+              </div>
+            </div>
+
+            <div class="card" style="border-top: 3px solid var(--aws-emerald)">
+              <div class="card-title">
+                🚀 Arquitectura B: Optimizada al consumo real
+              </div>
+              <ul
+                style="
+                  padding-left: 18px;
+                  display: grid;
+                  gap: 7px;
+                  margin-bottom: 12px;
+                "
+              >
+                <li>
+                  Servidor del tamaño justo que se apaga fuera de horario
+                  laboral (<strong>250 horas/mes</strong>).
+                </li>
+                <li>
+                  Mueve archivos antiguos automáticamente a almacenamiento
+                  económico (S3 Glacier).
+                </li>
+                <li>
+                  Desplegada en una región más económica cercana a sus usuarios.
+                </li>
+              </ul>
+              <div
+                style="
+                  padding: 9px 12px;
+                  background: var(--aws-emerald-soft);
+                  border-radius: 8px;
+                  color: #6ee7b7;
+                  font-weight: 700;
+                  font-size: 0.9rem;
+                "
+              >
+                Costo estimado: ~$95 USD / mes (77% de ahorro)
+              </div>
+            </div>
+          </div>
+
+          <div class="exam-tip">
+            <span>📌</span>
+            <div>
+              <strong>Recuerda para el examen:</strong> La transferencia de
+              datos <strong>entrante (IN)</strong> desde Internet hacia AWS es
+              gratuita, mientras que la transferencia
+              <strong>saliente (OUT)</strong> hacia Internet se cobra.
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 6: BLOQUE 3 - PRICING MODELS INTERACTIVO -->
+        <section class="slide" data-block="Bloque 3 · Pricing Models">
+          <div class="slide-header">
+            <div class="eyebrow">
+              Bloque 3 · Modelos de Precios en EC2 y Cómputo
+            </div>
+            <h2 class="slide-title">
+              Los 5 Modelos de Pricing que debes dominar
+            </h2>
+            <p class="slide-subtitle">
+              Selecciona cada pestaña para analizar cómo funciona, cuándo
+              elegirlo y sus palabras clave en el examen.
+            </p>
+          </div>
+
+          <div class="tab-bar" id="pricingTabs">
+            <button class="tab-btn active" onclick="selectPricingTab(0)">
+              1. On-Demand
+            </button>
+            <button class="tab-btn" onclick="selectPricingTab(1)">
+              2. Reserved Instances (RI)
+            </button>
+            <button class="tab-btn" onclick="selectPricingTab(2)">
+              3. Savings Plans
+            </button>
+            <button class="tab-btn" onclick="selectPricingTab(3)">
+              4. Spot Instances
+            </button>
+            <button class="tab-btn" onclick="selectPricingTab(4)">
+              5. AWS Free Tier
+            </button>
+          </div>
+
+          <div id="pricingContent" class="card card-accent-orange">
+            <!-- Populated dynamically by JS -->
+          </div>
+        </section>
+
+        <!-- SLIDE 7: BLOQUE 3 - RESERVED VS SAVINGS PLANS Y SPOT -->
+        <section class="slide" data-block="Bloque 3 · Pricing Models">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 3 · Diferencias Clave del Examen</div>
+            <h2 class="slide-title">
+              Reserved Instances vs. Savings Plans (y el rol de Spot)
+            </h2>
+            <p class="slide-subtitle">
+              Una pregunta clásica en CLF-C02 es distinguir entre reservar
+              capacidad específica frente a comprometer gasto flexible.
+            </p>
+          </div>
+
+          <div class="grid-2" style="margin-bottom: 14px">
+            <div class="card card-accent-blue">
+              <div class="card-title">🔒 Reserved Instances (RI)</div>
+              <p>
+                Te comprometes a usar una
+                <strong>configuración específica</strong> (familia de instancia,
+                región, sistema operativo) por 1 o 3 años.
+              </p>
+              <div class="analogy-box">
+                <strong>Analogía:</strong> Reservar exactamente la habitación
+                #304 de un hotel por todo un año. Tienes gran descuento, pero
+                debes usar esa habitación.
+              </div>
+            </div>
+
+            <div class="card card-accent-orange">
+              <div class="card-title">💳 Savings Plans</div>
+              <p>
+                Te comprometes a gastar un
+                <strong>monto fijo por hora</strong> (ej. $10/hora) durante 1 o
+                3 años, aplicando automáticamente el descuento a tu cómputo.
+              </p>
+              <div class="analogy-box">
+                <strong>Analogía:</strong> Comprar una tarjeta prepago de
+                consumo en una cadena de hoteles: puedes cambiar de habitación o
+                ciudad y sigue aplicando el descuento.
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="border-left: 4px solid var(--aws-purple)">
+            <div class="card-title" style="color: var(--aws-purple)">
+              ⚡ Spot Instances: Máximo ahorro (hasta 90%) con riesgo de
+              interrupción
+            </div>
+            <p>
+              Aprovechan capacidad ociosa de AWS. AWS puede reclamarlas con un
+              aviso de <strong>2 minutos</strong>. Úsalas solo en tareas
+              <strong>tolerantes a fallos o interrupciones</strong> (ej.
+              renderizado, análisis de big data, pruebas),
+              <strong>NUNCA</strong> en bases de datos críticas.
+            </p>
+          </div>
+        </section>
+
+        <!-- SLIDE 8: BLOQUE 4 - AWS PRICING CALCULATOR -->
+        <section class="slide" data-block="Bloque 4 · AWS Pricing Calculator">
+          <div class="slide-header">
+            <div class="eyebrow">
+              Bloque 4 · Planificación Antes de Desplegar
+            </div>
+            <h2 class="slide-title">
+              AWS Pricing Calculator: Estima antes de gastar
+            </h2>
+            <p class="slide-subtitle">
+              Es una herramienta web gratuita para simular el costo mensual de
+              una arquitectura antes de crear un solo recurso en AWS.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card card-accent-blue">
+              <div class="card-title">🧭 ¿Para qué sirve y cuándo se usa?</div>
+              <ul
+                style="
+                  padding-left: 18px;
+                  display: grid;
+                  gap: 9px;
+                  margin-top: 6px;
+                "
+              >
+                <li>
+                  <strong>Momento de uso:</strong> En la fase de diseño o
+                  cotización (<em>antes</em> de desplegar).
+                </li>
+                <li>
+                  <strong>Función:</strong> Seleccionas servicios (ej. EC2, S3,
+                  RDS), región y uso esperado para obtener un presupuesto
+                  estimado.
+                </li>
+                <li>
+                  <strong>Compartible:</strong> Genera un enlace para mostrar la
+                  estimación a gerentes o clientes.
+                </li>
+              </ul>
+            </div>
+
+            <div class="card card-accent-orange">
+              <div class="card-title">
+                ⚖️ Estimar vs. Monitorear (¡No los confundas!)
+              </div>
+              <div style="margin-top: 8px; display: grid; gap: 10px">
+                <div
+                  style="
+                    padding: 10px 12px;
+                    background: var(--bg-surface);
+                    border-radius: 10px;
+                  "
+                >
+                  <strong style="color: var(--aws-blue)"
+                    >AWS Pricing Calculator (Futuro):</strong
+                  ><br />
+                  <span style="font-size: 0.86rem; color: var(--text-secondary)"
+                    >Calcula cuánto <em>podría</em> costar una arquitectura
+                    nueva que aún no existe.</span
+                  >
+                </div>
+                <div
+                  style="
+                    padding: 10px 12px;
+                    background: var(--bg-surface);
+                    border-radius: 10px;
+                  "
+                >
+                  <strong style="color: var(--aws-orange)"
+                    >Cost Explorer / Billing (Presente y Pasado):</strong
+                  ><br />
+                  <span style="font-size: 0.86rem; color: var(--text-secondary)"
+                    >Analiza lo que <em>ya estás gastando</em> en tu cuenta real
+                    de AWS.</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 9: BLOQUE 4 - SIMULADOR PRICING CALCULATOR -->
+        <section class="slide" data-block="Bloque 4 · AWS Pricing Calculator">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 4 · Simulación Práctica</div>
+            <h2 class="slide-title">
+              Mini-Simulador: Estima tu primera arquitectura web
+            </h2>
+            <p class="slide-subtitle">
+              Ajusta los parámetros para ver cómo la región, las horas de uso y
+              el almacenamiento cambian el presupuesto estimado.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="control-group">
+                <div class="control-label"><span>📍 Región AWS</span></div>
+                <select
+                  id="calcRegion"
+                  class="styled-select"
+                  onchange="updateCalculator()"
+                >
+                  <option value="1.0">
+                    US East (N. Virginia) — Tarifa Base (1.0x)
+                  </option>
+                  <option value="1.12">
+                    EU (Ireland) — Tarifa Media (1.12x)
+                  </option>
+                  <option value="1.35">
+                    South America (São Paulo) — Tarifa Alta (1.35x)
+                  </option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <div class="control-label">
+                  <span>🖥️ Servidores EC2 (t3.medium)</span>
+                  <span id="lblInstances" style="color: var(--aws-orange)"
+                    >2 instancias</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="calcInstances"
+                  min="1"
+                  max="10"
+                  value="2"
+                  oninput="updateCalculator()"
+                />
+              </div>
+
+              <div class="control-group">
+                <div class="control-label">
+                  <span>⏱️ Horas activas al mes</span>
+                  <span id="lblHours" style="color: var(--aws-orange)"
+                    >730 hrs (24/7)</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="calcHours"
+                  min="100"
+                  max="730"
+                  step="30"
+                  value="730"
+                  oninput="updateCalculator()"
+                />
+              </div>
+
+              <div class="control-group" style="margin-bottom: 0">
+                <div class="control-label">
+                  <span>💾 Almacenamiento Amazon S3</span>
+                  <span id="lblStorage" style="color: var(--aws-orange)"
+                    >500 GB</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="calcStorage"
+                  min="50"
+                  max="5000"
+                  step="50"
+                  value="500"
+                  oninput="updateCalculator()"
+                />
+              </div>
+            </div>
+
+            <div
+              class="card card-accent-emerald"
+              style="
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+              "
+            >
+              <div>
+                <div class="card-title">
+                  📊 Resultado de la Estimación Mensual
+                </div>
+                <p style="margin-bottom: 14px">
+                  Desglose aproximado generado antes de desplegar recursos:
+                </p>
+
+                <div style="display: grid; gap: 8px; font-size: 0.9rem">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 8px 12px;
+                      background: var(--bg-surface);
+                      border-radius: 8px;
+                    "
+                  >
+                    <span>Cómputo (Amazon EC2):</span>
+                    <strong id="resCompute">$60.74</strong>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 8px 12px;
+                      background: var(--bg-surface);
+                      border-radius: 8px;
+                    "
+                  >
+                    <span>Almacenamiento (Amazon S3):</span>
+                    <strong id="resStorage">$11.50</strong>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 8px 12px;
+                      background: var(--bg-surface);
+                      border-radius: 8px;
+                    "
+                  >
+                    <span>Data Transfer IN (Subida):</span>
+                    <strong style="color: var(--aws-emerald)"
+                      >$0.00 (Gratis)</strong
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  margin-top: 16px;
+                  padding: 14px;
+                  background: var(--aws-emerald-soft);
+                  border: 1px solid rgba(16, 185, 129, 0.35);
+                  border-radius: 12px;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  gap: 10px;
+                  flex-wrap: wrap;
+                "
+              >
+                <span style="font-weight: 700">Total Mensual Estimado:</span>
+                <span
+                  id="resTotal"
+                  style="
+                    font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+                    font-weight: 800;
+                    color: var(--aws-emerald);
+                  "
+                  >$72.24 USD</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 10: BLOQUE 5 - ECOSISTEMA BILLING & COST MANAGEMENT -->
+        <section class="slide" data-block="Bloque 5 · Administración de Costos">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 5 · Visibilidad y Control</div>
+            <h2 class="slide-title">
+              AWS Billing and Cost Management: Tu centro de control
+            </h2>
+            <p class="slide-subtitle">
+              Una vez que despliegas recursos, AWS ofrece un conjunto de
+              herramientas especializadas para observar, alertar y auditar tus
+              gastos.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card card-accent-orange">
+              <div class="card-title">
+                🧾 ¿Qué es AWS Billing and Cost Management?
+              </div>
+              <p>
+                Es la consola central donde pagas tus facturas, descargas
+                comprobantes fiscales, configuras métodos de pago y accedes a
+                todas las herramientas de análisis de costos de AWS.
+              </p>
+            </div>
+
+            <div class="card card-accent-blue">
+              <div class="card-title">
+                🏢 Bonus Examen: Consolidated Billing (AWS Organizations)
+              </div>
+              <p>
+                Si una empresa tiene varias cuentas AWS (Desarrollo, Pruebas,
+                Producción), puede unirlas en una sola factura consolidada y
+                sumar su consumo para obtener
+                <strong>descuentos por volumen</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div class="exam-tip">
+            <span>🧠</span>
+            <div>
+              <strong>Estrategia mental:</strong> En el examen no basta con
+              saber que "todas sirven para costos". Cada herramienta resuelve un
+              problema específico: <strong>visualizar</strong>,
+              <strong>alertar</strong>, <strong>detallar al máximo</strong> o
+              <strong>detectar picos raros</strong>.
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 11: BLOQUE 5 - LAS 4 HERRAMIENTAS CLAVE -->
+        <section class="slide" data-block="Bloque 5 · Administración de Costos">
+          <div class="slide-header">
+            <div class="eyebrow">
+              Bloque 5 · Herramientas de Costos al Detalle
+            </div>
+            <h2 class="slide-title">
+              ¿Qué herramienta usar según el problema?
+            </h2>
+            <p class="slide-subtitle">
+              Haz clic en cada herramienta para ver qué problema resuelve y cómo
+              identificarla al instante en el examen.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="expand-card open" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>📈 1. AWS Cost Explorer</span>
+                <span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                <p>
+                  <strong>Propósito:</strong> Interfaz visual con gráficos para
+                  analizar costos históricos (últimos 12 meses) y proyectar
+                  gastos futuros (próximos 12 meses).
+                </p>
+                <p style="margin-top: 6px; color: var(--aws-blue)">
+                  <strong>Palabras clave examen:</strong> "Visualizar
+                  tendencias", "gráficos de gasto", "predecir/proyectar costos
+                  futuros (forecast)".
+                </p>
+              </div>
+            </div>
+
+            <div class="expand-card open" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>🚨 2. AWS Budgets</span>
+                <span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                <p>
+                  <strong>Propósito:</strong> Definir límites de gasto o uso y
+                  enviar <strong>alertas automáticas</strong> (email/SNS) cuando
+                  el costo real o proyectado supera tu umbral.
+                </p>
+                <p style="margin-top: 6px; color: var(--aws-orange)">
+                  <strong>Palabras clave examen:</strong> "Notificar cuando
+                  supere $100", "alertas de presupuesto", "establecer umbrales
+                  (thresholds)".
+                </p>
+              </div>
+            </div>
+
+            <div class="expand-card open" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>📑 3. AWS Cost and Usage Report (CUR)</span>
+                <span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                <p>
+                  <strong>Propósito:</strong> El reporte más detallado y
+                  granular posible (hora por hora, recurso por recurso,
+                  etiquetas) exportado a un bucket de Amazon S3.
+                </p>
+                <p style="margin-top: 6px; color: var(--aws-emerald)">
+                  <strong>Palabras clave examen:</strong> "Información más
+                  detallada/granular", "exportar a S3", "análisis profundo con
+                  Athena/QuickSight".
+                </p>
+              </div>
+            </div>
+
+            <div class="expand-card open" onclick="toggleExpand(this)">
+              <div class="expand-header">
+                <span>🕵️ 4. AWS Cost Anomaly Detection</span>
+                <span class="expand-icon">+</span>
+              </div>
+              <div class="expand-body">
+                <p>
+                  <strong>Propósito:</strong> Usa
+                  <strong>Machine Learning</strong> para aprender tus patrones
+                  normales de gasto y avisarte automáticamente si ocurre un pico
+                  inusual.
+                </p>
+                <p style="margin-top: 6px; color: var(--aws-purple)">
+                  <strong>Palabras clave examen:</strong> "Machine Learning",
+                  "gastos inesperados o inusuales", "reducir sorpresas en la
+                  factura".
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 12: BLOQUE 5 - MINI DESAFÍO DE HERRAMIENTAS -->
+        <section class="slide" data-block="Bloque 5 · Administración de Costos">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 5 · Entrenamiento Rápido</div>
+            <h2 class="slide-title">
+              Mini-Desafío: Elige la herramienta exacta
+            </h2>
+            <p class="slide-subtitle">
+              Pon a prueba tu criterio seleccionando la herramienta de AWS
+              correcta para cada situación empresarial.
+            </p>
+          </div>
+
+          <div class="card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-bottom: 12px;
+              "
+            >
+              <span class="badge badge-blue" id="toolChallengeBadge"
+                >Escenario 1 de 3</span
+              >
+              <button class="btn-ghost" onclick="nextToolChallenge()">
+                Siguiente escenario →
+              </button>
+            </div>
+
+            <h3
+              id="toolChallengeQuestion"
+              style="
+                font-size: clamp(1rem, 1.35vw, 1.15rem);
+                margin-bottom: 14px;
+              "
+            >
+              <!-- Populated by JS -->
+            </h3>
+
+            <div id="toolChallengeOptions" class="grid-2">
+              <!-- Populated by JS -->
+            </div>
+
+            <div id="toolChallengeFeedback" class="feedback-panel"></div>
+          </div>
+        </section>
+
+        <!-- SLIDE 13: BLOQUE 6 - OPTIMIZACIÓN DE COSTOS -->
+        <section class="slide" data-block="Bloque 6 · Optimización de Costos">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 6 · Gastar de Forma Inteligente</div>
+            <h2 class="slide-title">
+              5 Estrategias esenciales para reducir costos en AWS
+            </h2>
+            <p class="slide-subtitle">
+              Optimizar costos no significa dejar de usar la nube, sino eliminar
+              el desperdicio y ajustar cada recurso a su demanda real.
+            </p>
+          </div>
+
+          <div class="grid-3" style="margin-bottom: 14px">
+            <div class="card card-accent-orange">
+              <div class="card-title">
+                📐 1. Right-Sizing (Dimensionar bien)
+              </div>
+              <p>
+                Elegir el tamaño exacto de instancia. Si un servidor usa solo el
+                10% de su CPU, cámbialo por uno más pequeño y económico.
+              </p>
+            </div>
+
+            <div class="card card-accent-blue">
+              <div class="card-title">🧹 2. Eliminar recursos ociosos</div>
+              <p>
+                Apagar entornos de prueba los fines de semana y borrar discos o
+                direcciones IP elásticas que nadie está utilizando.
+              </p>
+            </div>
+
+            <div class="card card-accent-emerald">
+              <div class="card-title">📈 3. Elasticidad (Auto Scaling)</div>
+              <p>
+                Aumentar servidores automáticamente cuando hay muchos usuarios y
+                reducirlos cuando baja el tráfico.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">
+                🏷️ 4. Elegir el modelo de precio correcto
+              </div>
+              <p>
+                Mover cargas estables de <em>On-Demand</em> a
+                <em>Savings Plans</em> o <em>Reserved Instances</em>, y usar
+                <em>Spot</em> para procesos batch interrumpibles.
+              </p>
+            </div>
+
+            <div class="card">
+              <div class="card-title">
+                🩺 5. AWS Trusted Advisor (Chequeo de ahorro)
+              </div>
+              <p>
+                Herramienta que inspecciona tu cuenta y te da recomendaciones
+                automáticas de optimización de costos (ej. instancias
+                infrautilizadas).
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 14: BLOQUE 6 - ESCENARIOS DE DECISIÓN -->
+        <section class="slide" data-block="Bloque 6 · Optimización de Costos">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 6 · Toma de Decisiones</div>
+            <h2 class="slide-title">
+              ¿Qué decisión toma un Cloud Practitioner?
+            </h2>
+            <p class="slide-subtitle">
+              Analiza estos 3 casos reales y selecciona la mejor acción de
+              optimización para descubrir el impacto.
+            </p>
+          </div>
+
+          <div class="grid-3">
+            <div class="card">
+              <span class="badge badge-orange" style="margin-bottom: 8px"
+                >Caso A · Desarrollo</span
+              >
+              <p
+                style="
+                  color: var(--text-primary);
+                  font-weight: 600;
+                  margin-bottom: 12px;
+                "
+              >
+                Un equipo de programación solo trabaja de lunes a viernes de
+                9:00 a 18:00, pero sus servidores EC2 pasan encendidos todo el
+                fin de semana.
+              </p>
+              <button
+                class="btn-ghost"
+                style="width: 100%"
+                onclick="
+                  revealDecision(
+                    this,
+                    '✅ Programar encendido/apagado automático (Instance Scheduler). Ahorras más del 65% de horas innecesarias.',
+                  )
+                "
+              >
+                Ver mejor decisión
+              </button>
+            </div>
+
+            <div class="card">
+              <span class="badge badge-blue" style="margin-bottom: 8px"
+                >Caso B · Base de Datos</span
+              >
+              <p
+                style="
+                  color: var(--text-primary);
+                  font-weight: 600;
+                  margin-bottom: 12px;
+                "
+              >
+                Una empresa tiene una base de datos crítica que funcionará de
+                forma continua 24/7 durante los próximos 3 años sin
+                interrupciones.
+              </p>
+              <button
+                class="btn-ghost"
+                style="width: 100%"
+                onclick="
+                  revealDecision(
+                    this,
+                    '✅ Comprar Reserved Instances a 3 años. Cargas predecibles y estables obtienen hasta un 72% de descuento.',
+                  )
+                "
+              >
+                Ver mejor decisión
+              </button>
+            </div>
+
+            <div class="card">
+              <span class="badge badge-emerald" style="margin-bottom: 8px"
+                >Caso C · Big Data</span
+              >
+              <p
+                style="
+                  color: var(--text-primary);
+                  font-weight: 600;
+                  margin-bottom: 12px;
+                "
+              >
+                Un laboratorio procesa videos científicos por la noche; si el
+                proceso se detiene, puede reanudarse más tarde sin pérdida de
+                datos.
+              </p>
+              <button
+                class="btn-ghost"
+                style="width: 100%"
+                onclick="
+                  revealDecision(
+                    this,
+                    '✅ Usar Spot Instances. Al ser tolerante a interrupciones, logras hasta un 90% de descuento frente a On-Demand.',
+                  )
+                "
+              >
+                Ver mejor decisión
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 15: BLOQUE 7 - TABLA COMPARATIVA DE HERRAMIENTAS -->
+        <section class="slide" data-block="Bloque 7 · Consolidación Examen">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 7 · Chuleta Visual de Repaso</div>
+            <h2 class="slide-title">
+              Mapa definitivo de Herramientas de Costos
+            </h2>
+            <p class="slide-subtitle">
+              Guarda esta tabla mentalmente: resume el 90% de preguntas sobre
+              gestión financiera en CLF-C02.
+            </p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Herramienta AWS</th>
+                  <th>¿Cuándo se usa?</th>
+                  <th>Función Principal</th>
+                  <th>Palabra Clave en Examen</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong style="color: var(--aws-blue)"
+                      >AWS Pricing Calculator</strong
+                    >
+                  </td>
+                  <td>Antes de desplegar</td>
+                  <td>Estimar costos de una arquitectura futura</td>
+                  <td><em>Estimar, cotizar, planificar</em></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong style="color: var(--aws-orange)"
+                      >AWS Cost Explorer</strong
+                    >
+                  </td>
+                  <td>Durante / Después</td>
+                  <td>Visualizar gráficos históricos y proyectar costos</td>
+                  <td><em>Gráficos, tendencias, forecast</em></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong style="color: var(--aws-rose)">AWS Budgets</strong>
+                  </td>
+                  <td>Continuo</td>
+                  <td>Configurar alertas al superar un monto o uso</td>
+                  <td><em>Alertas, notificaciones, umbral</em></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong style="color: var(--aws-emerald)"
+                      >Cost &amp; Usage Report (CUR)</strong
+                    >
+                  </td>
+                  <td>Auditoría profunda</td>
+                  <td>Datos más granulares exportados a S3</td>
+                  <td><em>Más detallado, granular, S3</em></td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong style="color: var(--aws-purple)"
+                      >Cost Anomaly Detection</strong
+                    >
+                  </td>
+                  <td>Continuo (Automático)</td>
+                  <td>Detectar picos inusuales con Machine Learning</td>
+                  <td><em>Machine Learning, gasto inusual</em></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SLIDE 16: BLOQUE 7 - ERRORES COMUNES EN EL EXAMEN -->
+        <section class="slide" data-block="Bloque 7 · Consolidación Examen">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 7 · Evita las Trampas</div>
+            <h2 class="slide-title">
+              4 Errores comunes de interpretación en el examen
+            </h2>
+            <p class="slide-subtitle">
+              Muchos estudiantes fallan estas preguntas por confundir conceptos
+              parecidos. Revisa cada corrección.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div
+                style="
+                  color: var(--aws-rose);
+                  font-weight: 700;
+                  margin-bottom: 4px;
+                "
+              >
+                ❌ Error 1: Confundir Pricing Calculator con Cost Explorer
+              </div>
+              <p>
+                <strong style="color: var(--aws-emerald)">✔ Realidad:</strong>
+                Calculator estima proyectos <em>futuros antes de crearlos</em>.
+                Cost Explorer analiza el gasto
+                <em>real de tu cuenta actual</em>.
+              </p>
+            </div>
+
+            <div class="card">
+              <div
+                style="
+                  color: var(--aws-rose);
+                  font-weight: 700;
+                  margin-bottom: 4px;
+                "
+              >
+                ❌ Error 2: Creer que AWS Budgets detiene servidores solo
+              </div>
+              <p>
+                <strong style="color: var(--aws-emerald)">✔ Realidad:</strong>
+                Su función principal es <strong>enviar alertas</strong> cuando
+                te acercas o pasas del límite (aunque existen Budget Actions
+                avanzadas, en CLF-C02 es sinónimo de alertas).
+              </p>
+            </div>
+
+            <div class="card">
+              <div
+                style="
+                  color: var(--aws-rose);
+                  font-weight: 700;
+                  margin-bottom: 4px;
+                "
+              >
+                ❌ Error 3: Pensar que apagar una EC2 elimina todos los costos
+              </div>
+              <p>
+                <strong style="color: var(--aws-emerald)">✔ Realidad:</strong>
+                Cuando detienes (<em>Stop</em>) una instancia EC2, dejas de
+                pagar por cómputo, pero
+                <strong>sigues pagando por el disco EBS</strong> asociado hasta
+                que la terminas (<em>Terminate</em>).
+              </p>
+            </div>
+
+            <div class="card">
+              <div
+                style="
+                  color: var(--aws-rose);
+                  font-weight: 700;
+                  margin-bottom: 4px;
+                "
+              >
+                ❌ Error 4: Usar Spot Instances para bases de datos
+              </div>
+              <p>
+                <strong style="color: var(--aws-emerald)">✔ Realidad:</strong>
+                Spot puede apagarse con 2 minutos de aviso. Jamás se recomienda
+                para cargas críticas o con estado como bases de datos.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 17: BLOQUE 7 - QUIZ FINAL (5 PREGUNTAS) -->
+        <section class="slide" data-block="Bloque 7 · Quiz Tipo Examen">
+          <div class="slide-header">
+            <div class="eyebrow">Bloque 7 · Simulador CLF-C02</div>
+            <h2 class="slide-title">Quiz Final: 5 Escenarios Tipo Examen</h2>
+            <p class="slide-subtitle">
+              Responde cada pregunta basada en escenarios reales y revisa la
+              retroalimentación inmediata.
+            </p>
+          </div>
+
+          <div class="card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 12px;
+              "
+            >
+              <span class="badge badge-orange" id="quizProgress"
+                >Pregunta 1 de 5</span
+              >
+              <span id="quizScoreBadge" class="badge badge-emerald"
+                >Puntaje: 0 / 5</span
+              >
+            </div>
+
+            <h3
+              id="quizQuestionText"
+              style="
+                font-size: clamp(0.98rem, 1.3vw, 1.12rem);
+                margin-bottom: 14px;
+                line-height: 1.45;
+              "
+            >
+              <!-- Populated by JS -->
+            </h3>
+
+            <div id="quizOptionsContainer">
+              <!-- Populated by JS -->
+            </div>
+
+            <div id="quizFeedbackBox" class="feedback-panel"></div>
+
+            <div
+              style="
+                margin-top: 14px;
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+              "
+            >
+              <button
+                id="quizNextBtn"
+                class="btn-primary"
+                style="padding: 10px 18px; font-size: 0.88rem; display: none"
+                onclick="nextQuizQuestion()"
+              >
+                Siguiente pregunta →
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SLIDE 18: CIERRE Y RESUMEN FINAL -->
+        <section class="slide" data-block="Cierre · Resumen">
+          <div class="hero-box">
+            <div class="hero-tag">🎉 ¡Módulo Completado!</div>
+            <h2
+              class="hero-title"
+              style="font-size: clamp(1.5rem, 2.8vw, 2.2rem)"
+            >
+              Listo para responder preguntas de
+              <span>Billing &amp; Pricing</span>
+            </h2>
+            <p class="slide-subtitle" style="margin: 0 auto 20px">
+              Has recorrido los 7 bloques esenciales del dominio de facturación
+              y gestión de costos de AWS Certified Cloud Practitioner (CLF-C02).
+            </p>
+
+            <div class="grid-3" style="text-align: left; margin-bottom: 22px">
+              <div class="card card-accent-orange">
+                <div class="card-title">1. Modelo Económico</div>
+                <p>
+                  Pay-as-you-go, cambio de CapEx a OpEx, y cobro por cómputo,
+                  almacenamiento y salida de datos (Data Transfer OUT).
+                </p>
+              </div>
+              <div class="card card-accent-blue">
+                <div class="card-title">2. Modelos de Compra</div>
+                <p>
+                  On-Demand (flexible), Reserved &amp; Savings Plans (compromiso
+                  1-3 años), y Spot (hasta 90% ahorro, interrumpible).
+                </p>
+              </div>
+              <div class="card card-accent-emerald">
+                <div class="card-title">3. Herramientas Exactas</div>
+                <p>
+                  Calculator (estimar), Cost Explorer (gráficos), Budgets
+                  (alertas), CUR (detalle máximo S3) y Anomaly Detection (ML).
+                </p>
+              </div>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+                flex-wrap: wrap;
+              "
+            >
+              <button class="btn-primary" onclick="restartPresentation()">
+                ↺ Reiniciar presentación completa
+              </button>
+              <button class="btn-nav" onclick="goToSlide(16)">
+                Repetir Quiz Final
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Bottom Navigation -->
+      <footer class="footer-nav">
+        <div class="nav-hint">
+          Usa las teclas <strong>←</strong> y <strong>→</strong> o desliza para
+          navegar
+        </div>
+        <div class="nav-buttons">
+          <button id="prevBtn" class="btn-nav" onclick="prevSlide()">
+            ← Anterior
+          </button>
+          <button id="nextBtn" class="btn-nav next" onclick="nextSlide()">
+            Siguiente →
+          </button>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      /* ==========================================================
+       1. PRESENTATION NAVIGATION STATE & TOUCH GESTURES
+       ========================================================== */
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      let currentSlide = 0;
+
+      const slideCounter = document.getElementById("slideCounter");
+      const blockIndicator = document.getElementById("blockIndicator");
+      const progressFill = document.getElementById("progressFill");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const stageEl = document.getElementById("stage");
+
+      function updateSlideUI() {
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle("active", idx === currentSlide);
+        });
+
+        const activeSlide = slides[currentSlide];
+        const blockName =
+          activeSlide.getAttribute("data-block") || "AWS CLF-C02";
+
+        slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+        blockIndicator.textContent = blockName;
+
+        const progressPct = ((currentSlide + 1) / totalSlides) * 100;
+        progressFill.style.width = `${progressPct}%`;
+
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === totalSlides - 1;
+        stageEl.scrollTop = 0;
+      }
+
+      function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updateSlideUI();
+        }
+      }
+
+      function prevSlide() {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateSlideUI();
+        }
+      }
+
+      function goToSlide(index) {
+        if (index >= 0 && index < totalSlides) {
+          currentSlide = index;
+          updateSlideUI();
+        }
+      }
+
+      function restartPresentation() {
+        resetQuiz();
+        currentToolIdx = 0;
+        renderToolChallenge();
+        goToSlide(0);
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT")
+          return;
+        if (e.key === "ArrowRight") nextSlide();
+        if (e.key === "ArrowLeft") prevSlide();
+      });
+
+      /* Touch Swipe Support for Mobile / Tablet */
+      let touchStartX = 0;
+      let touchStartY = 0;
+
+      stageEl.addEventListener(
+        "touchstart",
+        (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+          touchStartY = e.changedTouches[0].screenY;
+        },
+        { passive: true },
+      );
+
+      stageEl.addEventListener(
+        "touchend",
+        (e) => {
+          if (
+            e.target.tagName === "INPUT" ||
+            e.target.closest(".table-responsive") ||
+            e.target.closest(".tab-bar")
+          )
+            return;
+          const diffX = e.changedTouches[0].screenX - touchStartX;
+          const diffY = e.changedTouches[0].screenY - touchStartY;
+          if (Math.abs(diffX) > 55 && Math.abs(diffX) > Math.abs(diffY) * 1.4) {
+            if (diffX < 0) nextSlide();
+            else prevSlide();
+          }
+        },
+        { passive: true },
+      );
+
+      /* ==========================================================
+       2. EXPANDABLE CARDS & DECISION REVEALS
+       ========================================================== */
+      function toggleExpand(cardElement) {
+        cardElement.classList.toggle("open");
+      }
+
+      function revealDecision(btn, text) {
+        const container = btn.parentElement;
+        const existing = container.querySelector(".decision-result");
+        if (existing) return;
+
+        const box = document.createElement("div");
+        box.className = "decision-result";
+        box.style.marginTop = "10px";
+        box.style.padding = "9px 11px";
+        box.style.borderRadius = "8px";
+        box.style.background = "var(--aws-emerald-soft)";
+        box.style.color = "#a7f3d0";
+        box.style.fontSize = "0.85rem";
+        box.textContent = text;
+        btn.style.display = "none";
+        container.appendChild(box);
+      }
+
+      /* ==========================================================
+       3. PRICING MODELS INTERACTIVE TABS (SLIDE 6)
+       ========================================================== */
+      const pricingModelsData = [
+        {
+          title: "On-Demand Instances",
+          badge: "Máxima Flexibilidad",
+          what: "Pagas por capacidad de cómputo por hora o por segundo, sin compromisos a largo plazo ni pagos iniciales.",
+          when: "Cargas impredecibles, desarrollo/pruebas, o aplicaciones nuevas donde aún no sabes cuánto tráfico tendrás.",
+          pro: "Cero compromiso; enciendes y apagas cuando quieras.",
+          con: "Es la opción con mayor costo por hora.",
+          example:
+            "Una startup lanza su primera app y no sabe si tendrá 100 o 10.000 usuarios este mes.",
+          keywords:
+            "Sin compromiso (no commitment), picos impredecibles, corto plazo.",
+        },
+        {
+          title: "Reserved Instances (RI)",
+          badge: "Hasta 72% de descuento",
+          what: "Te comprometes a usar una configuración específica de instancia (familia, región, SO) durante 1 o 3 años.",
+          when: "Aplicaciones estables con uso predecible 24/7 (ej. bases de datos o servidores centrales permanentes).",
+          pro: "Gran descuento frente a On-Demand y opción de reservar capacidad en una Zona de Disponibilidad.",
+          con: "Menos flexible si cambias de familia de servidor o región.",
+          example:
+            "El servidor principal del sistema contable de un banco que funciona sin parar todo el año.",
+          keywords:
+            "Compromiso 1 o 3 años, carga estable/predecible (steady-state).",
+        },
+        {
+          title: "Savings Plans",
+          badge: "Hasta 72% con flexibilidad",
+          what: "Te comprometes a un gasto consistente por hora (ej. $15/hora) durante 1 o 3 años, aplicando automáticamente el descuento a tu cómputo.",
+          when: "Empresas que mantienen un consumo constante pero quieren libertad para cambiar tamaños de instancia, regiones o usar Fargate/Lambda.",
+          pro: "Combina altos descuentos con flexibilidad tecnológica.",
+          con: "Debes cumplir el compromiso de gasto horario acordado.",
+          example:
+            "Una empresa tecnológica que moderniza sus servidores cada pocos meses pero mantiene un gasto base estable.",
+          keywords:
+            "Compromiso monetario por hora ($/hr), flexibilidad entre familias/regiones.",
+        },
+        {
+          title: "Spot Instances",
+          badge: "Hasta 90% de descuento",
+          what: "Compras capacidad de cómputo ociosa de AWS a precios ultrabajos, sabiendo que AWS puede reclamarla con 2 minutos de aviso.",
+          when: "Procesamiento por lotes (batch), análisis de big data, renderizado de video o tareas que pueden pausarse y reanudarse.",
+          pro: "El precio más barato de toda la nube AWS.",
+          con: "Puede ser interrumpida en cualquier momento si AWS necesita la capacidad.",
+          example:
+            "Procesar 50.000 imágenes nocturnas mediante una cola de trabajo tolerante a fallos.",
+          keywords:
+            "Tolerante a fallos/interrupciones (fault-tolerant), batch, máximo ahorro.",
+        },
+        {
+          title: "AWS Free Tier (Capa Gratuita)",
+          badge: "Ideal para aprender",
+          what: "Permite explorar y probar más de 100 servicios de AWS sin costo dentro de ciertos límites mensuales.",
+          when: "Estudiantes, pruebas de concepto (PoC) y aprendizaje inicial en AWS.",
+          pro: "Tres modalidades: Siempre gratis (Always Free), 12 meses gratis (ej. 750 hrs EC2 t2/t3.micro) y pruebas cortas (Trials).",
+          con: "Si superas los límites gratuitos, AWS te cobrará la tarifa estándar por el excedente.",
+          example:
+            "Un estudiante practicando laboratorios para su examen Cloud Practitioner.",
+          keywords: "12 meses gratis, Always Free, pruebas iniciales.",
+        },
+      ];
+
+      function selectPricingTab(index) {
+        const tabs = document.querySelectorAll("#pricingTabs .tab-btn");
+        tabs.forEach((t, i) => t.classList.toggle("active", i === index));
+
+        const item = pricingModelsData[index];
+        const container = document.getElementById("pricingContent");
+        container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+          <h3 style="font-size: clamp(1.05rem, 1.5vw, 1.28rem); color: var(--text-primary);">${item.title}</h3>
+          <span class="badge badge-orange">${item.badge}</span>
+        </div>
+        <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+          <div style="background: var(--bg-surface); padding: 12px; border-radius: 10px;">
+            <strong style="color: var(--aws-blue); font-size: 0.9rem;">¿Qué es y cómo funciona?</strong>
+            <p style="margin-top: 4px;">${item.what}</p>
+          </div>
+          <div style="background: var(--bg-surface); padding: 12px; border-radius: 10px;">
+            <strong style="color: var(--aws-emerald); font-size: 0.9rem;">¿Cuándo conviene usarlo?</strong>
+            <p style="margin-top: 4px;">${item.when}</p>
+          </div>
+        </div>
+        <div class="grid-3" style="gap: 10px; font-size: 0.85rem;">
+          <div style="padding: 9px 11px; border-left: 3px solid var(--aws-emerald); background: rgba(16,185,129,0.07); border-radius: 6px;">
+            <strong>✔ Ventaja:</strong> ${item.pro}
+          </div>
+          <div style="padding: 9px 11px; border-left: 3px solid var(--aws-rose); background: rgba(244,63,94,0.07); border-radius: 6px;">
+            <strong>⚠ Limitación:</strong> ${item.con}
+          </div>
+          <div style="padding: 9px 11px; border-left: 3px solid var(--aws-orange); background: rgba(255,153,0,0.07); border-radius: 6px;">
+            <strong>💡 Ejemplo:</strong> ${item.example}
+          </div>
+        </div>
+        <div class="exam-tip" style="margin-top: 12px;">
+          <span>🎯</span>
+          <div><strong>Palabras clave en el examen:</strong> ${item.keywords}</div>
+        </div>
+      `;
+      }
+
+      /* ==========================================================
+       4. PRICING CALCULATOR SIMULATOR (SLIDE 9)
+       ========================================================== */
+      function updateCalculator() {
+        const regionMultiplier = parseFloat(
+          document.getElementById("calcRegion").value,
+        );
+        const instances = parseInt(
+          document.getElementById("calcInstances").value,
+          10,
+        );
+        const hours = parseInt(document.getElementById("calcHours").value, 10);
+        const storage = parseInt(
+          document.getElementById("calcStorage").value,
+          10,
+        );
+
+        document.getElementById("lblInstances").textContent =
+          `${instances} instancia${instances > 1 ? "s" : ""}`;
+        document.getElementById("lblHours").textContent =
+          `${hours} hrs${hours === 730 ? " (24/7)" : ""}`;
+        document.getElementById("lblStorage").textContent = `${storage} GB`;
+
+        const hourlyRate = 0.0416 * regionMultiplier;
+        const computeCost = instances * hours * hourlyRate;
+        const storageCost = storage * (0.023 * regionMultiplier);
+        const totalCost = computeCost + storageCost;
+
+        document.getElementById("resCompute").textContent =
+          `$${computeCost.toFixed(2)}`;
+        document.getElementById("resStorage").textContent =
+          `$${storageCost.toFixed(2)}`;
+        document.getElementById("resTotal").textContent =
+          `$${totalCost.toFixed(2)} USD`;
+      }
+
+      /* ==========================================================
+       5. MINI-CHALLENGE: HERRAMIENTAS DE COSTOS (SLIDE 12)
+       ========================================================== */
+      const toolChallenges = [
+        {
+          question:
+            "Un gerente financiero quiere recibir un correo electrónico automático en el momento en que el gasto mensual de AWS alcance el 80% de los $500 asignados al proyecto.",
+          options: [
+            "AWS Pricing Calculator",
+            "AWS Budgets",
+            "AWS Cost and Usage Report",
+            "AWS Trusted Advisor",
+          ],
+          correct: 1,
+          explanation:
+            "AWS Budgets permite establecer límites de presupuesto y enviar alertas automáticas cuando el gasto real o proyectado supera un umbral.",
+        },
+        {
+          question:
+            "El equipo de finanzas necesita descargar el archivo más granular y detallado posible con todos los cargos por hora y etiquetas de recursos en un bucket de S3 para analizarlo con herramientas de BI.",
+          options: [
+            "AWS Cost Explorer",
+            "AWS Cost Anomaly Detection",
+            "AWS Cost and Usage Report (CUR)",
+            "AWS Pricing Calculator",
+          ],
+          correct: 2,
+          explanation:
+            "AWS Cost and Usage Report (CUR) entrega el desglose más completo y granular disponible en AWS, publicándolo directamente en Amazon S3.",
+        },
+        {
+          question:
+            "Un desarrollador olvidó apagar un clúster costoso durante la noche. La empresa quiere un sistema con Machine Learning que detecte automáticamente picos de gasto fuera de lo normal.",
+          options: [
+            "AWS Cost Anomaly Detection",
+            "AWS Organizations",
+            "AWS Pricing Calculator",
+            "AWS Free Tier",
+          ],
+          correct: 0,
+          explanation:
+            "AWS Cost Anomaly Detection utiliza Machine Learning para monitorear patrones de gasto y alertar sobre aumentos inusuales o inesperados.",
+        },
+      ];
+
+      let currentToolIdx = 0;
+
+      function renderToolChallenge() {
+        const item = toolChallenges[currentToolIdx];
+        document.getElementById("toolChallengeBadge").textContent =
+          `Escenario ${currentToolIdx + 1} de ${toolChallenges.length}`;
+        document.getElementById("toolChallengeQuestion").textContent =
+          item.question;
+
+        const optionsBox = document.getElementById("toolChallengeOptions");
+        const feedbackBox = document.getElementById("toolChallengeFeedback");
+        feedbackBox.className = "feedback-panel";
+        feedbackBox.innerHTML = "";
+
+        optionsBox.innerHTML = item.options
+          .map(
+            (opt, idx) => `
+        <button class="option-btn" onclick="checkToolChallenge(${idx}, this)">
+          <strong>${String.fromCharCode(65 + idx)}.</strong> <span>${opt}</span>
+        </button>
+      `,
+          )
+          .join("");
+      }
+
+      function checkToolChallenge(selectedIdx, btn) {
+        const item = toolChallenges[currentToolIdx];
+        const buttons = document.querySelectorAll(
+          "#toolChallengeOptions .option-btn",
+        );
+        buttons.forEach((b, idx) => {
+          b.disabled = true;
+          if (idx === item.correct) b.classList.add("correct");
+          else if (idx === selectedIdx) b.classList.add("incorrect");
+        });
+
+        const feedbackBox = document.getElementById("toolChallengeFeedback");
+        const isRight = selectedIdx === item.correct;
+        feedbackBox.className = "feedback-panel show";
+        feedbackBox.style.background = isRight
+          ? "var(--aws-emerald-soft)"
+          : "var(--aws-rose-soft)";
+        feedbackBox.style.border = `1px solid ${isRight ? "var(--aws-emerald)" : "var(--aws-rose)"}`;
+        feedbackBox.innerHTML = `<strong>${isRight ? "✔ ¡Correcto!" : "✖ Revisa este detalle:"}</strong> ${item.explanation}`;
+      }
+
+      function nextToolChallenge() {
+        currentToolIdx = (currentToolIdx + 1) % toolChallenges.length;
+        renderToolChallenge();
+      }
+
+      /* ==========================================================
+       6. FINAL QUIZ (5 QUESTIONS - SLIDE 17)
+       ========================================================== */
+      const quizData = [
+        {
+          q: "Una empresa planea migrar una aplicación nueva a AWS y necesita estimar cuánto costará mensualmente antes de crear cualquier recurso en su cuenta. ¿Qué herramienta debe utilizar?",
+          options: [
+            "AWS Cost Explorer",
+            "AWS Pricing Calculator",
+            "AWS Cost and Usage Report (CUR)",
+            "AWS Budgets",
+          ],
+          correct: 1,
+          feedback:
+            "AWS Pricing Calculator sirve para modelar y estimar costos antes de desplegar recursos. Cost Explorer y CUR analizan gastos ya ocurridos.",
+        },
+        {
+          q: "Una compañía ejecuta procesos nocturnos de análisis de datos que pueden detenerse y reanudarse sin afectar el negocio. Buscan reducir al máximo el costo de las instancias Amazon EC2. ¿Qué opción de compra es la más adecuada?",
+          options: [
+            "On-Demand Instances",
+            "Dedicated Hosts",
+            "Spot Instances",
+            "Standard Reserved Instances",
+          ],
+          correct: 2,
+          feedback:
+            "Spot Instances ofrece descuentos de hasta el 90% y es ideal para cargas de trabajo tolerantes a fallos o interrupciones como procesos batch.",
+        },
+        {
+          q: "Una startup desea mantener la libertad de cambiar entre diferentes familias de instancias EC2 y regiones durante los próximos 3 años, pero quiere obtener descuentos significativos comprometiéndose a un gasto fijo por hora. ¿Qué modelo debe elegir?",
+          options: [
+            "Compute Savings Plans",
+            "Spot Instances",
+            "On-Demand Instances",
+            "AWS Free Tier",
+          ],
+          correct: 0,
+          feedback:
+            "Savings Plans ofrece grandes descuentos (hasta 72%) a cambio de un compromiso de gasto por hora durante 1 o 3 años, manteniendo flexibilidad para cambiar familias de instancia y regiones.",
+        },
+        {
+          q: "¿Cuál de las siguientes acciones contribuye directamente a trasladar gastos de capital (CapEx) a gastos variables (OpEx) al adoptar AWS?",
+          options: [
+            "Comprar servidores físicos propios y alojarlos en un centro de datos privado",
+            "Pagar mensualmente únicamente por los recursos de cómputo y almacenamiento consumidos sin inversión inicial en hardware",
+            "Mantener instancias EC2 de gran tamaño encendidas 24/7 sin monitorear su uso",
+            "Pagar por adelantado el mantenimiento de centros de datos físicos por 10 años",
+          ],
+          correct: 1,
+          feedback:
+            "El modelo Pay-as-you-go de AWS elimina la inversión inicial en infraestructura física (CapEx) y la reemplaza por un gasto operativo variable (OpEx).",
+        },
+        {
+          q: "Un administrador de nube necesita visualizar gráficos de los costos de los últimos 6 meses por servicio y obtener una proyección del gasto para los próximos 3 meses. ¿Qué servicio de AWS debe usar?",
+          options: [
+            "AWS Pricing Calculator",
+            "AWS Artifact",
+            "AWS Cost Explorer",
+            "Amazon Inspector",
+          ],
+          correct: 2,
+          feedback:
+            "AWS Cost Explorer proporciona gráficos interactivos para analizar tendencias históricas de costos y generar proyecciones futuras (forecasting).",
+        },
+      ];
+
+      let quizIndex = 0;
+      let quizScore = 0;
+      let quizAnswered = false;
+
+      function renderQuiz() {
+        const item = quizData[quizIndex];
+        quizAnswered = false;
+
+        document.getElementById("quizProgress").textContent =
+          `Pregunta ${quizIndex + 1} de ${quizData.length}`;
+        document.getElementById("quizScoreBadge").textContent =
+          `Puntaje: ${quizScore} / ${quizData.length}`;
+        document.getElementById("quizQuestionText").textContent = item.q;
+        document.getElementById("quizNextBtn").style.display = "none";
+
+        const feedbackBox = document.getElementById("quizFeedbackBox");
+        feedbackBox.className = "feedback-panel";
+        feedbackBox.innerHTML = "";
+
+        const container = document.getElementById("quizOptionsContainer");
+        container.innerHTML = item.options
+          .map(
+            (opt, idx) => `
+        <button class="option-btn" onclick="answerQuiz(${idx}, this)">
+          <strong>${String.fromCharCode(65 + idx)}.</strong> <span>${opt}</span>
+        </button>
+      `,
+          )
+          .join("");
+      }
+
+      function answerQuiz(selectedIdx) {
+        if (quizAnswered) return;
+        quizAnswered = true;
+
+        const item = quizData[quizIndex];
+        const buttons = document.querySelectorAll(
+          "#quizOptionsContainer .option-btn",
+        );
+        buttons.forEach((btn, idx) => {
+          btn.disabled = true;
+          if (idx === item.correct) btn.classList.add("correct");
+          else if (idx === selectedIdx) btn.classList.add("incorrect");
+        });
+
+        const isCorrect = selectedIdx === item.correct;
+        if (isCorrect) quizScore++;
+
+        document.getElementById("quizScoreBadge").textContent =
+          `Puntaje: ${quizScore} / ${quizData.length}`;
+
+        const feedbackBox = document.getElementById("quizFeedbackBox");
+        feedbackBox.className = "feedback-panel show";
+        feedbackBox.style.background = isCorrect
+          ? "var(--aws-emerald-soft)"
+          : "var(--aws-rose-soft)";
+        feedbackBox.style.border = `1px solid ${isCorrect ? "var(--aws-emerald)" : "var(--aws-rose)"}`;
+        feedbackBox.innerHTML = `<strong>${isCorrect ? "✔ ¡Respuesta Correcta!" : "✖ Respuesta Incorrecta."}</strong> ${item.feedback}`;
+
+        const nextBtn = document.getElementById("quizNextBtn");
+        nextBtn.style.display = "inline-block";
+        nextBtn.textContent =
+          quizIndex < quizData.length - 1
+            ? "Siguiente pregunta →"
+            : "Finalizar y ver resumen →";
+      }
+
+      function nextQuizQuestion() {
+        if (quizIndex < quizData.length - 1) {
+          quizIndex++;
+          renderQuiz();
+        } else {
+          nextSlide();
+        }
+      }
+
+      function resetQuiz() {
+        quizIndex = 0;
+        quizScore = 0;
+        renderQuiz();
+      }
+
+      /* ==========================================================
+       7. INITIALIZATION
+       ========================================================== */
+      updateSlideUI();
+      selectPricingTab(0);
+      updateCalculator();
+      renderToolChallenge();
+      renderQuiz();
+    </script>
+  </body>
+</html>
