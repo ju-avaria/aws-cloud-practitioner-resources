@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Support Plans | AWS Cloud Practitioner (CLF-C02)</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #263449;
+      --aws-orange: #ff9900;
+      --aws-orange-hover: #e68a00;
+      --aws-blue: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --success: #10b981;
+      --error: #ef4444;
+      --badge-bg: rgba(255, 153, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header & Progress */
+    header {
+      background-color: #0b1120;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .brand span.aws-tag {
+      background: var(--aws-orange);
+      color: #0f172a;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .slide-counter {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background-color: var(--border-color);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--aws-orange), #ffb84d);
+      width: 12.5%;
+      transition: width 0.35s ease;
+    }
+
+    /* Main Slide Container */
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1050px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Typography & Badges */
+    .slide-header {
+      margin-bottom: 1.75rem;
+    }
+
+    .tag-pill {
+      display: inline-block;
+      background-color: var(--badge-bg);
+      color: var(--aws-orange);
+      border: 1px solid rgba(255, 153, 0, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 0.6rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    /* Grid & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.4rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 153, 0, 0.5);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.65rem;
+      color: var(--aws-orange);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card p, .card li {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .card ul {
+      padding-left: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .card li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* Alert / Exam Tip Box */
+    .exam-tip {
+      margin-top: 1.5rem;
+      background: linear-gradient(135deg, rgba(255, 153, 0, 0.12), rgba(56, 189, 248, 0.08));
+      border-left: 4px solid var(--aws-orange);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+
+    .exam-tip strong {
+      color: var(--aws-orange);
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.95rem;
+    }
+
+    .exam-tip p {
+      font-size: 0.93rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .warning-box {
+      margin-top: 1.25rem;
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .warning-box strong {
+      color: #fca5a5;
+    }
+
+    /* Interactive Tabs inside Plan Slides */
+    .interactive-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--aws-orange);
+      color: #0f172a;
+      border-color: var(--aws-orange);
+    }
+
+    .tab-panel {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.4rem;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    /* Key Highlight Badges */
+    .kw {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--aws-blue);
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    /* Comparison Table */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--bg-card);
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: #0b1120;
+      color: var(--aws-orange);
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: var(--bg-card-hover);
+    }
+
+    /* Case Studies & Quiz */
+    .scenario-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.35rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .scenario-title {
+      font-weight: 700;
+      color: var(--aws-blue);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .option-btn {
+      background-color: #0f172a;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--aws-orange);
+      background-color: rgba(255, 153, 0, 0.08);
+    }
+
+    .option-btn.correct {
+      background-color: rgba(16, 185, 129, 0.2);
+      border-color: var(--success);
+      color: #6ee7b7;
+    }
+
+    .option-btn.wrong {
+      background-color: rgba(239, 68, 68, 0.2);
+      border-color: var(--error);
+      color: #fca5a5;
+    }
+
+    .feedback-msg {
+      margin-top: 0.85rem;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+      line-height: 1.45;
+    }
+
+    .feedback-msg.show {
+      display: block;
+    }
+
+    .feedback-msg.success {
+      background-color: rgba(16, 185, 129, 0.12);
+      border: 1px solid var(--success);
+      color: #a7f3d0;
+    }
+
+    .feedback-msg.error {
+      background-color: rgba(239, 68, 68, 0.12);
+      border: 1px solid var(--error);
+      color: #fecaca;
+    }
+
+    /* Quiz Score Banner */
+    .score-banner {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid var(--aws-orange);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    .score-banner h3 {
+      color: var(--aws-orange);
+      font-size: 1.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .reset-btn {
+      margin-top: 0.8rem;
+      background-color: var(--aws-orange);
+      color: #0f172a;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Footer Navigation */
+    footer {
+      background-color: #0b1120;
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-btn {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      border-color: var(--aws-orange);
+      color: var(--aws-orange);
+    }
+
+    .nav-btn.primary {
+      background-color: var(--aws-orange);
+      color: #0f172a;
+      border-color: var(--aws-orange);
+    }
+
+    .nav-btn.primary:hover:not(:disabled) {
+      background-color: var(--aws-orange-hover);
+      color: #0f172a;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .dots {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    .dot.active {
+      background-color: var(--aws-orange);
+      transform: scale(1.25);
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.65rem; }
+      h2 { font-size: 1.45rem; }
+      header, footer { padding: 0.85rem 1rem; }
+      .dots { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="aws-tag">AWS</span>
+      <span>Support Plans — CLF-C02</span>
+    </div>
+    <div class="slide-counter" id="slideCounter">Diapositiva 1 de 8</div>
+  </header>
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+
+  <main>
+    <!-- SLIDE 1: INTRODUCCIÓN -->
+    <section class="slide active" data-slide="0">
+      <div class="slide-header">
+        <span class="tag-pill">Módulo 1 • Fundamentos</span>
+        <h1>¿Qué es AWS Support y para qué sirve?</h1>
+        <p class="subtitle">Conjunto de herramientas, recursos y acceso a ingenieros de AWS diseñados para ayudarte a optimizar costos, mejorar el rendimiento y resolver incidentes en la nube.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>🛠️ Resolución Técnica</h3>
+          <p>Ayuda directa para diagnosticar errores, configurar servicios y resolver interrupciones según la criticidad de tu negocio.</p>
+        </div>
+        <div class="card">
+          <h3>🧭 Buenas Prácticas</h3>
+          <p>Acceso a <span class="kw">AWS Trusted Advisor</span> para recibir recomendaciones automáticas de seguridad, costos y tolerancia a fallos.</p>
+        </div>
+        <div class="card">
+          <h3>📈 Escalabilidad por Etapa</h3>
+          <p>Cuatro niveles progresivos: <strong>Basic</strong>, <strong>Developer</strong>, <strong>Business</strong> y <strong>Enterprise</strong>. Pagas según el nivel de criticidad de tus cargas.</p>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <strong>⚠️ Concepto clave de examen (Responsabilidad Compartida):</strong> Contratar un plan de soporte (incluso Enterprise) <strong>NO</strong> significa que AWS administrará, parchará ni operará tu infraestructura por ti. AWS te asesora y responde ante incidentes, pero el cliente sigue siendo responsable de operar sus aplicaciones y datos.
+      </div>
+    </section>
+
+    <!-- SLIDE 2: BASIC SUPPORT -->
+    <section class="slide" data-slide="1">
+      <div class="slide-header">
+        <span class="tag-pill">Plan 1 de 4 • Gratuito</span>
+        <h2>AWS Basic Support</h2>
+        <p class="subtitle">Incluido por defecto en todas las cuentas de AWS sin costo adicional. Ideal para explorar y aprender.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>✅ ¿Qué incluye?</h3>
+          <ul>
+            <li>Soporte 24/7 para <strong>facturación y gestión de cuentas</strong> (Billing & Account).</li>
+            <li>Documentación técnica, whitepapers y foros de la comunidad (AWS re:Post).</li>
+            <li><span class="kw">AWS Personal Health Dashboard</span> (alertas sobre eventos de AWS que afectan tu cuenta).</li>
+            <li>Acceso a las <strong>7 comprobaciones básicas</strong> de AWS Trusted Advisor.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🚫 Limitaciones y Perfil</h3>
+          <ul>
+            <li><strong>Soporte técnico:</strong> ❌ No incluye acceso a ingenieros de soporte técnico (casos técnicos).</li>
+            <li><strong>Arquitectura:</strong> ❌ Sin orientación arquitectónica.</li>
+            <li><strong>Tiempo de respuesta:</strong> No aplica para casos técnicos.</li>
+            <li><strong>Perfil ideal:</strong> Estudiantes, cuentas personales, pruebas de concepto o cargas no críticas.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exam-tip">
+        <strong>🎯 Clave para el examen CLF-C02:</strong>
+        <p>Si una pregunta menciona "sin costo adicional", "solo consultas de facturación/cuenta" o "comprobaciones básicas de Trusted Advisor", la respuesta es <strong>Basic Support</strong>.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: DEVELOPER SUPPORT -->
+    <section class="slide" data-slide="2">
+      <div class="slide-header">
+        <span class="tag-pill">Plan 2 de 4 • Entornos de Prueba</span>
+        <h2>AWS Developer Support</h2>
+        <p class="subtitle">El primer nivel de pago. Pensado para equipos que están construyendo, probando o experimentando en AWS.</p>
+      </div>
+
+      <div class="interactive-tabs" data-group="dev">
+        <button class="tab-btn active" onclick="switchTab('dev', 0)">Características Clave</button>
+        <button class="tab-btn" onclick="switchTab('dev', 1)">Tiempos y Contacto</button>
+        <button class="tab-btn" onclick="switchTab('dev', 2)">Ejemplo Cotidiano</button>
+      </div>
+
+      <div class="tab-panel active" data-panel="dev-0">
+        <div class="grid-2">
+          <div>
+            <h3 style="color: var(--aws-orange); margin-bottom: 0.5rem;">✅ Qué agrega sobre Basic</h3>
+            <ul style="padding-left: 1.2rem; color: #cbd5e1; line-height: 1.6;">
+              <li><strong>Acceso a soporte técnico:</strong> 1 contacto autorizado puede abrir casos técnicos ilimitados.</li>
+              <li><strong>Orientación general:</strong> Recomendaciones básicas sobre qué servicios elegir o cómo configurarlos.</li>
+              <li><strong>Trusted Advisor:</strong> Mantiene las 7 comprobaciones básicas (no desbloquea todas).</li>
+            </ul>
+          </div>
+          <div>
+            <h3 style="color: var(--aws-blue); margin-bottom: 0.5rem;">👤 Perfil de Organización</h3>
+            <p style="color: #cbd5e1; line-height: 1.6;">Desarrolladores individuales o startups en etapa temprana que aún <strong>no tienen aplicaciones en producción</strong> y solo necesitan ayuda ocasional en horario laboral.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="dev-1">
+        <ul style="padding-left: 1.2rem; color: #cbd5e1; line-height: 1.8;">
+          <li><strong>Canal de contacto:</strong> Únicamente vía web (consola de AWS, correo electrónico) en <strong>horario comercial</strong>. No incluye teléfono ni chat.</li>
+          <li><strong>Orientación general (General guidance):</strong> Respuesta en menos de <strong>24 horas</strong>.</li>
+          <li><strong>Sistema afectado (System impaired):</strong> Respuesta en menos de <strong>12 horas</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="tab-panel" data-panel="dev-2">
+        <p style="color: #cbd5e1; line-height: 1.6;">
+          <strong>Escenario:</strong> Una startup está desarrollando una app móvil en un entorno de pruebas (<em>staging</em>). El equipo tiene dudas sobre cómo conectar Lambda con DynamoDB y necesita abrir un ticket técnico económico sin pagar soporte 24/7. <strong>Plan ideal: Developer Support.</strong>
+        </p>
+      </div>
+
+      <div class="exam-tip">
+        <strong>🎯 Clave para el examen CLF-C02:</strong>
+        <p>Palabras clave: <span class="kw">Entornos de desarrollo/pruebas</span>, <span class="kw">horario laboral (business hours)</span>, <span class="kw">respuesta &lt; 12 horas</span> y <span class="kw">sin cargas de producción</span>.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: BUSINESS SUPPORT -->
+    <section class="slide" data-slide="3">
+      <div class="slide-header">
+        <span class="tag-pill">Plan 3 de 4 • Producción</span>
+        <h2>AWS Business Support</h2>
+        <p class="subtitle">El plan mínimo recomendado para empresas con cargas de trabajo en <strong>producción</strong>.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>📞 Soporte Técnico 24/7</h3>
+          <p>Acceso <strong>24/7</strong> por teléfono, chat y web. Contactos ilimitados (usuarios IAM) pueden abrir casos técnicos.</p>
+        </div>
+        <div class="card">
+          <h3>⚡ Respuesta Rápida</h3>
+          <ul>
+            <li>Sistema de producción afectado: <strong>&lt; 4 horas</strong>.</li>
+            <li>Sistema de producción caído: <strong>&lt; 1 hora</strong>.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🔍 Trusted Advisor Completo</h3>
+          <p>Desbloquea el <strong>acceso completo</strong> a todas las comprobaciones de AWS Trusted Advisor y la <span class="kw">AWS Support API</span>.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1.25rem;">
+        <h3>🏗️ Arquitectura y Terceros</h3>
+        <p>Incluye orientación sobre casos de uso específicos (cómo combinar servicios para tu arquitectura) y soporte de interoperabilidad con software de terceros común (ej. sistemas operativos o bases de datos en EC2).</p>
+      </div>
+
+      <div class="exam-tip">
+        <strong>🎯 Clave para el examen CLF-C02:</strong>
+        <p>Si el enunciado indica <span class="kw">cargas en producción</span>, <span class="kw">soporte 24/7</span>, <span class="kw">respuesta en menos de 1 hora</span> o <span class="kw">acceso completo a Trusted Advisor</span> al menor costo posible → <strong>Business Support</strong>.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: ENTERPRISE SUPPORT -->
+    <section class="slide" data-slide="4">
+      <div class="slide-header">
+        <span class="tag-pill">Plan 4 de 4 • Misión Crítica</span>
+        <h2>AWS Enterprise Support</h2>
+        <p class="subtitle">Diseñado para grandes organizaciones con cargas de trabajo críticas para el negocio que exigen máxima disponibilidad y acompañamiento proactivo.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>🌟 Diferenciadores Exclusivos</h3>
+          <ul>
+            <li><strong>TAM (Technical Account Manager):</strong> Un ingeniero dedicado asignado proactivamente a tu cuenta para guiar tu arquitectura y operaciones.</li>
+            <li><strong>Respuesta crítica:</strong> Menos de <strong>15 minutos</strong> cuando un sistema crítico de negocio cae.</li>
+            <li><strong>Infrastructure Event Management (IEM):</strong> Acompañamiento para eventos de alto tráfico (ej. Black Friday, lanzamientos globales).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🛡️ Respaldo Estratégico</h3>
+          <ul>
+            <li><strong>AWS Concierge Support Team:</strong> Equipo dedicado para consultas rápidas de facturación y administración de cuentas.</li>
+            <li><strong>Well-Architected Reviews:</strong> Revisiones arquitectónicas guiadas y talleres proactivos.</li>
+            <li><strong>Perfil ideal:</strong> Bancos, aerolíneas, e-commerce masivos o empresas donde cada minuto de caída cuesta miles de dólares.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exam-tip">
+        <strong>🎯 Clave para el examen CLF-C02:</strong>
+        <p>En el examen, si lees <span class="kw">Technical Account Manager (TAM)</span>, <span class="kw">15 minutos</span>, <span class="kw">Concierge Support</span> o <span class="kw">Infrastructure Event Management</span>, la respuesta es automáticamente <strong>Enterprise Support</strong>.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: COMPARATIVA VISUAL -->
+    <section class="slide" data-slide="5">
+      <div class="slide-header">
+        <span class="tag-pill">Resumen Visual</span>
+        <h2>Comparativa de Planes AWS Support</h2>
+        <p class="subtitle">Tabla de referencia rápida para memorizar las diferencias clave antes del examen.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Característica</th>
+              <th>Basic</th>
+              <th>Developer</th>
+              <th>Business</th>
+              <th>Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Costo</strong></td>
+              <td>Gratis</td>
+              <td>Bajo (desde $29/mes*)</td>
+              <td>Medio (desde $100/mes*)</td>
+              <td>Alto (desde $15,000/mes*)</td>
+            </tr>
+            <tr>
+              <td><strong>Entorno ideal</strong></td>
+              <td>Aprendizaje / Pruebas</td>
+              <td>Desarrollo / Staging</td>
+              <td>Producción</td>
+              <td>Misión Crítica</td>
+            </tr>
+            <tr>
+              <td><strong>Soporte Técnico</strong></td>
+              <td>❌ Solo facturación/cuenta</td>
+              <td>Horario laboral (Web)</td>
+              <td>24/7 (Teléfono, chat, web)</td>
+              <td>24/7 (Prioritario)</td>
+            </tr>
+            <tr>
+              <td><strong>Tiempo de respuesta más rápido</strong></td>
+              <td>No aplica</td>
+              <td>&lt; 12 horas (Sistema afectado)</td>
+              <td>&lt; 1 hora (Producción caída)</td>
+              <td><strong>&lt; 15 min</strong> (Crítico caído)</td>
+            </tr>
+            <tr>
+              <td><strong>AWS Trusted Advisor</strong></td>
+              <td>7 checks básicos</td>
+              <td>7 checks básicos</td>
+              <td><strong>Todos los checks</strong></td>
+              <td><strong>Todos los checks</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Arquitectura y TAM</strong></td>
+              <td>No</td>
+              <td>Guía general</td>
+              <td>Guía por caso de uso</td>
+              <td><strong>TAM dedicado + IEM + Concierge</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.6rem;">*Nota: Los precios de pago se calculan como un porcentaje del gasto mensual de AWS con un mínimo base.</p>
+    </section>
+
+    <!-- SLIDE 7: CASOS PRÁCTICOS -->
+    <section class="slide" data-slide="6">
+      <div class="slide-header">
+        <span class="tag-pill">Práctica Aplicada</span>
+        <h2>Casos Prácticos: ¿Qué plan elegirías?</h2>
+        <p class="subtitle">Analiza cada situación empresarial y selecciona el plan más adecuado y rentable.</p>
+      </div>
+
+      <div class="scenario-box" id="case1">
+        <div class="scenario-title">Caso 1: Comercio electrónico antes del Cyber Monday</div>
+        <p style="font-size: 0.94rem; color: #cbd5e1;">Una tienda minorista global espera un aumento de 10x en su tráfico la próxima semana. Necesitan un ingeniero dedicado que revise su arquitectura antes del evento y respuesta en menos de 15 minutos si falla el sistema de pagos.</p>
+        <div class="options-grid">
+          <button class="option-btn" onclick="checkCase('case1', false, 'Developer solo cubre horario laboral y desarrollo, no eventos críticos.')">Developer Support</button>
+          <button class="option-btn" onclick="checkCase('case1', false, 'Business tiene respuesta de 1 hora y no incluye TAM ni Infrastructure Event Management.')">Business Support</button>
+          <button class="option-btn" onclick="checkCase('case1', true, '¡Exacto! Enterprise ofrece un Technical Account Manager (TAM), gestión de eventos de infraestructura (IEM) y SLA de 15 minutos.')">Enterprise Support</button>
+        </div>
+        <div class="feedback-msg"></div>
+      </div>
+
+      <div class="scenario-box" id="case2">
+        <div class="scenario-title">Caso 2: Aplicación en producción con presupuesto optimizado</div>
+        <p style="font-size: 0.94rem; color: #cbd5e1;">Una empresa mediana acaba de lanzar su portal de clientes a producción. Requieren soporte técnico 24/7 por teléfono y acceso completo a AWS Trusted Advisor para optimizar costos, manteniendo los gastos de soporte al mínimo.</p>
+        <div class="options-grid">
+          <button class="option-btn" onclick="checkCase('case2', false, 'Developer no tiene soporte telefónico 24/7 ni acceso completo a Trusted Advisor.')">Developer Support</button>
+          <button class="option-btn" onclick="checkCase('case2', true, '¡Correcto! Business Support es el plan más económico que ofrece soporte técnico 24/7 y todas las comprobaciones de Trusted Advisor.')">Business Support</button>
+          <button class="option-btn" onclick="checkCase('case2', false, 'Enterprise cumple, pero no optimiza costos para una empresa mediana que no pidió TAM.')">Enterprise Support</button>
+        </div>
+        <div class="feedback-msg"></div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: QUIZ FINAL -->
+    <section class="slide" data-slide="7">
+      <div class="slide-header">
+        <span class="tag-pill">Evaluación CLF-C02</span>
+        <h2>Quiz Final de Certificación</h2>
+        <p class="subtitle">Pon a prueba tus conocimientos con 5 preguntas estilo examen AWS Cloud Practitioner.</p>
+      </div>
+
+      <div id="quizContainer"></div>
+
+      <div class="score-banner" id="scoreBanner">
+        <h3 id="scoreTitle">Resultado: 0 / 5</h3>
+        <p id="scoreText" style="color: #cbd5e1;"></p>
+        <button class="reset-btn" onclick="resetQuiz()">Reiniciar Quiz</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← Anterior</button>
+    <div class="dots" id="dotsContainer"></div>
+    <button class="nav-btn primary" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+  </footer>
+
+  <script>
+    // Slide Navigation Logic
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideCounter = document.getElementById('slideCounter');
+    const progressBar = document.getElementById('progressBar');
+    const dotsContainer = document.getElementById('dotsContainer');
+
+    // Initialize navigation dots
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateUI() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === currentSlide);
+      });
+
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((d, idx) => {
+        d.classList.toggle('active', idx === currentSlide);
+      });
+
+      slideCounter.textContent = `Diapositiva ${currentSlide + 1} de ${totalSlides}`;
+      progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+      nextBtn.textContent = currentSlide === totalSlides - 1 ? 'Finalizado ✓' : 'Siguiente →';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function changeSlide(dir) {
+      const next = currentSlide + dir;
+      if (next >= 0 && next < totalSlides) {
+        currentSlide = next;
+        updateUI();
+      }
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateUI();
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') changeSlide(1);
+      if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    // Interactive Tabs inside Slides
+    function switchTab(group, index) {
+      const buttons = document.querySelectorAll(`.interactive-tabs[data-group="${group}"] .tab-btn`);
+      buttons.forEach((btn, idx) => btn.classList.toggle('active', idx === index));
+
+      for (let i = 0; i < 3; i++) {
+        const panel = document.querySelector(`.tab-panel[data-panel="${group}-${i}"]`);
+        if (panel) panel.classList.toggle('active', i === index);
+      }
+    }
+
+    // Case Study Logic
+    function checkCase(caseId, isCorrect, message) {
+      const box = document.getElementById(caseId);
+      const buttons = box.querySelectorAll('.option-btn');
+      const feedback = box.querySelector('.feedback-msg');
+
+      buttons.forEach(btn => btn.disabled = true);
+      event.target.classList.add(isCorrect ? 'correct' : 'wrong');
+
+      feedback.textContent = message;
+      feedback.className = `feedback-msg show ${isCorrect ? 'success' : 'error'}`;
+    }
+
+    // Quiz Data & Logic
+    const quizData = [
+      {
+        q: "1. ¿Qué plan de soporte de AWS incluye un Technical Account Manager (TAM) dedicado?",
+        options: ["Basic Support", "Developer Support", "Business Support", "Enterprise Support"],
+        correct: 3,
+        explanation: "El Technical Account Manager (TAM) es un beneficio exclusivo de AWS Enterprise Support."
+      },
+      {
+        q: "2. Una empresa tiene cargas de trabajo en producción y necesita acceso completo a todas las comprobaciones de AWS Trusted Advisor al menor costo posible. ¿Qué plan debe elegir?",
+        options: ["Basic Support", "Developer Support", "Business Support", "Enterprise Support"],
+        correct: 2,
+        explanation: "Business Support es el plan de menor costo que desbloquea la totalidad de comprobaciones de AWS Trusted Advisor y soporte 24/7."
+      },
+      {
+        q: "3. ¿Cuál es el tiempo de respuesta objetivo cuando un sistema crítico de negocio cae en AWS Enterprise Support?",
+        options: ["Menos de 15 minutos", "Menos de 1 hora", "Menos de 4 horas", "Menos de 12 horas"],
+        correct: 0,
+        explanation: "Enterprise Support garantiza respuesta en menos de 15 minutos para sistemas críticos caídos (Business ofrece < 1 hora)."
+      },
+      {
+        q: "4. Un desarrollador está probando un prototipo en AWS y necesita abrir casos técnicos en horario laboral sin pagar soporte 24/7. ¿Qué plan se ajusta mejor?",
+        options: ["Basic Support", "Developer Support", "Business Support", "Enterprise Support"],
+        correct: 1,
+        explanation: "Developer Support está pensado para entornos de prueba y ofrece soporte técnico vía web en horario laboral."
+      },
+      {
+        q: "5. ¿Cuál de las siguientes afirmaciones es VERDADERA sobre los planes de soporte de AWS?",
+        options: [
+          "Basic Support incluye soporte técnico telefónico 24/7.",
+          "Contratar Enterprise Support significa que AWS administrará los servidores del cliente.",
+          "Todos los planes de AWS incluyen soporte 24/7 para consultas de facturación y cuenta.",
+          "Developer Support incluye el AWS Concierge Support Team."
+        ],
+        correct: 2,
+        explanation: "Incluso el plan gratuito (Basic) incluye soporte 24/7 para facturación y administración de cuentas. Ningún plan transfiere la administración operativa al equipo de AWS."
+      }
+    ];
+
+    let answeredCount = 0;
+    let score = 0;
+
+    function renderQuiz() {
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = '';
+      answeredCount = 0;
+      score = 0;
+      document.getElementById('scoreBanner').style.display = 'none';
+
+      quizData.forEach((item, qIdx) => {
+        const div = document.createElement('div');
+        div.className = 'scenario-box';
+        div.innerHTML = `
+          <div class="scenario-title">${item.q}</div>
+          <div class="options-grid" id="q-opts-${qIdx}">
+            ${item.options.map((opt, oIdx) => `
+              <button class="option-btn" onclick="answerQuiz(${qIdx}, ${oIdx}, this)">${opt}</button>
+            `).join('')}
+          </div>
+          <div class="feedback-msg" id="q-fb-${qIdx}"></div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function answerQuiz(qIdx, oIdx, btnElement) {
+      const item = quizData[qIdx];
+      const optsContainer = document.getElementById(`q-opts-${qIdx}`);
+      const buttons = optsContainer.querySelectorAll('.option-btn');
+      const feedback = document.getElementById(`q-fb-${qIdx}`);
+
+      buttons.forEach((b, idx) => {
+        b.disabled = true;
+        if (idx === item.correct) b.classList.add('correct');
+      });
+
+      const isCorrect = oIdx === item.correct;
+      if (!isCorrect) btnElement.classList.add('wrong');
+      if (isCorrect) score++;
+
+      feedback.textContent = (isCorrect ? '✅ ¡Correcto! ' : '❌ Incorrecto. ') + item.explanation;
+      feedback.className = `feedback-msg show ${isCorrect ? 'success' : 'error'}`;
+
+      answeredCount++;
+      if (answeredCount === quizData.length) {
+        const banner = document.getElementById('scoreBanner');
+        const title = document.getElementById('scoreTitle');
+        const text = document.getElementById('scoreText');
+        title.textContent = `Puntuación Final: ${score} de ${quizData.length}`;
+        text.textContent = score >= 4
+          ? '¡Excelente dominio! Estás listo para responder preguntas de AWS Support en el examen CLF-C02.'
+          : 'Buen intento. Repasa la tabla comparativa de la diapositiva 6 para afianzar los tiempos de respuesta y beneficios clave.';
+        banner.style.display = 'block';
+      }
+    }
+
+    function resetQuiz() {
+      renderQuiz();
+    }
+
+    // Initialize Quiz on load
+    renderQuiz();
+  </script>
+</body>
+</html>
