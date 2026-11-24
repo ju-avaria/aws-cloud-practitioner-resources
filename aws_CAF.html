@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Cloud Adoption Framework (AWS CAF) - Guía Interactiva CLF-C02</title>
+  <style>
+    /* ==========================================================================
+       VARIABLES Y ESTILOS BASE (PALETA AWS OSCURA)
+       ========================================================================== */
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --aws-navy: #232f3e;
+      --aws-orange: #ff9900;
+      --aws-orange-hover: #e68a00;
+      --aws-blue: #00a8e1;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --warning: #f59e0b;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       BARRA SUPERIOR DE NAVEGACIÓN Y PROGRESO
+       ========================================================================== */
+    header {
+      background-color: var(--aws-navy);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--aws-orange), #ff6600);
+      color: #0f172a;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .slide-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .menu-toggle-btn {
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition-fast);
+    }
+
+    .menu-toggle-btn:hover {
+      border-color: var(--aws-orange);
+      color: var(--aws-orange);
+    }
+
+    /* Barra de progreso continua */
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background-color: var(--bg-primary);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--aws-orange), var(--aws-blue));
+      width: 14.28%;
+      transition: width var(--transition-normal);
+    }
+
+    /* Menú desplegable de índice rápido */
+    .quick-menu {
+      display: none;
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem;
+      animation: fadeInDown 0.25s ease;
+    }
+
+    .quick-menu.open {
+      display: block;
+    }
+
+    .quick-menu-grid {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.6rem;
+    }
+
+    .menu-item {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .menu-item:hover {
+      border-color: var(--aws-blue);
+      color: var(--text-primary);
+    }
+
+    .menu-item.active {
+      border-color: var(--aws-orange);
+      background-color: rgba(255, 153, 0, 0.12);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       CONTENEDOR PRINCIPAL DE DIAPOSITIVAS
+       ========================================================================== */
+    main {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 5.5rem 1.25rem;
+    }
+
+    .slide {
+      display: none;
+      animation: slideFadeIn 0.4s ease forwards;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes slideFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .slide-kicker {
+      color: var(--aws-orange);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.25rem;
+    }
+
+    .slide-title {
+      font-size: clamp(1.5rem, 2.8vw, 2.15rem);
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 0.35rem;
+      max-width: 820px;
+    }
+
+    /* ==========================================================================
+       COMPONENTES REUTILIZABLES (TARJETAS, BOTONES, BADGES)
+       ========================================================================== */
+    .card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.35rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.15rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition-fast);
+    }
+
+    .btn-primary {
+      background-color: var(--aws-orange);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--aws-orange-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid #475569;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #475569;
+    }
+
+    .btn-blue {
+      background-color: var(--aws-blue);
+      color: #0f172a;
+    }
+
+    .btn-blue:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(255, 153, 0, 0.12), rgba(0, 168, 225, 0.1));
+      border-left: 4px solid var(--aws-orange);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .exam-tip {
+      background-color: rgba(0, 168, 225, 0.1);
+      border: 1px solid rgba(0, 168, 225, 0.35);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+    }
+
+    .exam-tip-icon {
+      background-color: var(--aws-blue);
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+
+    /* ==========================================================================
+       SLIDE 1: COMERCIAL ANDINA & PROBLEMA
+       ========================================================================== */
+    .infra-svg-wrapper {
+      background-color: #0b1120;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .problem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .problem-item {
+      background-color: var(--danger-bg);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      opacity: 0;
+      transform: translateX(15px);
+      transition: all 0.35s ease;
+    }
+
+    .problem-item.revealed {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .problem-num {
+      background-color: var(--danger);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       SLIDE 2: QUÉ ES / QUÉ NO ES / ANALOGÍA MUDANZA
+       ========================================================================== */
+    .not-caf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.85rem;
+    }
+
+    .not-caf-item {
+      background-color: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      padding: 0.85rem;
+      font-size: 0.9rem;
+    }
+
+    .analogy-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .analogy-card {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .analogy-card:hover, .analogy-card.active {
+      border-color: var(--aws-orange);
+      transform: translateY(-2px);
+    }
+
+    .analogy-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--aws-orange);
+      margin-bottom: 0.25rem;
+    }
+
+    /* ==========================================================================
+       SLIDE 3: LAS 6 PERSPECTIVAS (HEXÁGONO INTERACTIVO + COMPARADOR)
+       ========================================================================== */
+    .perspectives-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .perspectives-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hex-node {
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .hex-node:hover {
+      filter: brightness(1.15);
+    }
+
+    .hex-node.selected circle.node-bg {
+      stroke: #ffffff;
+      stroke-width: 3.5px;
+    }
+
+    .detail-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .badge-business {
+      background-color: rgba(255, 153, 0, 0.18);
+      color: var(--aws-orange);
+      border: 1px solid rgba(255, 153, 0, 0.4);
+    }
+
+    .badge-tech {
+      background-color: rgba(0, 168, 225, 0.18);
+      color: var(--aws-blue);
+      border: 1px solid rgba(0, 168, 225, 0.4);
+    }
+
+    .comparator-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background-color: var(--bg-primary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: var(--transition-fast);
+    }
+
+    .tab-btn.active {
+      background-color: var(--aws-blue);
+      color: #0f172a;
+      border-color: var(--aws-blue);
+    }
+
+    /* ==========================================================================
+       SLIDE 4: SIMULACIÓN INTERACTIVA COMERCIAL ANDINA
+       ========================================================================== */
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 920px) {
+      .sim-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .scenario-pills {
+      display: flex;
+      gap: 0.45rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .scenario-pill {
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .scenario-pill.active {
+      border-color: var(--aws-orange);
+      color: var(--text-primary);
+    }
+
+    .scenario-pill.solved {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .options-grid-6 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 0.65rem;
+      margin-top: 1rem;
+    }
+
+    .sim-option-btn {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .sim-option-btn:hover {
+      border-color: var(--aws-orange);
+      background-color: rgba(255, 153, 0, 0.08);
+    }
+
+    .sim-option-btn.correct {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+    }
+
+    .sim-option-btn.wrong {
+      background-color: var(--danger-bg);
+      border-color: var(--danger);
+    }
+
+    .feedback-box {
+      margin-top: 1.1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      display: none;
+      animation: slideFadeIn 0.3s ease;
+    }
+
+    .feedback-box.show {
+      display: block;
+    }
+
+    .feedback-box.success {
+      background-color: var(--success-bg);
+      border: 1px solid var(--success);
+    }
+
+    .feedback-box.error {
+      background-color: var(--danger-bg);
+      border: 1px solid var(--danger);
+    }
+
+    .consequence-card {
+      margin-top: 0.75rem;
+      background-color: rgba(15, 23, 42, 0.75);
+      border-left: 3px solid var(--warning);
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+    }
+
+    /* ==========================================================================
+       SLIDE 5: COMPLEMENTARIEDAD (CYBERDAY)
+       ========================================================================== */
+    .cyberday-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .pillar-card {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pillar-card.dimmed {
+      opacity: 0.32;
+      filter: grayscale(0.8);
+      border-color: var(--danger);
+    }
+
+    .pillar-card.highlighted {
+      border-color: var(--success);
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.2);
+      transform: translateY(-3px);
+    }
+
+    /* ==========================================================================
+       SLIDE 6: EVALUACIÓN FINAL CLF-C02
+       ========================================================================== */
+    .quiz-container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .quiz-option {
+      width: 100%;
+      text-align: left;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.9rem 1.1rem;
+      border-radius: 10px;
+      margin-bottom: 0.65rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .quiz-option:hover:not(:disabled) {
+      border-color: var(--aws-blue);
+      background-color: rgba(0, 168, 225, 0.08);
+    }
+
+    .quiz-option.selected-correct {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+    }
+
+    .quiz-option.selected-wrong {
+      background-color: var(--danger-bg);
+      border-color: var(--danger);
+    }
+
+    .quiz-letter {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       SLIDE 7: RESUMEN FINAL
+       ========================================================================== */
+    .quote-banner {
+      background: linear-gradient(135deg, #232f3e 0%, #0f172a 100%);
+      border: 2px solid var(--aws-orange);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      box-shadow: 0 12px 30px rgba(255, 153, 0, 0.15);
+    }
+
+    .quote-text {
+      font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .quote-accent {
+      color: var(--aws-orange);
+    }
+
+    /* ==========================================================================
+       BARRA INFERIOR DE CONTROLES
+       ========================================================================== */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border-color);
+      padding: 0.75rem 1.25rem;
+      z-index: 90;
+    }
+
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .step-dots {
+      display: flex;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--bg-tertiary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .dot.active {
+      width: 26px;
+      border-radius: 999px;
+      background-color: var(--aws-orange);
+    }
+
+    .keyboard-hint {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 640px) {
+      .keyboard-hint {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       ENCABEZADO Y BARRA DE PROGRESO
+       ======================================================================== -->
+  <header>
+    <div class="header-content">
+      <div class="brand">
+        <span class="brand-badge">AWS CLF-C02</span>
+        <span>AWS Cloud Adoption Framework (AWS CAF)</span>
+      </div>
+
+      <div class="slide-meta">
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Abrir índice de diapositivas">
+          <span>☰ Índice (<span id="slideCounterText">1/7</span>)</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Menú desplegable de navegación rápida -->
+    <nav class="quick-menu" id="quickMenu">
+      <div class="quick-menu-grid" id="quickMenuGrid"></div>
+    </nav>
+  </header>
+
+  <!-- ========================================================================
+       CONTENIDO DE LAS 7 DIAPOSITIVAS
+       ======================================================================== -->
+  <main>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 1: INTRODUCCIÓN - EL PROBLEMA
+         ====================================================================== -->
+    <section class="slide active" id="slide-0">
+      <div class="slide-header">
+        <div class="slide-kicker">Módulo 1 de 7 • Caso de Estudio Central</div>
+        <h1 class="slide-title">Introducción: El Problema de Comercial Andina</h1>
+        <p class="slide-subtitle">Comprender por qué migrar hacia la nube es una transformación organizacional y no solo un traslado técnico de servidores.</p>
+      </div>
+
+      <div class="grid-2">
+        <!-- Columna Izquierda: Situación actual de Comercial Andina -->
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <h2 style="font-size:1.15rem; color:var(--aws-orange);">🏪 Situación Actual: Comercial Andina</h2>
+            <span style="font-size:0.78rem; background:#334155; padding:0.2rem 0.6rem; border-radius:6px;">On-Premises</span>
+          </div>
+          <p style="font-size:0.92rem; color:var(--text-secondary);">
+            Empresa minorista en crecimiento con tienda online y servidores físicos propios. Enfrenta <strong>caídas en fechas de alta demanda</strong>, altos costos de mantenimiento y un equipo de TI pequeño acostumbrado a procesos manuales.
+          </p>
+
+          <!-- Ilustración SVG interactiva de la infraestructura local -->
+          <div class="infra-svg-wrapper">
+            <svg viewBox="0 0 500 230" width="100%" height="auto" role="img" aria-label="Infraestructura actual de Comercial Andina">
+              <!-- Fondo y contenedores -->
+              <rect x="10" y="10" width="480" height="210" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+              <text x="25" y="34" fill="#94a3b8" font-size="11" font-weight="bold">CENTRO DE DATOS LOCAL (COMERCIAL ANDINA)</text>
+
+              <!-- Nodo 1: Tienda Web -->
+              <g transform="translate(30, 52)">
+                <rect width="125" height="68" rx="8" fill="#0f172a" stroke="#00a8e1" stroke-width="1.5"/>
+                <text x="62" y="26" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="bold">🛒 Tienda Web</text>
+                <text x="62" y="44" text-anchor="middle" fill="#94a3b8" font-size="10">Monolítica antigua</text>
+                <text x="62" y="58" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold">⚠ Se cae en picos</text>
+              </g>
+
+              <!-- Nodo 2: Base de datos local -->
+              <g transform="translate(188, 52)">
+                <rect width="125" height="68" rx="8" fill="#0f172a" stroke="#00a8e1" stroke-width="1.5"/>
+                <text x="62" y="26" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="bold">🗄️ Base de Datos</text>
+                <text x="62" y="44" text-anchor="middle" fill="#94a3b8" font-size="10">Servidores propios</text>
+                <text x="62" y="58" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="bold">💰 Alto mantenimiento</text>
+              </g>
+
+              <!-- Nodo 3: Equipo TI pequeño -->
+              <g transform="translate(345, 52)">
+                <rect width="125" height="68" rx="8" fill="#0f172a" stroke="#ff9900" stroke-width="1.5"/>
+                <text x="62" y="26" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="bold">👥 Equipo TI (4)</text>
+                <text x="62" y="44" text-anchor="middle" fill="#94a3b8" font-size="10">Solo soporte local</text>
+                <text x="62" y="58" text-anchor="middle" fill="#ff9900" font-size="9" font-weight="bold">📚 Sin experiencia AWS</text>
+              </g>
+
+              <!-- Flechas de conexión -->
+              <line x1="155" y1="86" x2="188" y2="86" stroke="#64748b" stroke-width="2" stroke-dasharray="4"/>
+              <line x1="313" y1="86" x2="345" y2="86" stroke="#64748b" stroke-width="2" stroke-dasharray="4"/>
+
+              <!-- Barra inferior: Procesos manuales -->
+              <g transform="translate(30, 138)">
+                <rect width="440" height="62" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1.5"/>
+                <text x="220" y="25" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="bold">⚙️ Procesos de Negocio y Seguridad Tradicionales</text>
+                <text x="220" y="45" text-anchor="middle" fill="#94a3b8" font-size="10.5">Aprobaciones lentas • Sin presupuestos cloud • Seguridad perimetral básica</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Pregunta detonante y simulación Lift & Shift sin plan -->
+        <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <div class="highlight-box" style="margin-top:0;">
+              <div style="font-size:0.8rem; font-weight:800; color:var(--aws-orange); text-transform:uppercase; margin-bottom:0.3rem;">Pregunta Clave</div>
+              <p style="font-size:1.1rem; font-weight:700; color:var(--text-primary);">
+                "Si Comercial Andina decide migrar sus servidores a AWS, ¿es suficiente con crear algunas instancias Amazon EC2?"
+              </p>
+            </div>
+
+            <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1rem;">
+              Haz clic en el botón para simular qué ocurre cuando una empresa realiza una migración puramente técnica ("Lift &amp; Shift") sin preparar a su organización:
+            </p>
+
+            <div style="display:flex; gap:0.65rem; flex-wrap:wrap;">
+              <button class="btn btn-primary" id="revealProblemBtn">
+                ⚡ Simular migración solo técnica (Revelar problema <span id="problemCountLabel">1/4</span>)
+              </button>
+              <button class="btn btn-secondary" id="resetProblemsBtn" style="display:none;">
+                Reiniciar
+              </button>
+            </div>
+
+            <div class="problem-list" id="problemList">
+              <div class="problem-item" id="prob-1">
+                <span class="problem-num">1</span>
+                <div>
+                  <strong style="color:#fca5a5;">Nadie en TI sabe administrar la nube:</strong>
+                  <span style="font-size:0.88rem; color:var(--text-secondary); display:block;">El equipo técnico opera AWS igual que sus servidores antiguos, generando errores operativos y frustración.</span>
+                </div>
+              </div>
+              <div class="problem-item" id="prob-2">
+                <span class="problem-num">2</span>
+                <div>
+                  <strong style="color:#fca5a5;">Facturas sorpresa sin control de presupuesto:</strong>
+                  <span style="font-size:0.88rem; color:var(--text-secondary); display:block;">Instancias sobredimensionadas quedan encendidas 24/7 sin alertas ni responsables de costos.</span>
+                </div>
+              </div>
+              <div class="problem-item" id="prob-3">
+                <span class="problem-num">3</span>
+                <div>
+                  <strong style="color:#fca5a5;">Brechas de seguridad por permisos mal configurados:</strong>
+                  <span style="font-size:0.88rem; color:var(--text-secondary); display:block;">Datos de clientes expuestos por usar cuentas compartidas sin políticas de mínimo privilegio.</span>
+                </div>
+              </div>
+              <div class="problem-item" id="prob-4">
+                <span class="problem-num">4</span>
+                <div>
+                  <strong style="color:#fca5a5;">Procesos de negocio rígidos que frenan las ventas:</strong>
+                  <span style="font-size:0.88rem; color:var(--text-secondary); display:block;">La tecnología ya es elástica, pero aprobar cambios comerciales sigue tardando semanas.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="slide1Conclusion" style="display:none; margin-top:1rem; padding:0.75rem; background:rgba(16,185,129,0.12); border:1px solid var(--success); border-radius:8px; font-size:0.88rem;">
+            ✅ <strong>Conclusión:</strong> Migrar servidores no basta. Para resolver estos 4 frentes nace <strong>AWS Cloud Adoption Framework (AWS CAF)</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 2: ¿QUÉ ES AWS CAF?
+         ====================================================================== -->
+    <section class="slide" id="slide-1">
+      <div class="slide-header">
+        <div class="slide-kicker">Módulo 2 de 7 • Concepto Fundamental</div>
+        <h1 class="slide-title">¿Qué es AWS Cloud Adoption Framework (AWS CAF)?</h1>
+        <p class="slide-subtitle">Una guía estratégica y organizacional para planificar y ejecutar una adopción exitosa de la nube.</p>
+      </div>
+
+      <!-- 3 Tarjetas: Qué ES / Para qué SIRVE / Qué problema RESUELVE -->
+      <div class="grid-3">
+        <div class="card">
+          <div style="font-size:1.5rem; margin-bottom:0.4rem;">📘</div>
+          <h3 style="color:var(--aws-orange); font-size:1.05rem; margin-bottom:0.4rem;">¿Qué ES?</h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">
+            Un <strong>marco de referencia (framework)</strong> basado en las mejores prácticas y experiencia de AWS ayudando a miles de empresas a migrar a la nube.
+          </p>
+        </div>
+
+        <div class="card">
+          <div style="font-size:1.5rem; margin-bottom:0.4rem;">🧭</div>
+          <h3 style="color:var(--aws-blue); font-size:1.05rem; margin-bottom:0.4rem;">¿Para qué SIRVE?</h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">
+            Ayuda a las organizaciones a <strong>comprender, planificar y ejecutar</strong> su transformación digital de forma ordenada, alineando negocio y tecnología.
+          </p>
+        </div>
+
+        <div class="card">
+          <div style="font-size:1.5rem; margin-bottom:0.4rem;">🧩</div>
+          <h3 style="color:var(--success); font-size:1.05rem; margin-bottom:0.4rem;">¿Qué problema RESUELVE?</h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary);">
+            Evita adopciones desordenadas donde solo se mueven servidores pero se olvidan las <strong>personas, los procesos, los costos y la seguridad</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Sección clave para examen: Qué NO es AWS CAF -->
+      <div class="card" style="margin-top:1.25rem; border-color:rgba(239,68,68,0.45);">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span style="background:var(--danger); color:white; font-size:0.75rem; font-weight:800; padding:0.2rem 0.55rem; border-radius:6px;">CLAVE EXAMEN CLF-C02</span>
+          <h3 style="font-size:1.05rem; color:#fca5a5;">¿Qué NO es AWS CAF? (Trampas frecuentes de examen)</h3>
+        </div>
+        <div class="not-caf-grid">
+          <div class="not-caf-item">
+            <strong>❌ No es un servicio de AWS</strong><br>
+            <span style="color:var(--text-muted); font-size:0.84rem;">No entras a la consola de AWS a "encender" o contratar AWS CAF.</span>
+          </div>
+          <div class="not-caf-item">
+            <strong>❌ No es un software instalable</strong><br>
+            <span style="color:var(--text-muted); font-size:0.84rem;">No es una herramienta técnica ni un agente que se descarga en servidores.</span>
+          </div>
+          <div class="not-caf-item">
+            <strong>❌ No es AWS Well-Architected</strong><br>
+            <span style="color:var(--text-muted); font-size:0.84rem;">Well-Architected evalúa <em>arquitecturas técnicas</em> (6 pilares); CAF guía la <em>transformación organizacional</em> (6 perspectivas).</span>
+          </div>
+          <div class="not-caf-item">
+            <strong>❌ No es AWS CART</strong><br>
+            <span style="color:var(--text-muted); font-size:0.84rem;">CART es un cuestionario online de evaluación rápida; CAF es el marco integral completo.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analogía visual interactiva: La Mudanza Empresarial -->
+      <div class="card" style="margin-top:1.25rem;">
+        <h3 style="font-size:1.08rem; color:var(--aws-orange); margin-bottom:0.35rem;">🏢 Analogía Cotidiana: Planificar una Mudanza Empresarial</h3>
+        <p style="font-size:0.9rem; color:var(--text-secondary);">
+          Mudar Comercial Andina a un edificio corporativo moderno no es solo contratar un camión para mover escritorios (servidores). Haz clic en cada área de la mudanza para ver cómo se traduce a AWS CAF:
+        </p>
+
+        <div class="analogy-steps" id="analogyContainer">
+          <div class="analogy-card active" data-analogy="0">
+            <div class="analogy-tag">1. Business (Negocio)</div>
+            <div style="font-weight:700; font-size:0.92rem;">¿Por qué nos mudamos?</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:0.25rem;">Atender más clientes y reducir arriendo.</div>
+          </div>
+          <div class="analogy-card" data-analogy="1">
+            <div class="analogy-tag">2. People (Personas)</div>
+            <div style="font-weight:700; font-size:0.92rem;">Preparar al equipo</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:0.25rem;">Enseñarles cómo usar las nuevas oficinas.</div>
+          </div>
+          <div class="analogy-card" data-analogy="2">
+            <div class="analogy-tag">3. Governance (Gobernanza)</div>
+            <div style="font-weight:700; font-size:0.92rem;">Presupuesto y reglas</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:0.25rem;">Definir gastos y quién aprueba compras.</div>
+          </div>
+          <div class="analogy-card" data-analogy="3">
+            <div class="analogy-tag">4. Platform (Plataforma)</div>
+            <div style="font-weight:700; font-size:0.92rem;">Planos y electricidad</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:0.25rem;">Diseñar la infraestructura del edificio.</div>
+          </div>
+          <div class="analogy-card" data-analogy="4">
+            <div class="analogy-tag">5. Security (Seguridad)</div>
+            <div style="font-weight:700; font-size:0.92rem;">Cerraduras y cámaras</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:0.25rem;">Controlar llaves y proteger activos.</div>
+          </div>
+          <div class="analogy-card" data-analogy="5">
+            <div class="analogy-tag">6. Operations (Operaciones)</div>
+            <div style="font-weight:700; font-size:0.92rem;">Mantenimiento diario</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-top:0.25rem;">Asegurar que luz y agua funcionen 24/7.</div>
+          </div>
+        </div>
+
+        <div id="analogyDetailBar" style="margin-top:0.9rem; background:var(--bg-primary); border:1px solid var(--aws-orange); border-radius:8px; padding:0.75rem 1rem; font-size:0.9rem;">
+          <strong>1. Business (Negocio):</strong> Antes de embalar una sola caja, la gerencia define el retorno esperado: vender más rápido y bajar costos fijos.
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 3: LAS 6 PERSPECTIVAS DE AWS CAF
+         ====================================================================== -->
+    <section class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-kicker">Módulo 3 de 7 • Estructura del Marco</div>
+        <h1 class="slide-title">Las 6 Perspectivas de AWS CAF</h1>
+        <p class="slide-subtitle">Haz clic en cada perspectiva del diagrama para explorar su propósito, la pregunta que responde y cómo aplica a Comercial Andina.</p>
+      </div>
+
+      <div class="perspectives-layout">
+        <!-- Diagrama SVG Interactivo de las 6 Perspectivas -->
+        <div class="card" style="text-align:center;">
+          <div style="display:flex; justify-content:center; gap:1rem; margin-bottom:0.5rem; font-size:0.8rem; font-weight:700;">
+            <span style="color:var(--aws-orange);">● Capacidades de Negocio (3)</span>
+            <span style="color:var(--aws-blue);">● Capacidades Técnicas (3)</span>
+          </div>
+
+          <svg viewBox="0 0 420 390" width="100%" style="max-width:410px; margin:0 auto; display:block;" role="img" aria-label="Diagrama interactivo de las 6 perspectivas de AWS CAF">
+            <!-- Líneas de conexión al centro -->
+            <line x1="210" y1="195" x2="210" y2="55" stroke="#475569" stroke-width="2"/>
+            <line x1="210" y1="195" x2="340" y2="125" stroke="#475569" stroke-width="2"/>
+            <line x1="210" y1="195" x2="340" y2="265" stroke="#475569" stroke-width="2"/>
+            <line x1="210" y1="195" x2="210" y2="335" stroke="#475569" stroke-width="2"/>
+            <line x1="210" y1="195" x2="80" y2="265" stroke="#475569" stroke-width="2"/>
+            <line x1="210" y1="195" x2="80" y2="125" stroke="#475569" stroke-width="2"/>
+
+            <!-- Círculo punteado de órbita -->
+            <circle cx="210" cy="195" r="140" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="5,5"/>
+
+            <!-- Centro: AWS CAF -->
+            <circle cx="210" cy="195" r="52" fill="#232f3e" stroke="#ff9900" stroke-width="2.5"/>
+            <text x="210" y="191" text-anchor="middle" fill="#ff9900" font-size="13" font-weight="bold">AWS CAF</text>
+            <text x="210" y="208" text-anchor="middle" fill="#cbd5e1" font-size="9.5">6 Perspectivas</text>
+
+            <!-- 1. Business (Top) -->
+            <g class="hex-node selected" data-persp="business" transform="translate(210, 55)">
+              <circle class="node-bg" r="42" fill="#ff9900"/>
+              <text y="-4" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="bold">Business</text>
+              <text y="12" text-anchor="middle" fill="#0f172a" font-size="9.5">(Negocio)</text>
+            </g>
+
+            <!-- 2. People (Top-Right) -->
+            <g class="hex-node" data-persp="people" transform="translate(340, 125)">
+              <circle class="node-bg" r="42" fill="#ff9900"/>
+              <text y="-4" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="bold">People</text>
+              <text y="12" text-anchor="middle" fill="#0f172a" font-size="9.5">(Personas)</text>
+            </g>
+
+            <!-- 3. Governance (Bottom-Right) -->
+            <g class="hex-node" data-persp="governance" transform="translate(340, 265)">
+              <circle class="node-bg" r="42" fill="#ff9900"/>
+              <text y="-4" text-anchor="middle" fill="#0f172a" font-size="11" font-weight="bold">Governance</text>
+              <text y="12" text-anchor="middle" fill="#0f172a" font-size="9.5">(Gobernanza)</text>
+            </g>
+
+            <!-- 4. Platform (Bottom) -->
+            <g class="hex-node" data-persp="platform" transform="translate(210, 335)">
+              <circle class="node-bg" r="42" fill="#00a8e1"/>
+              <text y="-4" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="bold">Platform</text>
+              <text y="12" text-anchor="middle" fill="#0f172a" font-size="9.5">(Plataforma)</text>
+            </g>
+
+            <!-- 5. Security (Bottom-Left) -->
+            <g class="hex-node" data-persp="security" transform="translate(80, 265)">
+              <circle class="node-bg" r="42" fill="#00a8e1"/>
+              <text y="-4" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="bold">Security</text>
+              <text y="12" text-anchor="middle" fill="#0f172a" font-size="9.5">(Seguridad)</text>
+            </g>
+
+            <!-- 6. Operations (Top-Left) -->
+            <g class="hex-node" data-persp="operations" transform="translate(80, 125)">
+              <circle class="node-bg" r="42" fill="#00a8e1"/>
+              <text y="-4" text-anchor="middle" fill="#0f172a" font-size="11.5" font-weight="bold">Operations</text>
+              <text y="12" text-anchor="middle" fill="#0f172a" font-size="9.5">(Operaciones)</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Panel de detalle de la perspectiva seleccionada -->
+        <div style="display:flex; flex-direction:column; gap:1rem;">
+          <div class="card" id="perspectiveDetailCard">
+            <span class="detail-badge badge-business" id="pCategory">Capacidad de Negocio</span>
+            <h2 id="pTitle" style="font-size:1.4rem; color:var(--text-primary); margin-bottom:0.5rem;">Business (Negocio)</h2>
+
+            <div style="background:var(--bg-primary); padding:0.75rem 1rem; border-radius:8px; border-left:3px solid var(--aws-orange); margin-bottom:0.85rem;">
+              <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Pregunta principal que responde:</div>
+              <div id="pQuestion" style="font-weight:700; color:var(--text-primary); font-size:0.98rem;">¿Cómo impulsa la nube los objetivos comerciales de la empresa?</div>
+            </div>
+
+            <p id="pDesc" style="font-size:0.92rem; color:var(--text-secondary); margin-bottom:0.75rem;">
+              Asegura que las inversiones en la nube estén directamente alineadas con los resultados estratégicos y financieros del negocio, evitando migrar por moda tecnológica.
+            </p>
+
+            <div style="background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.35); border-radius:8px; padding:0.85rem;">
+              <div style="font-size:0.78rem; font-weight:800; color:var(--success); text-transform:uppercase; margin-bottom:0.25rem;">🏪 Ejemplo en Comercial Andina</div>
+              <p id="pExample" style="font-size:0.9rem; color:var(--text-primary);">
+                Reducir los costos de servidores físicos, mejorar la experiencia de compra online y aumentar la capacidad de ventas durante temporadas de alta demanda.
+              </p>
+            </div>
+          </div>
+
+          <!-- Comparador especial para no confundir perspectivas en el examen -->
+          <div class="card" style="border-color:var(--aws-blue);">
+            <div style="font-size:0.82rem; font-weight:800; color:var(--aws-blue); text-transform:uppercase; margin-bottom:0.5rem;">
+              🎯 ¡Ojo en el examen CLF-C02! No las confundas
+            </div>
+            <div class="comparator-tabs">
+              <button class="tab-btn active" data-comp="gov-sec">Governance vs Security</button>
+              <button class="tab-btn" data-comp="plat-ops">Platform vs Operations</button>
+            </div>
+            <div id="comparatorContent" style="font-size:0.88rem; color:var(--text-secondary);">
+              <!-- Contenido dinámico vía JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 4: SIMULACIÓN INTERACTIVA - APLICAR CAF A COMERCIAL ANDINA
+         ====================================================================== -->
+    <section class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-kicker">Módulo 4 de 7 • Práctica Guiada</div>
+        <h1 class="slide-title">Simulación: Aplica AWS CAF a Comercial Andina</h1>
+        <p class="slide-subtitle">Lee cada desafío real que enfrenta Comercial Andina durante su migración y elige qué perspectiva de AWS CAF debe liderar la solución.</p>
+      </div>
+
+      <div class="sim-layout">
+        <!-- Panel izquierdo: Escenario y selección -->
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+            <span style="font-size:0.82rem; font-weight:700; color:var(--aws-orange);">DESAFÍOS DE TRANSFORMACIÓN</span>
+            <span style="font-size:0.82rem; color:var(--text-muted);">Resueltos: <strong id="simSolvedCount" style="color:var(--success);">0</strong> / 6</span>
+          </div>
+
+          <!-- Selector rápido de los 6 escenarios -->
+          <div class="scenario-pills" id="scenarioPills"></div>
+
+          <!-- Caja del caso actual -->
+          <div style="background:var(--bg-primary); border:1px solid var(--border-color); border-radius:12px; padding:1.1rem; margin-top:0.5rem;">
+            <div style="font-size:0.78rem; font-weight:700; color:var(--aws-blue); text-transform:uppercase;" id="simStepLabel">Escenario 1 de 6</div>
+            <h3 style="font-size:1.1rem; color:var(--text-primary); margin:0.35rem 0;" id="simSituationTitle">Situación en Comercial Andina:</h3>
+            <p style="font-size:0.96rem; color:var(--text-secondary);" id="simSituationText"></p>
+          </div>
+
+          <p style="font-size:0.88rem; font-weight:700; margin-top:1rem; color:var(--text-primary);">
+            ¿Qué perspectiva de AWS CAF aborda este desafío?
+          </p>
+
+          <!-- Botones de las 6 perspectivas -->
+          <div class="options-grid-6" id="simOptionsGrid"></div>
+
+          <!-- Retroalimentación inmediata -->
+          <div class="feedback-box" id="simFeedbackBox">
+            <div id="simFeedbackTitle" style="font-weight:800; font-size:0.98rem; margin-bottom:0.3rem;"></div>
+            <p id="simFeedbackExplanation" style="font-size:0.9rem; color:var(--text-primary);"></p>
+            <div class="consequence-card" id="simConsequenceCard"></div>
+            <div style="margin-top:0.85rem; text-align:right;">
+              <button class="btn btn-primary" id="nextScenarioBtn">Siguiente escenario →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel derecho: Mapa animado de transformación coordinada -->
+        <div class="card" style="text-align:center;">
+          <h3 style="font-size:1.05rem; color:var(--text-primary); margin-bottom:0.25rem;">Mapa de Transformación Coordinada</h3>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">
+            Cada perspectiva resuelta ilumina y conecta una pieza clave de Comercial Andina en AWS.
+          </p>
+
+          <svg viewBox="0 0 380 340" width="100%" style="max-width:370px; margin:0 auto; display:block;" role="img" aria-label="Progreso de transformación de Comercial Andina">
+            <!-- Líneas de conexión hacia el núcleo -->
+            <line id="sim-line-business" x1="190" y1="170" x2="190" y2="50" stroke="#334155" stroke-width="3"/>
+            <line id="sim-line-people" x1="190" y1="170" x2="310" y2="110" stroke="#334155" stroke-width="3"/>
+            <line id="sim-line-governance" x1="190" y1="170" x2="310" y2="230" stroke="#334155" stroke-width="3"/>
+            <line id="sim-line-platform" x1="190" y1="170" x2="190" y2="290" stroke="#334155" stroke-width="3"/>
+            <line id="sim-line-security" x1="190" y1="170" x2="70" y2="230" stroke="#334155" stroke-width="3"/>
+            <line id="sim-line-operations" x1="190" y1="170" x2="70" y2="110" stroke="#334155" stroke-width="3"/>
+
+            <!-- Centro: Comercial Andina en AWS -->
+            <circle id="sim-core-circle" cx="190" cy="170" r="54" fill="#0f172a" stroke="#475569" stroke-width="2.5"/>
+            <text x="190" y="164" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">Comercial</text>
+            <text x="190" y="179" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">Andina</text>
+            <text id="sim-core-status" x="190" y="196" text-anchor="middle" fill="#94a3b8" font-size="9">0/6 Listo</text>
+
+            <!-- Nodos -->
+            <g id="sim-node-business" transform="translate(190, 50)">
+              <rect x="-48" y="-20" width="96" height="40" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+              <text y="4" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">Business</text>
+            </g>
+
+            <g id="sim-node-people" transform="translate(310, 110)">
+              <rect x="-48" y="-20" width="96" height="40" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+              <text y="4" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">People</text>
+            </g>
+
+            <g id="sim-node-governance" transform="translate(310, 230)">
+              <rect x="-48" y="-20" width="96" height="40" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+              <text y="4" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">Governance</text>
+            </g>
+
+            <g id="sim-node-platform" transform="translate(190, 290)">
+              <rect x="-48" y="-20" width="96" height="40" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+              <text y="4" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">Platform</text>
+            </g>
+
+            <g id="sim-node-security" transform="translate(70, 230)">
+              <rect x="-48" y="-20" width="96" height="40" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+              <text y="4" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">Security</text>
+            </g>
+
+            <g id="sim-node-operations" transform="translate(70, 110)">
+              <rect x="-48" y="-20" width="96" height="40" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+              <text y="4" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">Operations</text>
+            </g>
+          </svg>
+
+          <div id="simCompleteBanner" style="display:none; margin-top:0.75rem; background:var(--success-bg); border:1px solid var(--success); border-radius:10px; padding:0.75rem; font-size:0.86rem;">
+            🎉 <strong>¡Transformación completa!</strong> Comercial Andina ahora cuenta con las 6 capacidades organizacionales y técnicas alineadas.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 5: ¿CÓMO SE COMPLEMENTAN LAS 6 PERSPECTIVAS?
+         ====================================================================== -->
+    <section class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="slide-kicker">Módulo 5 de 7 • Visión Sistémica</div>
+        <h1 class="slide-title">¿Cómo se complementan las 6 perspectivas?</h1>
+        <p class="slide-subtitle">Proyecto unificado: <strong>"Lanzamiento de la nueva tienda web escalable de Comercial Andina para el CyberDay"</strong>.</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1rem;">
+          <p style="font-size:0.92rem; color:var(--text-secondary);">
+            Ninguna perspectiva trabaja aislada. Prueba qué sucede si apagas una perspectiva o activa el modo coordinado:
+          </p>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="coordAllBtn">✨ Ver trabajo coordinado (6/6)</button>
+            <button class="btn btn-secondary" id="simulateMissingBtn">⚠️ Simular qué pasa si falta una</button>
+          </div>
+        </div>
+
+        <div id="cyberdayAlertBox" class="highlight-box" style="margin-top:0; display:none;"></div>
+
+        <div class="cyberday-grid" id="cyberdayGrid">
+          <div class="pillar-card highlighted" data-pillar="business">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--aws-orange);">1. BUSINESS (NEGOCIO)</div>
+            <h4 style="margin:0.25rem 0; font-size:1rem;">Define la meta comercial</h4>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">Soportar <strong>5x más visitas</strong> sin caídas durante el CyberDay y aumentar las ventas online en un 20%.</p>
+          </div>
+
+          <div class="pillar-card highlighted" data-pillar="people">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--aws-orange);">2. PEOPLE (PERSONAS)</div>
+            <h4 style="margin:0.25rem 0; font-size:1rem;">Prepara a los equipos</h4>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">Entrena al equipo de soporte y desarrollo para gestionar la tienda en AWS y coordinar turnos durante el evento.</p>
+          </div>
+
+          <div class="pillar-card highlighted" data-pillar="governance">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--aws-orange);">3. GOVERNANCE (GOBERNANZA)</div>
+            <h4 style="margin:0.25rem 0; font-size:1rem;">Controla presupuesto y métricas</h4>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">Aprueba un presupuesto extra temporal para el pico de tráfico y define KPIs de costo por venta.</p>
+          </div>
+
+          <div class="pillar-card highlighted" data-pillar="platform">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--aws-blue);">4. PLATFORM (PLATAFORMA)</div>
+            <h4 style="margin:0.25rem 0; font-size:1rem;">Construye la solución técnica</h4>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">Diseña la arquitectura web elástica y la base de datos escalable que crecerán automáticamente ante la demanda.</p>
+          </div>
+
+          <div class="pillar-card highlighted" data-pillar="security">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--aws-blue);">5. SECURITY (SEGURIDAD)</div>
+            <h4 style="margin:0.25rem 0; font-size:1rem;">Protege pagos y clientes</h4>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">Asegura las transacciones con cifrado, restringe permisos internos con IAM y protege el sitio contra ataques web.</p>
+          </div>
+
+          <div class="pillar-card highlighted" data-pillar="operations">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--aws-blue);">6. OPERATIONS (OPERACIONES)</div>
+            <h4 style="margin:0.25rem 0; font-size:1rem;">Garantiza continuidad 24/7</h4>
+            <p style="font-size:0.86rem; color:var(--text-secondary);">Monitorea métricas en tiempo real durante el CyberDay y ejecuta respuestas rápidas ante cualquier alerta.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 6: EVALUACIÓN FINAL ESTILO CLF-C02
+         ====================================================================== -->
+    <section class="slide" id="slide-5">
+      <div class="slide-header">
+        <div class="slide-kicker">Módulo 6 de 7 • Comprobación de Conocimientos</div>
+        <h1 class="slide-title">Evaluación Final estilo AWS Cloud Practitioner (CLF-C02)</h1>
+        <p class="slide-subtitle">Responde estas 5 preguntas tipo examen para validar tu comprensión de AWS CAF.</p>
+      </div>
+
+      <div class="quiz-container">
+        <div class="card" id="quizCard">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
+            <span style="font-size:0.82rem; font-weight:800; color:var(--aws-orange);" id="quizProgressLabel">Pregunta 1 de 5</span>
+            <span style="font-size:0.82rem; color:var(--text-muted);">Puntaje actual: <strong id="quizLiveScore" style="color:var(--aws-blue);">0</strong>/5</span>
+          </div>
+
+          <h3 id="quizQuestionText" style="font-size:1.1rem; color:var(--text-primary); margin-bottom:1.1rem; line-height:1.45;"></h3>
+
+          <div id="quizOptionsContainer"></div>
+
+          <div class="feedback-box" id="quizFeedbackBox">
+            <div id="quizFeedbackTitle" style="font-weight:800; margin-bottom:0.25rem;"></div>
+            <p id="quizFeedbackDesc" style="font-size:0.9rem;"></p>
+            <div style="margin-top:0.85rem; text-align:right;">
+              <button class="btn btn-primary" id="quizNextBtn">Siguiente pregunta →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pantalla de resultados del Quiz -->
+        <div class="card" id="quizResultsCard" style="display:none; text-align:center;">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem;" id="quizMedal">🏆</div>
+          <h2 style="font-size:1.5rem; color:var(--text-primary);">Resultado de la Evaluación CLF-C02</h2>
+          <p style="font-size:1.15rem; margin:0.5rem 0; color:var(--aws-orange); font-weight:800;" id="quizFinalScoreText"></p>
+          <p style="font-size:0.92rem; color:var(--text-secondary); max-width:600px; margin:0 auto 1.25rem auto;" id="quizDiagnosticText"></p>
+
+          <div class="exam-tip" style="text-align:left; margin-bottom:1.25rem;">
+            <span class="exam-tip-icon">RESUMEN EXAMEN</span>
+            <div style="font-size:0.88rem; color:var(--text-secondary);">
+              <strong>Lo que debes recordar en el examen CLF-C02:</strong>
+              <ul style="margin-left:1.1rem; margin-top:0.35rem; line-height:1.6;">
+                <li><strong>AWS CAF</strong> es un marco de referencia organizacional (no un servicio ni Well-Architected).</li>
+                <li>Tiene <strong>6 perspectivas</strong>: 3 de negocio (<em>Business, People, Governance</em>) y 3 técnicas (<em>Platform, Security, Operations</em>).</li>
+                <li><strong>Governance</strong> = presupuestos, políticas y control de valor/riesgo; <strong>Security</strong> = protección técnica, cifrado e IAM.</li>
+                <li><strong>Platform</strong> = diseñar y modernizar arquitectura; <strong>Operations</strong> = monitorear, soportar y operar día a día.</li>
+              </ul>
+            </div>
+          </div>
+
+          <button class="btn btn-secondary" id="restartQuizBtn">🔄 Repetir evaluación</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 7: RESUMEN FINAL
+         ====================================================================== -->
+    <section class="slide" id="slide-6">
+      <div class="slide-header">
+        <div class="slide-kicker">Módulo 7 de 7 • Cierre y Síntesis</div>
+        <h1 class="slide-title">Resumen Final: AWS Cloud Adoption Framework</h1>
+        <p class="slide-subtitle">Una vista rápida para recordar cómo las 6 perspectivas impulsan una adopción exitosa en la nube.</p>
+      </div>
+
+      <!-- Frase central destacada -->
+      <div class="quote-banner">
+        <div style="font-size:0.8rem; font-weight:800; letter-spacing:1.5px; color:var(--aws-blue); text-transform:uppercase; margin-bottom:0.5rem;">
+          Idea Central para Recordar
+        </div>
+        <p class="quote-text">
+          "Adoptar la nube no significa solamente cambiar servidores;<br>
+          <span class="quote-accent">significa transformar la organización.</span>"
+        </p>
+      </div>
+
+      <!-- Síntesis en 2 bloques: Negocio vs Técnicas -->
+      <div class="grid-2">
+        <div class="card" style="border-top:4px solid var(--aws-orange);">
+          <h3 style="color:var(--aws-orange); margin-bottom:0.75rem; font-size:1.1rem;">📊 Capacidades de Negocio (El Qué, Quién y Control)</h3>
+          <div style="display:flex; flex-direction:column; gap:0.65rem; font-size:0.9rem;">
+            <div style="background:var(--bg-primary); padding:0.7rem; border-radius:8px;">
+              <strong>1. Business (Negocio):</strong> Alinea la nube con objetivos financieros y comerciales.
+            </div>
+            <div style="background:var(--bg-primary); padding:0.7rem; border-radius:8px;">
+              <strong>2. People (Personas):</strong> Capacita equipos, redefine roles y gestiona el cambio cultural.
+            </div>
+            <div style="background:var(--bg-primary); padding:0.7rem; border-radius:8px;">
+              <strong>3. Governance (Gobernanza):</strong> Establece presupuestos, políticas, prioridades y control de riesgos.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="border-top:4px solid var(--aws-blue);">
+          <h3 style="color:var(--aws-blue); margin-bottom:0.75rem; font-size:1.1rem;">⚙️ Capacidades Técnicas (El Cómo se Construye, Protege y Opera)</h3>
+          <div style="display:flex; flex-direction:column; gap:0.65rem; font-size:0.9rem;">
+            <div style="background:var(--bg-primary); padding:0.7rem; border-radius:8px;">
+              <strong>4. Platform (Plataforma):</strong> Diseña y moderniza la arquitectura y aplicaciones en AWS.
+            </div>
+            <div style="background:var(--bg-primary); padding:0.7rem; border-radius:8px;">
+              <strong>5. Security (Seguridad):</strong> Protege datos y sistemas mediante IAM, cifrado y controles.
+            </div>
+            <div style="background:var(--bg-primary); padding:0.7rem; border-radius:8px;">
+              <strong>6. Operations (Operaciones):</strong> Monitorea, soporta y mantiene la disponibilidad diaria.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem; display:flex; justify-content:center; gap:0.85rem; flex-wrap:wrap;">
+        <button class="btn btn-primary" id="restartPresentationBtn">⏮ Volver al inicio de la presentación</button>
+        <button class="btn btn-secondary" id="goToSimBtn">🧩 Repasar simulación de Comercial Andina</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       PIE DE PÁGINA CON CONTROLES DE NAVEGACIÓN
+       ======================================================================== -->
+  <footer>
+    <div class="footer-inner">
+      <button class="btn btn-secondary" id="prevSlideBtn" disabled>← Anterior</button>
+
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0.3rem;">
+        <div class="step-dots" id="stepDots"></div>
+        <span class="keyboard-hint">Usa las teclas ← y → para navegar</span>
+      </div>
+
+      <button class="btn btn-primary" id="nextSlideBtn">Siguiente →</button>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       LÓGICA JAVASCRIPT AUTOCONTENIDA
+       ======================================================================== -->
+  <script>
+    (function () {
+      /* ======================================================================
+         1. DATOS DE METADATOS DE DIAPOSITIVAS
+         ====================================================================== */
+      const slidesMeta = [
+        { title: "1. Introducción: El Problema" },
+        { title: "2. ¿Qué es AWS CAF?" },
+        { title: "3. Las 6 Perspectivas de AWS CAF" },
+        { title: "4. Simulación: Comercial Andina" },
+        { title: "5. Complementariedad (CyberDay)" },
+        { title: "6. Evaluación Final CLF-C02" },
+        { title: "7. Resumen Final" }
+      ];
+
+      let currentSlide = 0;
+      const totalSlides = slidesMeta.length;
+
+      const slides = document.querySelectorAll(".slide");
+      const prevBtn = document.getElementById("prevSlideBtn");
+      const nextBtn = document.getElementById("nextSlideBtn");
+      const progressFill = document.getElementById("progressFill");
+      const slideCounterText = document.getElementById("slideCounterText");
+      const stepDotsContainer = document.getElementById("stepDots");
+      const quickMenu = document.getElementById("quickMenu");
+      const quickMenuGrid = document.getElementById("quickMenuGrid");
+      const menuToggleBtn = document.getElementById("menuToggleBtn");
+
+      /* Inicializar puntos de navegación y menú rápido */
+      slidesMeta.forEach((meta, idx) => {
+        // Dot inferior
+        const dot = document.createElement("span");
+        dot.className = "dot" + (idx === 0 ? " active" : "");
+        dot.title = meta.title;
+        dot.addEventListener("click", () => goToSlide(idx));
+        stepDotsContainer.appendChild(dot);
+
+        // Item del menú rápido
+        const menuItem = document.createElement("button");
+        menuItem.className = "menu-item" + (idx === 0 ? " active" : "");
+        menuItem.innerHTML = `<span>${meta.title}</span>`;
+        menuItem.addEventListener("click", () => {
+          goToSlide(idx);
+          quickMenu.classList.remove("open");
+        });
+        quickMenuGrid.appendChild(menuItem);
+      });
+
+      function goToSlide(index) {
+        if (index < 0 || index >= totalSlides) return;
+        currentSlide = index;
+
+        slides.forEach((s, i) => {
+          s.classList.toggle("active", i === currentSlide);
+        });
+
+        // Actualizar botones
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === totalSlides - 1;
+        nextBtn.textContent = currentSlide === totalSlides - 1 ? "Fin ✓" : "Siguiente →";
+
+        // Actualizar barra de progreso e indicadores
+        const pct = ((currentSlide + 1) / totalSlides) * 100;
+        progressFill.style.width = `${pct}%`;
+        slideCounterText.textContent = `${currentSlide + 1}/${totalSlides}`;
+
+        // Actualizar dots y menú
+        document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+        document.querySelectorAll(".menu-item").forEach((m, i) => m.classList.toggle("active", i === currentSlide));
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      prevBtn.addEventListener("click", () => goToSlide(currentSlide - 1));
+      nextBtn.addEventListener("click", () => goToSlide(currentSlide + 1));
+      menuToggleBtn.addEventListener("click", () => quickMenu.classList.toggle("open"));
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") goToSlide(currentSlide + 1);
+        if (e.key === "ArrowLeft") goToSlide(currentSlide - 1);
+      });
+
+      /* ======================================================================
+         2. LÓGICA DIAPOSITIVA 1: REVELACIÓN PROGRESIVA DE PROBLEMAS
+         ====================================================================== */
+      let revealedCount = 0;
+      const revealProblemBtn = document.getElementById("revealProblemBtn");
+      const resetProblemsBtn = document.getElementById("resetProblemsBtn");
+      const problemCountLabel = document.getElementById("problemCountLabel");
+      const slide1Conclusion = document.getElementById("slide1Conclusion");
+
+      revealProblemBtn.addEventListener("click", () => {
+        if (revealedCount < 4) {
+          revealedCount++;
+          const item = document.getElementById(`prob-${revealedCount}`);
+          if (item) item.classList.add("revealed");
+
+          if (revealedCount < 4) {
+            problemCountLabel.textContent = `${revealedCount + 1}/4`;
+          } else {
+            revealProblemBtn.disabled = true;
+            revealProblemBtn.textContent = "Todos los problemas revelados (4/4)";
+            resetProblemsBtn.style.display = "inline-flex";
+            slide1Conclusion.style.display = "block";
+          }
+        }
+      });
+
+      resetProblemsBtn.addEventListener("click", () => {
+        revealedCount = 0;
+        for (let i = 1; i <= 4; i++) {
+          document.getElementById(`prob-${i}`).classList.remove("revealed");
+        }
+        revealProblemBtn.disabled = false;
+        revealProblemBtn.innerHTML = '⚡ Simular migración solo técnica (Revelar problema <span id="problemCountLabel">1/4</span>)';
+        resetProblemsBtn.style.display = "none";
+        slide1Conclusion.style.display = "none";
+      });
+
+      /* ======================================================================
+         3. LÓGICA DIAPOSITIVA 2: ANALOGÍA INTERACTIVA DE LA MUDANZA
+         ====================================================================== */
+      const analogyDetails = [
+        "<strong>1. Business (Negocio):</strong> Antes de embalar una sola caja, la gerencia define el retorno esperado: vender más rápido, evitar caídas y bajar costos fijos.",
+        "<strong>2. People (Personas):</strong> De nada sirve un edificio inteligente si el personal no sabe usarlo. Se capacita al equipo de TI y se aclaran sus nuevos roles.",
+        "<strong>3. Governance (Gobernanza):</strong> Se fijan presupuestos mensuales, reglas de uso y quién autoriza nuevas contrataciones para evitar gastos descontrolados.",
+        "<strong>4. Platform (Plataforma):</strong> Los arquitectos diseñan la distribución moderna del edificio: cómo funcionarán la tienda web y la base de datos en AWS.",
+        "<strong>5. Security (Seguridad):</strong> Se instalan cerraduras electrónicas (IAM), cajas fuertes (cifrado) y cámaras para proteger los datos de los clientes.",
+        "<strong>6. Operations (Operaciones):</strong> Se establece el equipo de mantenimiento y monitoreo diario para asegurar que todo opere 24/7 sin interrupciones."
+      ];
+
+      const analogyCards = document.querySelectorAll(".analogy-card");
+      const analogyDetailBar = document.getElementById("analogyDetailBar");
+
+      analogyCards.forEach((card) => {
+        card.addEventListener("click", () => {
+          analogyCards.forEach((c) => c.classList.remove("active"));
+          card.classList.add("active");
+          const idx = parseInt(card.getAttribute("data-analogy"), 10);
+          analogyDetailBar.innerHTML = analogyDetails[idx];
+        });
+      });
+
+      /* ======================================================================
+         4. LÓGICA DIAPOSITIVA 3: EXPLORADOR DE LAS 6 PERSPECTIVAS Y COMPARADOR
+         ====================================================================== */
+      const perspectivesData = {
+        business: {
+          category: "Capacidad de Negocio",
+          badgeClass: "badge-business",
+          title: "Business (Negocio)",
+          question: "¿Cómo impulsa la nube los objetivos comerciales de la empresa?",
+          desc: "Relaciona la adopción de la nube con los resultados financieros y estratégicos. Asegura que cada inversión tecnológica genere valor real para el negocio.",
+          example: "Reducir costos de mantenimiento de servidores físicos, mejorar la experiencia de compra online y aumentar la capacidad de ventas en temporadas altas."
+        },
+        people: {
+          category: "Capacidad de Negocio",
+          badgeClass: "badge-business",
+          title: "People (Personas)",
+          question: "¿Cómo preparamos a nuestra gente, roles y cultura para la nube?",
+          desc: "Se enfoca en cerrar la brecha de habilidades, definir nuevos roles, fomentar una cultura ágil y acompañar a los colaboradores en la gestión del cambio.",
+          example: "Capacitar al equipo pequeño de TI de Comercial Andina en servicios fundamentales de AWS y definir quién administrará la nube."
+        },
+        governance: {
+          category: "Capacidad de Negocio",
+          badgeClass: "badge-business",
+          title: "Governance (Gobernanza)",
+          question: "¿Cómo dirigimos, controlamos y medimos el valor y el riesgo?",
+          desc: "Establece las reglas del juego: gestión financiera en la nube, presupuestos, políticas de aprobación, cumplimiento normativo y seguimiento de beneficios.",
+          example: "Establecer presupuestos mensuales en AWS, alertas de gasto y políticas claras sobre quién puede aprobar la creación de nuevos recursos."
+        },
+        platform: {
+          category: "Capacidad Técnica",
+          badgeClass: "badge-tech",
+          title: "Platform (Plataforma)",
+          question: "¿Cómo diseñamos y modernizamos nuestra arquitectura tecnológica?",
+          desc: "Se ocupa del diseño de la infraestructura en la nube, patrones de arquitectura escalable y modernización de aplicaciones y bases de datos.",
+          example: "Diseñar cómo migrar y modernizar la tienda web de Comercial Andina y su base de datos local hacia servicios elásticos en AWS."
+        },
+        security: {
+          category: "Capacidad Técnica",
+          badgeClass: "badge-tech",
+          title: "Security (Seguridad)",
+          question: "¿Cómo protegemos nuestros datos, sistemas y accesos?",
+          desc: "Se enfoca en la confidencialidad, integridad y disponibilidad mediante gestión de identidades, cifrado, protección de red y respuesta ante amenazas.",
+          example: "Configurar permisos granulares con AWS IAM, cifrar la información de clientes y pagos, y establecer controles de acceso estrictos."
+        },
+        operations: {
+          category: "Capacidad Técnica",
+          badgeClass: "badge-tech",
+          title: "Operations (Operaciones)",
+          question: "¿Cómo mantenemos el entorno funcionando de forma confiable día a día?",
+          desc: "Se encarga de la administración continua: monitoreo de salud, gestión de incidentes, respaldos, continuidad operativa y cumplimiento de niveles de servicio.",
+          example: "Monitorear el rendimiento de la tienda web 24/7, recibir alertas tempranas y resolver incidentes rápidamente para evitar caídas."
+        }
+      };
+
+      const hexNodes = document.querySelectorAll(".hex-node");
+      const pCategory = document.getElementById("pCategory");
+      const pTitle = document.getElementById("pTitle");
+      const pQuestion = document.getElementById("pQuestion");
+      const pDesc = document.getElementById("pDesc");
+      const pExample = document.getElementById("pExample");
+
+      hexNodes.forEach((node) => {
+        node.addEventListener("click", () => {
+          hexNodes.forEach((n) => n.classList.remove("selected"));
+          node.classList.add("selected");
+
+          const key = node.getAttribute("data-persp");
+          const data = perspectivesData[key];
+          pCategory.textContent = data.category;
+          pCategory.className = "detail-badge " + data.badgeClass;
+          pTitle.textContent = data.title;
+          pQuestion.textContent = data.question;
+          pDesc.textContent = data.desc;
+          pExample.textContent = data.example;
+        });
+      });
+
+      /* Comparador Governance vs Security y Platform vs Operations */
+      const comparatorData = {
+        "gov-sec": `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div style="background:var(--bg-primary); padding:0.75rem; border-radius:8px; border-left:3px solid var(--aws-orange);">
+              <strong style="color:var(--aws-orange);">Governance (Reglas y Control)</strong>
+              <p style="margin-top:0.25rem; font-size:0.83rem;">Define <em>qué está permitido a nivel de negocio</em>: presupuestos, aprobaciones de gasto, políticas corporativas y retorno de inversión.</p>
+            </div>
+            <div style="background:var(--bg-primary); padding:0.75rem; border-radius:8px; border-left:3px solid var(--aws-blue);">
+              <strong style="color:var(--aws-blue);">Security (Protección Técnica)</strong>
+              <p style="margin-top:0.25rem; font-size:0.83rem;">Implementa los <em>candados técnicos</em>: permisos IAM, cifrado de datos, firewalls y defensa contra accesos no autorizados.</p>
+            </div>
+          </div>
+        `,
+        "plat-ops": `
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div style="background:var(--bg-primary); padding:0.75rem; border-radius:8px; border-left:3px solid var(--aws-blue);">
+              <strong style="color:var(--aws-blue);">Platform (Construir la Casa)</strong>
+              <p style="margin-top:0.25rem; font-size:0.83rem;">Diseña y construye la <em>arquitectura tecnológica</em>: cómo se migran y modernizan las aplicaciones y bases de datos.</p>
+            </div>
+            <div style="background:var(--bg-primary); padding:0.75rem; border-radius:8px; border-left:3px solid var(--success);">
+              <strong style="color:var(--success);">Operations (Mantenerla Viva)</strong>
+              <p style="margin-top:0.25rem; font-size:0.83rem;">Administra el <em>funcionamiento diario</em>: monitoreo continuo, gestión de incidentes, respaldos y alta disponibilidad.</p>
+            </div>
+          </div>
+        `
+      };
+
+      const comparatorContent = document.getElementById("comparatorContent");
+      comparatorContent.innerHTML = comparatorData["gov-sec"];
+
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          comparatorContent.innerHTML = comparatorData[btn.getAttribute("data-comp")];
+        });
+      });
+
+      /* ======================================================================
+         5. LÓGICA DIAPOSITIVA 4: SIMULACIÓN INTERACTIVA COMERCIAL ANDINA
+         ====================================================================== */
+      const simulationScenarios = [
+        {
+          id: "business",
+          name: "Business (Negocio)",
+          situation: "La gerencia de Comercial Andina duda si vale la pena invertir en AWS y necesita justificar cómo la nube ayudará a reducir costos físicos y vender más en fechas clave.",
+          explanation: "¡Exacto! La perspectiva Business conecta la adopción tecnológica con resultados empresariales medibles, retorno de inversión (ROI) y crecimiento comercial.",
+          consequence: "Consecuencia de ignorarla: Comercial Andina migraría tecnología sin metas claras de negocio, sin poder medir si la nube realmente mejoró su rentabilidad."
+        },
+        {
+          id: "people",
+          name: "People (Personas)",
+          situation: "El equipo de TI de 4 personas solo tiene experiencia administrando servidores locales antiguos y siente incertidumbre y temor frente a las herramientas de AWS.",
+          explanation: "¡Correcto! La perspectiva People se centra en capacitar al personal, desarrollar nuevas habilidades cloud, redefinir roles y gestionar el cambio cultural.",
+          consequence: "Consecuencia de ignorarla: El equipo se resistirá al cambio o cometerá errores básicos por falta de formación en la nube."
+        },
+        {
+          id: "governance",
+          name: "Governance (Gobernanza)",
+          situation: "Finanzas teme que los desarrolladores creen recursos en AWS sin control y que a fin de mes llegue una factura inesperada sin saber quién aprobó el gasto.",
+          explanation: "¡Muy bien! Governance establece presupuestos, políticas de control financiero, asignación de responsabilidades y seguimiento de riesgos.",
+          consequence: "Consecuencia de ignorarla: Sobrecostos descontrolados en la nube y falta de claridad sobre quién toma decisiones o rinde cuentas."
+        },
+        {
+          id: "platform",
+          name: "Platform (Plataforma)",
+          situation: "El equipo técnico necesita definir la arquitectura adecuada en AWS para modernizar la tienda web monolítica y migrar la base de datos local para que escale automáticamente.",
+          explanation: "¡Acertaste! Platform se enfoca en diseñar la arquitectura tecnológica, seleccionar los servicios de infraestructura y modernizar las aplicaciones.",
+          consequence: "Consecuencia de ignorarla: Se replicaría una arquitectura rígida en la nube que seguiría cayéndose cuando aumenten las visitas."
+        },
+        {
+          id: "security",
+          name: "Security (Seguridad)",
+          situation: "Comercial Andina procesa datos personales y pagos de miles de clientes; necesita definir permisos estrictos de acceso (IAM) y cifrar toda la información almacenada.",
+          explanation: "¡Correcto! Security protege la confidencialidad e integridad de los datos y sistemas mediante controles técnicos, cifrado y gestión de identidades.",
+          consequence: "Consecuencia de ignorarla: Exposición de datos sensibles de clientes, multas legales y pérdida irreparable de confianza en la marca."
+        },
+        {
+          id: "operations",
+          name: "Operations (Operaciones)",
+          situation: "Una vez migrada la tienda web, la empresa necesita monitorear su rendimiento en tiempo real, configurar alertas automáticas y atender incidentes 24/7.",
+          explanation: "¡Excelente! Operations asegura que los entornos en la nube se administren, supervisen y mantengan disponibles de forma continua día tras día.",
+          consequence: "Consecuencia de ignorarla: Si ocurre una falla en plena madrugada o un domingo, nadie la detectará a tiempo y se perderán ventas."
+        }
+      ];
+
+      let currentSimIdx = 0;
+      const solvedSet = new Set();
+
+      const scenarioPills = document.getElementById("scenarioPills");
+      const simStepLabel = document.getElementById("simStepLabel");
+      const simSituationText = document.getElementById("simSituationText");
+      const simOptionsGrid = document.getElementById("simOptionsGrid");
+      const simFeedbackBox = document.getElementById("simFeedbackBox");
+      const simFeedbackTitle = document.getElementById("simFeedbackTitle");
+      const simFeedbackExplanation = document.getElementById("simFeedbackExplanation");
+      const simConsequenceCard = document.getElementById("simConsequenceCard");
+      const nextScenarioBtn = document.getElementById("nextScenarioBtn");
+      const simSolvedCount = document.getElementById("simSolvedCount");
+      const simCompleteBanner = document.getElementById("simCompleteBanner");
+
+      function renderSimPills() {
+        scenarioPills.innerHTML = "";
+        simulationScenarios.forEach((sc, idx) => {
+          const pill = document.createElement("button");
+          pill.className = "scenario-pill" +
+            (idx === currentSimIdx ? " active" : "") +
+            (solvedSet.has(sc.id) ? " solved" : "");
+          pill.textContent = `Caso ${idx + 1}` + (solvedSet.has(sc.id) ? " ✓" : "");
+          pill.addEventListener("click", () => loadScenario(idx));
+          scenarioPills.appendChild(pill);
+        });
+      }
+
+      function loadScenario(idx) {
+        currentSimIdx = idx;
+        const sc = simulationScenarios[idx];
+        simStepLabel.textContent = `Escenario ${idx + 1} de 6`;
+        simSituationText.textContent = sc.situation;
+        simFeedbackBox.className = "feedback-box";
+
+        renderSimPills();
+
+        // Renderizar las 6 opciones
+        simOptionsGrid.innerHTML = "";
+        simulationScenarios.forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.className = "sim-option-btn";
+          const parts = opt.name.split(" ");
+          btn.innerHTML = `<strong style="font-size:0.9rem;">${parts[0]}</strong><span style="font-size:0.78rem; color:var(--text-muted);">${parts[1]}</span>`;
+
+          if (solvedSet.has(sc.id) && opt.id === sc.id) {
+            btn.classList.add("correct");
+          }
+
+          btn.addEventListener("click", () => handleSimAnswer(opt.id, btn));
+          simOptionsGrid.appendChild(btn);
+        });
+
+        if (solvedSet.has(sc.id)) {
+          showSimFeedback(true, sc);
+        }
+      }
+
+      function handleSimAnswer(selectedId, clickedBtn) {
+        const sc = simulationScenarios[currentSimIdx];
+        document.querySelectorAll(".sim-option-btn").forEach((b) => b.classList.remove("wrong", "correct"));
+
+        if (selectedId === sc.id) {
+          clickedBtn.classList.add("correct");
+          solvedSet.add(sc.id);
+          updateTransformationDiagram(sc.id);
+          renderSimPills();
+          showSimFeedback(true, sc);
+        } else {
+          clickedBtn.classList.add("wrong");
+          showSimFeedback(false, sc);
+        }
+      }
+
+      function showSimFeedback(isCorrect, sc) {
+        simFeedbackBox.className = "feedback-box show " + (isCorrect ? "success" : "error");
+        if (isCorrect) {
+          simFeedbackTitle.style.color = "var(--success)";
+          simFeedbackTitle.textContent = "✅ ¡Respuesta Correcta! — " + sc.name;
+          simFeedbackExplanation.textContent = sc.explanation;
+          simConsequenceCard.innerHTML = `⚠️ <strong>${sc.consequence}</strong>`;
+          nextScenarioBtn.style.display = "inline-flex";
+          nextScenarioBtn.textContent = currentSimIdx < 5 ? "Siguiente escenario →" : "Ir al primer escenario ↺";
+        } else {
+          simFeedbackTitle.style.color = "#fca5a5";
+          simFeedbackTitle.textContent = "❌ No es la perspectiva principal para este caso";
+          simFeedbackExplanation.textContent = "Analiza cuál es el problema raíz descrito en la situación (¿es negocio, personas, control/presupuesto, arquitectura técnica, protección o monitoreo diario?) e inténtalo de nuevo.";
+          simConsequenceCard.innerHTML = `💡 <strong>Pista:</strong> Revisa si el desafío trata sobre personas, dinero/reglas, diseño técnico, seguridad o mantenimiento diario.`;
+          nextScenarioBtn.style.display = "none";
+        }
+      }
+
+      function updateTransformationDiagram(id) {
+        const isBiz = ["business", "people", "governance"].includes(id);
+        const color = isBiz ? "#ff9900" : "#00a8e1";
+
+        const line = document.getElementById(`sim-line-${id}`);
+        const nodeGroup = document.getElementById(`sim-node-${id}`);
+        if (line) line.setAttribute("stroke", color);
+        if (nodeGroup) {
+          const rect = nodeGroup.querySelector("rect");
+          const text = nodeGroup.querySelector("text");
+          rect.setAttribute("fill", color);
+          rect.setAttribute("stroke", "#ffffff");
+          text.setAttribute("fill", "#0f172a");
+        }
+
+        simSolvedCount.textContent = solvedSet.size;
+        document.getElementById("sim-core-status").textContent = `${solvedSet.size}/6 Listo`;
+
+        if (solvedSet.size === 6) {
+          const core = document.getElementById("sim-core-circle");
+          core.setAttribute("stroke", "#10b981");
+          core.setAttribute("fill", "#064e3b");
+          simCompleteBanner.style.display = "block";
+        }
+      }
+
+      nextScenarioBtn.addEventListener("click", () => {
+        const next = (currentSimIdx + 1) % simulationScenarios.length;
+        loadScenario(next);
+      });
+
+      loadScenario(0);
+
+      /* ======================================================================
+         6. LÓGICA DIAPOSITIVA 5: COMPLEMENTARIEDAD EN CYBERDAY
+         ====================================================================== */
+      const coordAllBtn = document.getElementById("coordAllBtn");
+      const simulateMissingBtn = document.getElementById("simulateMissingBtn");
+      const cyberdayAlertBox = document.getElementById("cyberdayAlertBox");
+      const pillarCards = document.querySelectorAll(".pillar-card");
+
+      const missingWarnings = [
+        {
+          pillar: "security",
+          msg: "⚠️ <strong>Si falta Security:</strong> La web escala bien y vende mucho en el CyberDay, pero los datos de tarjetas quedan expuestos y sufren un robo de información."
+        },
+        {
+          pillar: "people",
+          msg: "⚠️ <strong>Si falta People:</strong> La arquitectura en AWS está lista, pero nadie en el equipo sabe cómo operar las alertas durante el evento."
+        },
+        {
+          pillar: "governance",
+          msg: "⚠️ <strong>Si falta Governance:</strong> Los servidores escalan sin límite de presupuesto aprobado y la ganancia del CyberDay se pierde en costos inesperados."
+        },
+        {
+          pillar: "operations",
+          msg: "⚠️ <strong>Si falta Operations:</strong> Nadie monitorea la tienda en tiempo real y un fallo en el carrito de compras pasa horas sin ser detectado."
+        }
+      ];
+      let missingIdx = 0;
+
+      coordAllBtn.addEventListener("click", () => {
+        pillarCards.forEach((c) => {
+          c.classList.remove("dimmed");
+          c.classList.add("highlighted");
+        });
+        cyberdayAlertBox.style.display = "block";
+        cyberdayAlertBox.innerHTML = "✅ <strong>Trabajo Coordinado (6/6):</strong> Las 6 perspectivas actúan como un engranaje completo. El CyberDay de Comercial Andina es rentable, seguro, escalable y estable.";
+      });
+
+      simulateMissingBtn.addEventListener("click", () => {
+        const currentWarning = missingWarnings[missingIdx];
+        missingIdx = (missingIdx + 1) % missingWarnings.length;
+
+        pillarCards.forEach((c) => {
+          if (c.getAttribute("data-pillar") === currentWarning.pillar) {
+            c.classList.remove("highlighted");
+            c.classList.add("dimmed");
+          } else {
+            c.classList.remove("dimmed");
+            c.classList.add("highlighted");
+          }
+        });
+
+        cyberdayAlertBox.style.display = "block";
+        cyberdayAlertBox.innerHTML = currentWarning.msg;
+      });
+
+      /* ======================================================================
+         7. LÓGICA DIAPOSITIVA 6: EVALUACIÓN FINAL CLF-C02 (5 PREGUNTAS)
+         ====================================================================== */
+      const quizQuestions = [
+        {
+          q: "1. ¿Cuál de las siguientes afirmaciones describe mejor qué es AWS Cloud Adoption Framework (AWS CAF)?",
+          options: [
+            "Un servicio administrado de AWS que migra automáticamente servidores locales a instancias Amazon EC2.",
+            "Un marco de referencia de mejores prácticas que ayuda a las organizaciones a planificar y ejecutar su transformación integral hacia la nube.",
+            "Una herramienta de monitoreo que detecta fallos de seguridad y rendimiento en aplicaciones en tiempo real.",
+            "Un marco técnico compuesto por 6 pilares para evaluar la eficiencia de una arquitectura específica."
+          ],
+          correct: 1,
+          explanation: "AWS CAF es un marco de referencia (framework) organizacional para guiar la transformación hacia la nube. No es un servicio técnico ni debe confundirse con AWS Well-Architected Framework (que evalúa arquitecturas mediante 6 pilares)."
+        },
+        {
+          q: "2. Una empresa minorista planea migrar a AWS, pero su personal de TI no tiene experiencia en la nube y necesita capacitación y redefinición de roles. ¿Qué perspectiva de AWS CAF aborda esta necesidad?",
+          options: [
+            "Operations (Operaciones)",
+            "Governance (Gobernanza)",
+            "People (Personas)",
+            "Platform (Plataforma)"
+          ],
+          correct: 2,
+          explanation: "La perspectiva People (Personas) se enfoca en el desarrollo de habilidades, capacitación, evolución cultural, roles y gestión del cambio organizacional."
+        },
+        {
+          q: "3. ¿Cuál es la diferencia principal entre las perspectivas Governance y Security en AWS CAF?",
+          options: [
+            "Governance se encarga de cifrar bases de datos, mientras que Security define los presupuestos mensuales.",
+            "Governance dirige y controla presupuestos, políticas y beneficios empresariales; Security protege datos, sistemas y accesos mediante controles técnicos.",
+            "Governance aplica solo antes de migrar, mientras que Security aplica únicamente después de terminar la migración.",
+            "No existe diferencia; ambas perspectivas pertenecen a las capacidades técnicas."
+          ],
+          correct: 1,
+          explanation: "Governance es una capacidad de negocio enfocada en dirección, control financiero, políticas y gestión de riesgos/valor; Security es una capacidad técnica centrada en proteger confidencialidad, integridad, IAM y cifrado."
+        },
+        {
+          q: "4. Un equipo de TI está definiendo cómo monitorear la disponibilidad diaria de sus aplicaciones en AWS y cómo responder rápidamente ante incidentes operativos. ¿A qué perspectiva corresponde esta actividad?",
+          options: [
+            "Operations (Operaciones)",
+            "Platform (Plataforma)",
+            "Business (Negocio)",
+            "People (Personas)"
+          ],
+          correct: 0,
+          explanation: "Operations (Operaciones) se enfoca en administrar, supervisar y mantener la disponibilidad diaria de los entornos en la nube, mientras que Platform se ocupa de diseñar y modernizar la arquitectura."
+        },
+        {
+          q: "5. Comercial Andina quiere migrar su tienda web a AWS. Además de diseñar la arquitectura técnica, decide alinear objetivos de ventas, capacitar a su equipo, fijar presupuestos, proteger datos y establecer monitoreo 24/7. ¿Qué demuestra este enfoque?",
+          options: [
+            "Que las seis perspectivas de AWS CAF se complementan entre sí para lograr una transformación exitosa.",
+            "Que una empresa puede omitir las capacidades de negocio si cuenta con buenos arquitectos.",
+            "Que AWS CAF reemplaza la necesidad de contratar soporte técnico.",
+            "Que migrar a la nube es exclusivamente responsabilidad del departamento de TI."
+          ],
+          correct: 0,
+          explanation: "AWS CAF demuestra que una adopción exitosa requiere coordinar tanto las capacidades de negocio (Business, People, Governance) como las técnicas (Platform, Security, Operations)."
+        }
+      ];
+
+      let currentQuizIdx = 0;
+      let quizScore = 0;
+      let questionAnswered = false;
+
+      const quizCard = document.getElementById("quizCard");
+      const quizResultsCard = document.getElementById("quizResultsCard");
+      const quizProgressLabel = document.getElementById("quizProgressLabel");
+      const quizLiveScore = document.getElementById("quizLiveScore");
+      const quizQuestionText = document.getElementById("quizQuestionText");
+      const quizOptionsContainer = document.getElementById("quizOptionsContainer");
+      const quizFeedbackBox = document.getElementById("quizFeedbackBox");
+      const quizFeedbackTitle = document.getElementById("quizFeedbackTitle");
+      const quizFeedbackDesc = document.getElementById("quizFeedbackDesc");
+      const quizNextBtn = document.getElementById("quizNextBtn");
+      const restartQuizBtn = document.getElementById("restartQuizBtn");
+
+      function renderQuizQuestion() {
+        questionAnswered = false;
+        const item = quizQuestions[currentQuizIdx];
+        quizProgressLabel.textContent = `Pregunta ${currentQuizIdx + 1} de ${quizQuestions.length}`;
+        quizQuestionText.textContent = item.q;
+        quizFeedbackBox.className = "feedback-box";
+
+        quizOptionsContainer.innerHTML = "";
+        const letters = ["A", "B", "C", "D"];
+
+        item.options.forEach((optText, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "quiz-option";
+          btn.innerHTML = `<span class="quiz-letter">${letters[idx]}</span><span>${optText}</span>`;
+          btn.addEventListener("click", () => handleQuizSelection(idx, btn));
+          quizOptionsContainer.appendChild(btn);
+        });
+      }
+
+      function handleQuizSelection(selectedIdx, selectedBtn) {
+        if (questionAnswered) return;
+        questionAnswered = true;
+
+        const item = quizQuestions[currentQuizIdx];
+        const allButtons = quizOptionsContainer.querySelectorAll(".quiz-option");
+        allButtons.forEach((b) => (b.disabled = true));
+
+        const isCorrect = selectedIdx === item.correct;
+        if (isCorrect) {
+          quizScore++;
+          quizLiveScore.textContent = quizScore;
+          selectedBtn.classList.add("selected-correct");
+          quizFeedbackBox.className = "feedback-box show success";
+          quizFeedbackTitle.style.color = "var(--success)";
+          quizFeedbackTitle.textContent = "✅ ¡Correcto!";
+        } else {
+          selectedBtn.classList.add("selected-wrong");
+          allButtons[item.correct].classList.add("selected-correct");
+          quizFeedbackBox.className = "feedback-box show error";
+          quizFeedbackTitle.style.color = "#fca5a5";
+          quizFeedbackTitle.textContent = "❌ Incorrecto";
+        }
+
+        quizFeedbackDesc.textContent = item.explanation;
+        quizNextBtn.textContent = currentQuizIdx < quizQuestions.length - 1 ? "Siguiente pregunta →" : "Ver resultados finales 🏆";
+      }
+
+      quizNextBtn.addEventListener("click", () => {
+        if (currentQuizIdx < quizQuestions.length - 1) {
+          currentQuizIdx++;
+          renderQuizQuestion();
+        } else {
+          showQuizResults();
+        }
+      });
+
+      function showQuizResults() {
+        quizCard.style.display = "none";
+        quizResultsCard.style.display = "block";
+        document.getElementById("quizFinalScoreText").textContent = `Obtuviste ${quizScore} de ${quizQuestions.length} respuestas correctas (${(quizScore / 5) * 100}%)`;
+
+        const medal = document.getElementById("quizMedal");
+        const diag = document.getElementById("quizDiagnosticText");
+
+        if (quizScore >= 4) {
+          medal.textContent = "🏆";
+          diag.textContent = "¡Excelente dominio! Estás muy bien preparado para responder preguntas sobre AWS CAF en el examen AWS Certified Cloud Practitioner (CLF-C02).";
+        } else if (quizScore >= 3) {
+          medal.textContent = "🎯";
+          diag.textContent = "¡Buen trabajo! Dominas los conceptos generales, pero te recomendamos repasar las diferencias entre Governance/Security y Platform/Operations.";
+        } else {
+          medal.textContent = "📘";
+          diag.textContent = "Te sugerimos repasar el Módulo 3 (Las 6 Perspectivas) y la simulación de Comercial Andina antes de rendir tu examen.";
+        }
+      }
+
+      restartQuizBtn.addEventListener("click", () => {
+        currentQuizIdx = 0;
+        quizScore = 0;
+        quizLiveScore.textContent = "0";
+        quizResultsCard.style.display = "none";
+        quizCard.style.display = "block";
+        renderQuizQuestion();
+      });
+
+      renderQuizQuestion();
+
+      /* ======================================================================
+         8. BOTONES DE NAVEGACIÓN FINAL (SLIDE 7)
+         ====================================================================== */
+      document.getElementById("restartPresentationBtn").addEventListener("click", () => goToSlide(0));
+      document.getElementById("goToSimBtn").addEventListener("click", () => goToSlide(3));
+    })();
+  </script>
+</body>
+</html>
