@@ -1,0 +1,2433 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      AWS Cloud Practitioner (CLF-C02) – Almacenamiento, Transferencia y
+      Migración
+    </title>
+    <style>
+      /* ==========================================================================
+       1. VARIABLES DE DISEÑO Y RESET (Paleta oscura inspirada en AWS)
+       ========================================================================== */
+      :root {
+        --bg-primary: #0b101b;
+        --bg-secondary: #131b2e;
+        --bg-card: #1a243b;
+        --bg-card-hover: #212e4a;
+        --aws-orange: #ff9900;
+        --aws-orange-soft: rgba(255, 153, 0, 0.15);
+        --aws-blue: #00a1c9;
+        --aws-blue-soft: rgba(0, 161, 201, 0.15);
+        --aws-purple: #8c4fff;
+        --aws-green: #10b981;
+        --aws-red: #ef4444;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+        --radius-md: 12px;
+        --radius-lg: 18px;
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        line-height: 1.5;
+      }
+
+      /* ==========================================================================
+       2. BARRA SUPERIOR Y MENÚ DE NAVEGACIÓN POR SECCIONES
+       ========================================================================== */
+      header {
+        background-color: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: 0.3px;
+      }
+
+      .brand-badge {
+        background: linear-gradient(135deg, var(--aws-orange), #e67e00);
+        color: #0b101b;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 800;
+      }
+
+      .nav-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .section-select {
+        background-color: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 0.45rem 0.85rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        cursor: pointer;
+        outline: none;
+        max-width: 280px;
+      }
+
+      .section-select:focus {
+        border-color: var(--aws-orange);
+      }
+
+      .slide-counter {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        background: var(--bg-card);
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .progress-bar-container {
+        width: 100%;
+        height: 4px;
+        background: var(--bg-secondary);
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--aws-orange), var(--aws-blue));
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      /* ==========================================================================
+       3. CONTENEDOR PRINCIPAL DE DIAPOSITIVAS
+       ========================================================================== */
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+        max-width: 1280px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      .slide {
+        display: none;
+        width: 100%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2rem 2.25rem;
+        box-shadow: var(--shadow-lg);
+        animation: fadeSlide 0.35s ease;
+      }
+
+      .slide.active {
+        display: block;
+      }
+
+      @keyframes fadeSlide {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .slide-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+      }
+
+      .section-tag {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--aws-orange);
+        background: var(--aws-orange-soft);
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        margin-bottom: 0.45rem;
+      }
+
+      .slide-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #ffffff;
+        line-height: 1.25;
+      }
+
+      .service-icon-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 14px;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 153, 0, 0.2),
+          rgba(0, 161, 201, 0.2)
+        );
+        border: 1px solid rgba(255, 153, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .service-icon-box svg {
+        width: 28px;
+        height: 28px;
+        stroke: var(--aws-orange);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* ==========================================================================
+       4. COMPONENTES REUTILIZABLES (Tarjetas, Grids, Idea Clave, Acordeones)
+       ========================================================================== */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        transition: var(--transition);
+      }
+
+      .card:hover {
+        border-color: rgba(255, 153, 0, 0.4);
+        background: var(--bg-card-hover);
+      }
+
+      .card h3 {
+        font-size: 1.05rem;
+        margin-bottom: 0.6rem;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .card p,
+      .card li {
+        font-size: 0.93rem;
+        color: var(--text-muted);
+      }
+
+      .card ul {
+        padding-left: 1.15rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .card li strong {
+        color: var(--text-main);
+      }
+
+      .key-idea {
+        margin-top: 1.5rem;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 153, 0, 0.14),
+          rgba(0, 161, 201, 0.08)
+        );
+        border-left: 4px solid var(--aws-orange);
+        padding: 0.95rem 1.25rem;
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        font-size: 0.98rem;
+      }
+
+      .key-idea strong {
+        color: var(--aws-orange);
+      }
+
+      .exam-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.85rem;
+      }
+
+      .badge {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        background: var(--aws-blue-soft);
+        color: #67e8f9;
+        border: 1px solid rgba(0, 161, 201, 0.3);
+      }
+
+      .badge.orange {
+        background: var(--aws-orange-soft);
+        color: #fdba74;
+        border-color: rgba(255, 153, 0, 0.3);
+      }
+
+      .badge.green {
+        background: rgba(16, 185, 129, 0.15);
+        color: #6ee7b7;
+        border-color: rgba(16, 185, 129, 0.3);
+      }
+
+      /* Diagramas Interactivos */
+      .diagram-box {
+        background: #0e1525;
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      .interactive-node {
+        cursor: pointer;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-color);
+        transition: var(--transition);
+        text-align: center;
+      }
+
+      .interactive-node:hover,
+      .interactive-node.selected {
+        border-color: var(--aws-orange);
+        background: rgba(255, 153, 0, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .node-detail-panel {
+        width: 100%;
+        background: var(--bg-card);
+        border: 1px solid rgba(0, 161, 201, 0.35);
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+        font-size: 0.9rem;
+        color: var(--text-main);
+      }
+
+      /* Tarjetas Desplegables */
+      .accordion-btn {
+        width: 100%;
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 0.85rem 1rem;
+        border-radius: 10px;
+        text-align: left;
+        font-size: 0.93rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition);
+      }
+
+      .accordion-btn:hover {
+        border-color: var(--aws-blue);
+      }
+
+      .accordion-content {
+        display: none;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        padding: 0.9rem 1rem;
+        font-size: 0.88rem;
+        color: var(--text-muted);
+      }
+
+      .accordion-content.open {
+        display: block;
+      }
+
+      /* Tablas Comparativas */
+      .table-wrapper {
+        overflow-x: auto;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+        text-align: left;
+      }
+
+      th {
+        background: #0e1525;
+        color: var(--aws-orange);
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-muted);
+        vertical-align: top;
+      }
+
+      td strong {
+        color: var(--text-main);
+      }
+
+      tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      /* Botones de filtro / pestañas */
+      .tab-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .tab-btn {
+        background: var(--bg-card);
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        padding: 0.45rem 0.9rem;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .tab-btn:hover {
+        color: #fff;
+        border-color: var(--aws-blue);
+      }
+
+      .tab-btn.active {
+        background: var(--aws-orange);
+        color: #0b101b;
+        border-color: var(--aws-orange);
+      }
+
+      /* ==========================================================================
+       5. ESTILOS DEL CUESTIONARIO (Sección 10)
+       ========================================================================== */
+      .quiz-option {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.85rem 1.1rem;
+        border-radius: 10px;
+        margin-bottom: 0.65rem;
+        cursor: pointer;
+        font-size: 0.93rem;
+        transition: var(--transition);
+      }
+
+      .quiz-option:hover:not(:disabled) {
+        border-color: var(--aws-blue);
+        background: var(--bg-card-hover);
+      }
+
+      .quiz-option.correct {
+        border-color: var(--aws-green);
+        background: rgba(16, 185, 129, 0.16);
+        color: #ecfdf5;
+      }
+
+      .quiz-option.wrong {
+        border-color: var(--aws-red);
+        background: rgba(239, 68, 68, 0.16);
+        color: #fef2f2;
+      }
+
+      .quiz-feedback {
+        margin-top: 1rem;
+        padding: 1rem 1.2rem;
+        border-radius: 10px;
+        background: #0e1525;
+        border: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        display: none;
+      }
+
+      .quiz-feedback.show {
+        display: block;
+      }
+
+      /* ==========================================================================
+       6. PIE DE PÁGINA CON CONTROLES DE NAVEGACIÓN
+       ========================================================================== */
+      footer {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        padding: 0.85rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .btn-nav {
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 0.55rem 1.2rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+      }
+
+      .btn-nav:hover:not(:disabled) {
+        border-color: var(--aws-orange);
+        background: var(--bg-card-hover);
+      }
+
+      .btn-nav.primary {
+        background: var(--aws-orange);
+        color: #0b101b;
+        border-color: var(--aws-orange);
+      }
+
+      .btn-nav.primary:hover:not(:disabled) {
+        background: #ffad33;
+      }
+
+      .btn-nav:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .keyboard-hint {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      kbd {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 0.15rem 0.4rem;
+        font-size: 0.75rem;
+        color: var(--text-main);
+      }
+
+      @media (max-width: 900px) {
+        .grid-2,
+        .grid-3,
+        .grid-4 {
+          grid-template-columns: 1fr;
+        }
+        .slide {
+          padding: 1.4rem;
+        }
+        .slide-title {
+          font-size: 1.35rem;
+        }
+        .keyboard-hint {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ENCABEZADO SUPERIOR Y SELECTOR DE SECCIÓN -->
+    <header>
+      <div class="brand">
+        <span class="brand-badge">AWS CLF-C02</span>
+        <span>Almacenamiento, Transferencia y Migración</span>
+      </div>
+      <div class="nav-controls">
+        <select
+          id="sectionSelect"
+          class="section-select"
+          aria-label="Navegar por secciones"
+        >
+          <option value="0">1. Introducción al almacenamiento en AWS</option>
+          <option value="1">2. Almacenamiento de bloques – Amazon EBS</option>
+          <option value="2">3. Almacenamiento de archivos – Amazon EFS</option>
+          <option value="3">4. Sistemas especializados – Amazon FSx</option>
+          <option value="4">5. Almacenamiento de objetos – Amazon S3</option>
+          <option value="5">6. Almacenamiento híbrido – Storage Gateway</option>
+          <option value="6">7. Transferencia – AWS Transfer Family</option>
+          <option value="7">
+            8A. Migración de datos: DataSync y Snow Family
+          </option>
+          <option value="8">8B. Migración de cargas: MGN, DMS y Backup</option>
+          <option value="9">9. Comparación general interactiva</option>
+          <option value="10">10. Repaso y evaluación (12 preguntas)</option>
+        </select>
+        <div id="slideCounter" class="slide-counter">Diapositiva 1 / 11</div>
+      </div>
+    </header>
+
+    <div class="progress-bar-container">
+      <div id="progressBar" class="progress-bar-fill"></div>
+    </div>
+
+    <!-- CONTENIDO DE DIAPOSITIVAS -->
+    <main>
+      <!-- ======================================================================
+         SECCIÓN 1: INTRODUCCIÓN AL ALMACENAMIENTO EN AWS
+         ====================================================================== -->
+      <section class="slide active" data-section="0">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag">Sección 1 • Fundamentos</span>
+            <h1 class="slide-title">Introducción al almacenamiento en AWS</h1>
+          </div>
+          <div class="service-icon-box" title="Almacenamiento Cloud">
+            <svg viewBox="0 0 24 24">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 1.25rem">
+          <div class="card">
+            <h3>☁️ ¿Por qué almacenamiento en la nube?</h3>
+            <ul>
+              <li>
+                <strong>Elasticidad:</strong> Crece o disminuye según la demanda
+                sin comprar discos físicos por adelantado.
+              </li>
+              <li>
+                <strong>Durabilidad y disponibilidad:</strong> AWS replica
+                automáticamente los datos para evitar pérdidas ante fallos de
+                hardware.
+              </li>
+              <li>
+                <strong>Pago por uso:</strong> Pagas solo por los GB que
+                almacenas y transfieres.
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🏢 Almacenamiento Local vs. Nube</h3>
+            <ul>
+              <li>
+                <strong>Local (On-Premises):</strong> Requiere comprar
+                servidores, mantener espacio físico, energía, refrigeración y
+                calcular capacidad máxima años antes.
+              </li>
+              <li>
+                <strong>Nube (AWS):</strong> Capacidad prácticamente ilimitada
+                bajo demanda, mantenimiento físico gestionado por AWS y acceso
+                global seguro.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Diagrama interactivo de los 3 modelos -->
+        <div class="diagram-box">
+          <div
+            style="
+              font-size: 0.9rem;
+              font-weight: 600;
+              color: var(--aws-orange);
+            "
+          >
+            Haz clic en cada modelo para ver su analogía y diagrama conceptual:
+          </div>
+          <div class="grid-3" style="width: 100%">
+            <div
+              class="interactive-node selected"
+              onclick="selectStorageModel('block', this)"
+            >
+              <div style="font-size: 1.5rem; margin-bottom: 0.3rem">
+                💽 ➡️ 🖥️
+              </div>
+              <strong>1. Bloques (Block)</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted)">
+                Disco conectado a un servidor
+              </div>
+            </div>
+            <div
+              class="interactive-node"
+              onclick="selectStorageModel('file', this)"
+            >
+              <div style="font-size: 1.5rem; margin-bottom: 0.3rem">
+                🖥️ ↔️ 📂 ↔️ 🖥️
+              </div>
+              <strong>2. Archivos (File)</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted)">
+                Carpeta compartida entre servidores
+              </div>
+            </div>
+            <div
+              class="interactive-node"
+              onclick="selectStorageModel('object', this)"
+            >
+              <div style="font-size: 1.5rem; margin-bottom: 0.3rem">
+                🪣 📦 + 🏷️
+              </div>
+              <strong>3. Objetos (Object)</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted)">
+                Repositorio mediante objetos y buckets
+              </div>
+            </div>
+          </div>
+          <div id="storageModelDetail" class="node-detail-panel">
+            <strong>Almacenamiento de Bloques (Ej. Amazon EBS):</strong> Divide
+            los datos en fragmentos de tamaño fijo (bloques).
+            <em>Analogía:</em> Es como el disco duro interno o SSD de tu
+            computador conectado directamente a un servidor; es ultrarrápido y
+            permite instalar un sistema operativo o base de datos.
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 2: ALMACENAMIENTO DE BLOQUES – AMAZON EBS
+         ====================================================================== -->
+      <section class="slide" data-section="1">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 2 • Almacenamiento de Bloques</span
+            >
+            <h1 class="slide-title">Amazon EBS (Elastic Block Store)</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <line x1="7" y1="8" x2="17" y2="8" />
+              <line x1="7" y1="12" x2="17" y2="12" />
+              <circle cx="8" cy="16" r="1" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>¿Qué problema resuelve y cómo funciona?</h3>
+            <ul>
+              <li>
+                <strong>Volúmenes persistentes:</strong> A diferencia del
+                almacenamiento temporal (Instance Store), los datos en EBS
+                sobreviven aunque detengas o reinicies tu instancia
+                <strong>Amazon EC2</strong>.
+              </li>
+              <li>
+                <strong>Conexión 1 a 1 (generalmente):</strong> Se conecta como
+                un disco virtual a una instancia EC2 dentro de la
+                <strong>misma Zona de Disponibilidad (AZ)</strong>.
+              </li>
+              <li>
+                <strong>Casos de uso:</strong> Discos de arranque del sistema
+                operativo, bases de datos relacionales/NoSQL en EC2 y
+                aplicaciones que requieren baja latencia.
+              </li>
+              <li>
+                <strong>Snapshots (Instantáneas):</strong> Copias de seguridad
+                incrementales (solo guardan los cambios nuevos) que se almacenan
+                en <strong>Amazon S3</strong>.
+              </li>
+            </ul>
+            <div class="exam-badges">
+              <span class="badge orange">Palabras clave examen:</span>
+              <span class="badge">Disco virtual para EC2</span>
+              <span class="badge">Persistencia</span>
+              <span class="badge">Misma AZ</span>
+              <span class="badge">Snapshots incrementales</span>
+            </div>
+          </div>
+
+          <!-- Ilustración interactiva EC2 + EBS + Snapshot -->
+          <div class="diagram-box">
+            <div style="font-size: 0.85rem; color: var(--text-muted)">
+              Arquitectura visual en una Zona de Disponibilidad (AZ)
+            </div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+              "
+            >
+              <div
+                class="interactive-node"
+                onclick="showEbsTip('ec2')"
+                style="flex: 1; min-width: 130px"
+              >
+                <div style="font-size: 1.6rem">🖥️</div>
+                <strong>Instancia EC2</strong>
+                <div style="font-size: 0.78rem; color: var(--text-muted)">
+                  Servidor virtual
+                </div>
+              </div>
+              <div
+                style="
+                  color: var(--aws-orange);
+                  font-weight: bold;
+                  font-size: 1.2rem;
+                "
+              >
+                🔗 Adjunto
+              </div>
+              <div
+                class="interactive-node selected"
+                onclick="showEbsTip('ebs')"
+                style="flex: 1; min-width: 130px"
+              >
+                <div style="font-size: 1.6rem">💽</div>
+                <strong>Volumen EBS</strong>
+                <div style="font-size: 0.78rem; color: var(--text-muted)">
+                  Disco persistente
+                </div>
+              </div>
+            </div>
+            <div style="color: var(--aws-blue); font-size: 0.85rem">
+              ⬇️ Respaldo incremental
+            </div>
+            <div
+              class="interactive-node"
+              onclick="showEbsTip('snap')"
+              style="width: 85%"
+            >
+              <strong>📸 EBS Snapshot (guardado en Amazon S3)</strong>
+              <div style="font-size: 0.78rem; color: var(--text-muted)">
+                Permite crear nuevos volúmenes o copiar a otra Región
+              </div>
+            </div>
+            <div id="ebsTipPanel" class="node-detail-panel">
+              <strong>Volumen EBS:</strong> Si detienes la instancia EC2 y la
+              vuelves a encender mañana, tus archivos y el sistema operativo
+              siguen intactos en el volumen EBS.
+            </div>
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> EBS funciona como un disco duro virtual
+            persistente que se conecta a una instancia EC2 dentro de la misma
+            Zona de Disponibilidad.
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 3: ALMACENAMIENTO DE ARCHIVOS – AMAZON EFS
+         ====================================================================== -->
+      <section class="slide" data-section="2">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 3 • Almacenamiento de Archivos</span
+            >
+            <h1 class="slide-title">Amazon EFS (Elastic File System)</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>¿Qué es y cuándo utilizarlo?</h3>
+            <ul>
+              <li>
+                <strong>Sistema de archivos compartido:</strong> Permite que
+                <strong>decenas, cientos o miles de instancias EC2</strong> lean
+                y escriban archivos simultáneamente.
+              </li>
+              <li>
+                <strong>Protocolo NFS (Network File System):</strong> Diseñado
+                principalmente para cargas de trabajo <strong>Linux</strong>.
+              </li>
+              <li>
+                <strong>Escalabilidad automática (Elástico):</strong> Crece y se
+                reduce automáticamente al agregar o borrar archivos; no
+                necesitas reservar tamaño por adelantado.
+              </li>
+              <li>
+                <strong>Multi-AZ:</strong> Accesible desde instancias EC2
+                ubicadas en diferentes Zonas de Disponibilidad de una misma
+                Región.
+              </li>
+              <li>
+                <strong>Casos de uso:</strong> Sistemas de gestión de contenido
+                (CMS como WordPress), directorios compartidos, analítica de
+                datos y contenedores.
+              </li>
+            </ul>
+            <div class="exam-badges">
+              <span class="badge orange">Palabras clave examen:</span>
+              <span class="badge">Compartido por múltiples EC2</span>
+              <span class="badge">NFS / Linux</span>
+              <span class="badge">Escala automáticamente</span>
+            </div>
+          </div>
+
+          <div
+            class="card"
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            "
+          >
+            <div>
+              <h3>⚖️ Diferencia rápida: EBS vs. EFS</h3>
+              <table style="margin-top: 0.75rem">
+                <thead>
+                  <tr>
+                    <th>Característica</th>
+                    <th>Amazon EBS</th>
+                    <th>Amazon EFS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Acceso</strong></td>
+                    <td>1 instancia EC2 (en general)</td>
+                    <td>Múltiples instancias EC2 a la vez</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Alcance</strong></td>
+                    <td>Una Zona de Disponibilidad</td>
+                    <td>Múltiples Zonas (Regional)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Tamaño</strong></td>
+                    <td>Debes definir capacidad</td>
+                    <td>Crece/reduce automáticamente</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Protocolo</strong></td>
+                    <td>Bloques (disco local virtual)</td>
+                    <td>Archivos (NFS para Linux)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div
+              style="
+                background: #0e1525;
+                padding: 0.85rem;
+                border-radius: 10px;
+                text-align: center;
+                margin-top: 1rem;
+                font-size: 0.88rem;
+              "
+            >
+              🖥️ EC2 (AZ-a) ➕ 🖥️ EC2 (AZ-b) ➕ 🖥️ EC2 (AZ-c) ➡️
+              <strong>📂 Sistema EFS Compartido</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> EFS permite que múltiples instancias
+            EC2 compartan archivos al mismo tiempo mediante un sistema de
+            archivos común en red (NFS).
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 4: SISTEMAS ESPECIALIZADOS – AMAZON FSX
+         ====================================================================== -->
+      <section class="slide" data-section="3">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 4 • Sistemas de Archivos Especializados</span
+            >
+            <h1 class="slide-title">Amazon FSx</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="3" width="20" height="7" rx="1" />
+              <rect x="2" y="14" width="20" height="7" rx="1" />
+              <line x1="6" y1="6.5" x2="6.01" y2="6.5" />
+              <line x1="6" y1="17.5" x2="6.01" y2="17.5" />
+            </svg>
+          </div>
+        </div>
+
+        <p
+          style="
+            color: var(--text-muted);
+            margin-bottom: 1.1rem;
+            font-size: 0.95rem;
+          "
+        >
+          <strong>Amazon FSx</strong> permite lanzar y ejecutar
+          <strong
+            >sistemas de archivos comerciales y de código abierto totalmente
+            administrados por AWS</strong
+          >, sin tener que instalar ni mantener servidores de archivos
+          manualmente.
+        </p>
+
+        <div class="grid-2" style="margin-bottom: 1rem">
+          <div class="card" style="border-color: rgba(0, 161, 201, 0.4)">
+            <h3>🪟 Amazon FSx for Windows File Server</h3>
+            <ul>
+              <li>
+                Almacenamiento de archivos nativo para entornos
+                <strong>Windows</strong>.
+              </li>
+              <li>
+                Compatible con el protocolo <strong>SMB</strong> (Server Message
+                Block) y sistema de archivos <strong>NTFS</strong>.
+              </li>
+              <li>
+                Se integra con Microsoft <strong>Active Directory</strong>.
+              </li>
+              <li>
+                <em>Uso típico:</em> Carpetas compartidas corporativas y
+                aplicaciones empresariales Windows.
+              </li>
+            </ul>
+          </div>
+          <div class="card" style="border-color: rgba(255, 153, 0, 0.4)">
+            <h3>⚡ Amazon FSx for Lustre</h3>
+            <ul>
+              <li>
+                Sistema de archivos optimizado para
+                <strong>computación de alto rendimiento (HPC)</strong>.
+              </li>
+              <li>Procesamiento ultrarrápido con latencias sub-milisegundo.</li>
+              <li>
+                Se integra directamente con Amazon S3 para procesar datos
+                masivos.
+              </li>
+              <li>
+                <em>Uso típico:</em> Machine Learning, simulaciones financieras,
+                renderizado de video y genómica.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>🗄️ Amazon FSx for NetApp ONTAP</h3>
+            <p>
+              Para empresas que ya usan <strong>NetApp ONTAP</strong> en local y
+              desean migrar a AWS manteniendo sus mismas funciones
+              (deduplicación, snapshots, multiprotocolo NFS/SMB).
+            </p>
+          </div>
+          <div class="card">
+            <h3>🐧 Amazon FSx for OpenZFS</h3>
+            <p>
+              Sistema de archivos administrado basado en el popular sistema de
+              archivos de código abierto <strong>OpenZFS</strong>, ideal para
+              cargas Linux que requieren alto rendimiento y clonación
+              instantánea.
+            </p>
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> FSx ofrece sistemas de archivos
+            especializados y administrados (recuerda:
+            <strong>Windows/SMB</strong> y
+            <strong>Lustre/Alto rendimiento</strong>).
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 5: ALMACENAMIENTO DE OBJETOS – AMAZON S3
+         ====================================================================== -->
+      <section class="slide" data-section="4">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 5 • Almacenamiento de Objetos</span
+            >
+            <h1 class="slide-title">Amazon S3 (Simple Storage Service)</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M5 4h14l-1.5 15a2 2 0 0 1-2 1.8h-7a2 2 0 0 1-2-1.8L5 4z"
+              />
+              <path d="M5 4c0-1.1 3.1-2 7-2s7 .9 7 2" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 1rem">
+          <div class="card">
+            <h3>🪣 Conceptos fundamentales</h3>
+            <ul>
+              <li>
+                <strong>Bucket (Contenedor):</strong> Carpeta raíz donde guardas
+                tus datos. Su nombre debe ser
+                <strong>único a nivel global</strong> en todo AWS.
+              </li>
+              <li>
+                <strong>Objeto:</strong> Cada archivo almacenado (foto, PDF,
+                video, respaldo) + sus metadatos y clave (nombre).
+              </li>
+              <li>
+                <strong>Durabilidad del 99.999999999% (11 nueves):</strong> AWS
+                replica tus objetos en múltiples instalaciones dentro de una
+                Región.
+              </li>
+              <li>
+                <strong>Lifecycle (Ciclo de vida):</strong> Reglas automáticas
+                para mover objetos a clases más baratas cuando envejecen o
+                eliminarlos.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Representación visual de un Bucket con objetos -->
+          <div class="diagram-box">
+            <div
+              style="
+                font-weight: 700;
+                color: var(--aws-orange);
+                font-size: 0.92rem;
+              "
+            >
+              🪣 Bucket S3: <code>mi-empresa-archivos-2026</code>
+            </div>
+            <div class="grid-3" style="width: 100%">
+              <div class="card" style="padding: 0.7rem; text-align: center">
+                <div style="font-size: 1.3rem">🖼️</div>
+                <div style="font-size: 0.8rem; font-weight: 600">logo.png</div>
+                <div style="font-size: 0.7rem; color: var(--aws-green)">
+                  Acceso Frecuente
+                </div>
+              </div>
+              <div class="card" style="padding: 0.7rem; text-align: center">
+                <div style="font-size: 1.3rem">📄</div>
+                <div style="font-size: 0.8rem; font-weight: 600">
+                  contrato_2024.pdf
+                </div>
+                <div style="font-size: 0.7rem; color: var(--aws-blue)">
+                  Poco Frecuente
+                </div>
+              </div>
+              <div class="card" style="padding: 0.7rem; text-align: center">
+                <div style="font-size: 1.3rem">🗄️</div>
+                <div style="font-size: 0.8rem; font-weight: 600">
+                  auditoria_2019.zip
+                </div>
+                <div style="font-size: 0.7rem; color: var(--aws-purple)">
+                  Archivado Glacier
+                </div>
+              </div>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted)">
+              🔄 <strong>Regla de Lifecycle:</strong> Después de 30 días ➔ Poco
+              Frecuente | Después de 365 días ➔ Glacier Deep Archive
+            </div>
+          </div>
+        </div>
+
+        <!-- Clases de almacenamiento S3 interactivas -->
+        <div class="card">
+          <h3>
+            📊 Clases de Almacenamiento S3 (Haz clic para filtrar por frecuencia
+            de acceso)
+          </h3>
+          <div class="tab-group" style="margin-top: 0.6rem">
+            <button class="tab-btn active" onclick="filterS3('all', this)">
+              Todas (7 clases)
+            </button>
+            <button class="tab-btn" onclick="filterS3('freq', this)">
+              Acceso Frecuente / Dinámico
+            </button>
+            <button class="tab-btn" onclick="filterS3('ia', this)">
+              Acceso Poco Frecuente (IA)
+            </button>
+            <button class="tab-btn" onclick="filterS3('glacier', this)">
+              Archivado (Glacier)
+            </button>
+          </div>
+          <div id="s3ClassesList" class="grid-4" style="gap: 0.75rem">
+            <!-- Se llena dinámicamente con JS -->
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> S3 almacena objetos con altísima
+            durabilidad y es ideal para guardar grandes cantidades de archivos
+            sin administrar servidores.
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 6: ALMACENAMIENTO HÍBRIDO – AWS STORAGE GATEWAY
+         ====================================================================== -->
+      <section class="slide" data-section="5">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag">Sección 6 • Nube Híbrida</span>
+            <h1 class="slide-title">AWS Storage Gateway</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 12h16" />
+              <path d="M12 4v16" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 1.25rem">
+          <div class="card">
+            <h3>🌉 ¿Qué problema resuelve?</h3>
+            <p style="margin-bottom: 0.75rem">
+              Es un servicio de <strong>almacenamiento híbrido</strong> que
+              conecta las aplicaciones locales (<em>on-premises</em>) de una
+              empresa con el almacenamiento en la nube de AWS, ofreciendo caché
+              local de baja latencia para los archivos más usados.
+            </p>
+            <div
+              style="
+                background: #0e1525;
+                padding: 0.85rem;
+                border-radius: 10px;
+                font-size: 0.88rem;
+                border-left: 3px solid var(--aws-blue);
+              "
+            >
+              <strong>Ejemplo cotidiano:</strong> Un hospital tiene servidores
+              locales que generan miles de radiografías diarias. No quiere
+              quedarse sin espacio en su edificio, así que instala Storage
+              Gateway: los médicos abren exámenes recientes al instante desde la
+              caché local, mientras todo se respalda automáticamente en Amazon
+              S3.
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>🔌 Los 3 tipos de Gateway (Clave de examen)</h3>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 0.7rem;
+                margin-top: 0.5rem;
+              "
+            >
+              <div
+                style="
+                  background: #0e1525;
+                  padding: 0.75rem;
+                  border-radius: 8px;
+                "
+              >
+                <strong style="color: var(--aws-orange)"
+                  >1. Amazon S3 File Gateway:</strong
+                >
+                <span style="font-size: 0.86rem; color: var(--text-muted)">
+                  Permite que servidores locales guarden archivos mediante
+                  protocolos estándar (NFS/SMB) directamente como objetos en
+                  <strong>Amazon S3</strong>.</span
+                >
+              </div>
+              <div
+                style="
+                  background: #0e1525;
+                  padding: 0.75rem;
+                  border-radius: 8px;
+                "
+              >
+                <strong style="color: var(--aws-blue)"
+                  >2. Volume Gateway:</strong
+                >
+                <span style="font-size: 0.86rem; color: var(--text-muted)">
+                  Presenta discos de bloques (iSCSI) a servidores locales y
+                  respalda sus copias como <strong>snapshots de EBS</strong> en
+                  AWS.</span
+                >
+              </div>
+              <div
+                style="
+                  background: #0e1525;
+                  padding: 0.75rem;
+                  border-radius: 8px;
+                "
+              >
+                <strong style="color: var(--aws-purple)"
+                  >3. Tape Gateway (VTL):</strong
+                >
+                <span style="font-size: 0.86rem; color: var(--text-muted)">
+                  Reemplaza las antiguas cintas magnéticas físicas por
+                  <strong>cintas virtuales</strong> almacenadas en S3 y S3
+                  Glacier.</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> Storage Gateway actúa como un puente
+            híbrido continuo entre la infraestructura local (on-premises) y el
+            almacenamiento de AWS.
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 7: TRANSFERENCIA DE ARCHIVOS – AWS TRANSFER FAMILY
+         ====================================================================== -->
+      <section class="slide" data-section="6">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 7 • Intercambio Externo de Archivos</span
+            >
+            <h1 class="slide-title">AWS Transfer Family</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <polyline points="17 1 21 5 17 9" />
+              <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+              <polyline points="7 23 3 19 7 15" />
+              <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>¿Qué es y qué problema resuelve?</h3>
+            <ul>
+              <li>
+                <strong>Servicio totalmente administrado</strong> para
+                transferir archivos directamente hacia y desde
+                <strong>Amazon S3</strong> o <strong>Amazon EFS</strong>.
+              </li>
+              <li>
+                Soporta protocolos estándar de la industria:
+                <strong>SFTP</strong> (SSH File Transfer Protocol),
+                <strong>FTPS</strong> y <strong>FTP</strong> (además de AS2 para
+                intercambio empresarial B2B).
+              </li>
+              <li>
+                <strong>Cero administración de servidores:</strong> Evita
+                instalar, parchar y mantener servidores FTP tradicionales.
+              </li>
+              <li>
+                <strong>Casos de uso:</strong> Intercambio diario de facturas,
+                nóminas o catálogos con clientes, bancos y proveedores externos
+                que ya usan clientes SFTP.
+              </li>
+            </ul>
+            <div class="exam-badges">
+              <span class="badge orange">Palabras clave examen:</span>
+              <span class="badge">SFTP / FTPS / FTP</span>
+              <span class="badge">Terceros / Proveedores</span>
+              <span class="badge">Destino: S3 o EFS</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>🔍 Trampa clásica de examen: Transfer Family vs. DataSync</h3>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 0.85rem;
+                margin-top: 0.75rem;
+              "
+            >
+              <div
+                style="
+                  background: rgba(255, 153, 0, 0.1);
+                  border: 1px solid rgba(255, 153, 0, 0.35);
+                  padding: 0.9rem;
+                  border-radius: 10px;
+                "
+              >
+                <strong style="color: var(--aws-orange)"
+                  >Elige AWS Transfer Family cuando:</strong
+                >
+                <p style="margin-top: 0.3rem; font-size: 0.88rem">
+                  La pregunta menciona explícitamente los protocolos
+                  <strong>SFTP, FTPS o FTP</strong> para intercambiar archivos
+                  con socios comerciales, clientes o sistemas heredados sin
+                  cambiar su forma de conectarse.
+                </p>
+              </div>
+              <div
+                style="
+                  background: rgba(0, 161, 201, 0.1);
+                  border: 1px solid rgba(0, 161, 201, 0.35);
+                  padding: 0.9rem;
+                  border-radius: 10px;
+                "
+              >
+                <strong style="color: var(--aws-blue)"
+                  >Elige AWS DataSync cuando:</strong
+                >
+                <p style="margin-top: 0.3rem; font-size: 0.88rem">
+                  La pregunta trata sobre
+                  <strong
+                    >migrar o sincronizar grandes volúmenes de datos
+                    internos</strong
+                  >
+                  (millones de archivos) de forma rápida y automatizada entre
+                  almacenamiento local y AWS.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> AWS Transfer Family permite transferir
+            archivos usando protocolos conocidos (SFTP, FTPS, FTP) directamente
+            hacia S3 o EFS sin administrar servidores.
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 8A: MIGRACIÓN Y TRANSFERENCIA DE DATOS (DataSync y Snow Family)
+         ====================================================================== -->
+      <section class="slide" data-section="7">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 8 (Parte 1) • Movimiento Masivo de Datos</span
+            >
+            <h1 class="slide-title">AWS DataSync y AWS Snow Family</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- AWS DataSync -->
+          <div class="card">
+            <h3>🚀 AWS DataSync (Transferencia por red acelerada)</h3>
+            <ul>
+              <li>
+                <strong>Qué hace:</strong> Automatiza y acelera el movimiento de
+                grandes cantidades de datos por internet o AWS Direct Connect
+                entre almacenamiento local y AWS (S3, EFS, FSx), o entre
+                servicios de AWS.
+              </li>
+              <li>
+                <strong>Velocidad:</strong> Utiliza un protocolo optimizado
+                mucho más rápido que herramientas tradicionales de copia.
+              </li>
+              <li>
+                <strong>Casos de uso:</strong> Migración única de millones de
+                archivos hacia la nube, replicación periódica para recuperación
+                ante desastres y traslado de datos para análisis.
+              </li>
+            </ul>
+            <div class="exam-badges">
+              <span class="badge">Transferencia online rápida</span>
+              <span class="badge">Automatización y programación</span>
+            </div>
+          </div>
+
+          <!-- AWS Snow Family -->
+          <div class="card">
+            <h3>📦 AWS Snow Family (Dispositivos físicos offline)</h3>
+            <ul>
+              <li>
+                <strong>Qué hace:</strong> Envío de
+                <strong>dispositivos físicos rugerizados</strong> a las
+                instalaciones del cliente para copiar terabytes o petabytes de
+                datos y enviarlos de vuelta a AWS por transporte físico.
+              </li>
+              <li>
+                <strong>¿Cuándo usarlos?:</strong> Cuando hay
+                <strong>ancho de banda limitado</strong>, conexiones inestables,
+                zonas remotas (ej. minas, barcos, áreas rurales) o cuando subir
+                los datos por internet tardaría semanas o meses.
+              </li>
+              <li>
+                <strong>Referencias del catálogo:</strong> <br />•
+                <strong>AWS Snowcone:</strong> Dispositivo pequeño y
+                ultraportátil (terabytes) para edge computing y transferencia.
+                <br />• <strong>AWS Snowball Edge:</strong> Maleta robusta de
+                mayor capacidad (decenas de terabytes) con cómputo y
+                almacenamiento local. <br />•
+                <em>Nota histórica (Snowmobile):</em> Fue un camión contenedor
+                diseñado para migraciones de exabytes; hoy es solo una
+                referencia conceptual histórica del catálogo y no un servicio
+                estándar de solicitud general.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> Si tienes buena conexión de red usa
+            <strong>DataSync</strong>; si el ancho de banda es limitado o hay
+            demasiados terabytes para subir por internet, usa dispositivos
+            físicos de <strong>AWS Snow Family</strong>.
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 8B: MIGRACIÓN DE CARGAS Y RESPALDOS (MGN, DMS y AWS Backup)
+         ====================================================================== -->
+      <section class="slide" data-section="8">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 8 (Parte 2) • Migración de Aplicaciones, BD y
+              Respaldos</span
+            >
+            <h1 class="slide-title">MGN, DMS y AWS Backup</h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <ellipse cx="12" cy="5" rx="9" ry="3" />
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <!-- MGN -->
+          <div class="card">
+            <h3>🖥️ AWS Application Migration Service (MGN)</h3>
+            <ul>
+              <li>
+                <strong>Propósito:</strong> Migrar
+                <strong>servidores completos y aplicaciones</strong> hacia AWS.
+              </li>
+              <li>
+                <strong>Estrategia Lift-and-Shift (Rehost):</strong> Replica
+                servidores físicos, virtuales (VMware/Hyper-V) o de otras nubes
+                hacia instancias <strong>Amazon EC2</strong> sin tener que
+                reescribir el código de la aplicación.
+              </li>
+              <li>
+                <strong>Ventaja:</strong> Minimiza el tiempo de inactividad
+                durante el corte final.
+              </li>
+            </ul>
+            <div class="exam-badges">
+              <span class="badge orange">Lift-and-Shift</span>
+              <span class="badge">Servidores completos</span>
+            </div>
+          </div>
+
+          <!-- DMS -->
+          <div class="card">
+            <h3>🗄️ AWS Database Migration Service (DMS)</h3>
+            <ul>
+              <li>
+                <strong>Propósito:</strong> Migrar
+                <strong>bases de datos</strong> hacia AWS de forma segura y
+                rápida.
+              </li>
+              <li>
+                <strong>Migración homogénea:</strong> Mismo motor (ej. Oracle a
+                Oracle, MySQL a MySQL).
+              </li>
+              <li>
+                <strong>Migración heterogénea:</strong> Distinto motor (ej.
+                Oracle a Amazon Aurora o PostgreSQL, apoyado por Schema
+                Conversion Tool).
+              </li>
+              <li>
+                <strong>Alta disponibilidad:</strong> La base de datos origen
+                sigue operando mientras DMS replica los cambios continuos.
+              </li>
+            </ul>
+            <div class="exam-badges">
+              <span class="badge orange">Homogénea / Heterogénea</span>
+              <span class="badge">Mínimo downtime</span>
+            </div>
+          </div>
+
+          <!-- AWS Backup -->
+          <div class="card">
+            <h3>🛡️ AWS Backup</h3>
+            <ul>
+              <li>
+                <strong>Propósito:</strong> Servicio
+                <strong>centralizado y automatizado</strong> para gestionar
+                copias de seguridad en toda tu cuenta u organización AWS.
+              </li>
+              <li>
+                <strong>Recursos compatibles:</strong> Volúmenes EBS, sistemas
+                EFS, sistemas FSx, bases de datos RDS, tablas DynamoDB y Storage
+                Gateway.
+              </li>
+              <li>
+                <strong>Ventaja:</strong> Define políticas únicas (frecuencia,
+                retención y cumplimiento) en un solo panel en lugar de
+                configurar scripts individuales por servicio.
+              </li>
+            </ul>
+            <div class="exam-badges">
+              <span class="badge green">Gestión centralizada</span>
+              <span class="badge">Políticas de respaldo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="key-idea">
+          <span>💡</span>
+          <div>
+            <strong>Idea clave:</strong> Cada servicio tiene un propósito único:
+            mover archivos (<strong>DataSync</strong>), transportar datos
+            físicos (<strong>Snow</strong>), migrar servidores
+            (<strong>MGN</strong>), migrar bases de datos (<strong>DMS</strong>)
+            o centralizar respaldos (<strong>AWS Backup</strong>).
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 9: COMPARACIÓN GENERAL INTERACTIVA
+         ====================================================================== -->
+      <section class="slide" data-section="9">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag"
+              >Sección 9 • Síntesis para Certificación</span
+            >
+            <h1 class="slide-title">
+              Comparación general y duelos clave del examen
+            </h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Selector de vista: Tabla general vs 8 comparaciones clave -->
+        <div class="tab-group">
+          <button
+            class="tab-btn active"
+            onclick="switchComparisonView('table', this)"
+          >
+            📋 Tabla Resumen (11 Servicios)
+          </button>
+          <button class="tab-btn" onclick="switchComparisonView('duels', this)">
+            ⚔️ 8 Duelos Clave del Examen CLF-C02
+          </button>
+        </div>
+
+        <!-- Vista 1: Tabla general de todos los servicios -->
+        <div
+          id="compTableView"
+          class="table-wrapper"
+          style="max-height: 410px; overflow-y: auto"
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Tipo / Función</th>
+                <th>Problema que resuelve</th>
+                <th>Caso de uso principal</th>
+                <th>Concepto clave examen</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Amazon EBS</strong></td>
+                <td>Bloques</td>
+                <td>Disco persistente para un servidor</td>
+                <td>SO y BD en una instancia EC2</td>
+                <td>Disco virtual en 1 AZ; Snapshots</td>
+              </tr>
+              <tr>
+                <td><strong>Amazon EFS</strong></td>
+                <td>Archivos (NFS)</td>
+                <td>Compartir archivos entre múltiples EC2</td>
+                <td>Sitios web, contenido compartido Linux</td>
+                <td>Elástico, Multi-AZ, protocolo NFS</td>
+              </tr>
+              <tr>
+                <td><strong>Amazon FSx</strong></td>
+                <td>Archivos administrados</td>
+                <td>Ejecutar sistemas de archivos nativos</td>
+                <td>Windows (SMB) o HPC (Lustre)</td>
+                <td>Windows File Server vs. Lustre</td>
+              </tr>
+              <tr>
+                <td><strong>Amazon S3</strong></td>
+                <td>Objetos</td>
+                <td>Guardar archivos ilimitados sin servidores</td>
+                <td>Imágenes, videos, backups, data lakes</td>
+                <td>Buckets, 11 nueves durabilidad, Clases</td>
+              </tr>
+              <tr>
+                <td><strong>Storage Gateway</strong></td>
+                <td>Almacenamiento híbrido</td>
+                <td>Conectar red local con nube AWS</td>
+                <td>Caché local con respaldo en S3/Glacier</td>
+                <td>File, Volume y Tape Gateway</td>
+              </tr>
+              <tr>
+                <td><strong>Transfer Family</strong></td>
+                <td>Transferencia archivos</td>
+                <td>Intercambio externo sin servidores FTP</td>
+                <td>Recibir archivos de proveedores/clientes</td>
+                <td>SFTP, FTPS, FTP hacia S3 o EFS</td>
+              </tr>
+              <tr>
+                <td><strong>AWS DataSync</strong></td>
+                <td>Transferencia masiva</td>
+                <td>Mover millones de archivos por red rápido</td>
+                <td>Migración/sincronización online de datos</td>
+                <td>Automatización y aceleración por red</td>
+              </tr>
+              <tr>
+                <td><strong>AWS Snow Family</strong></td>
+                <td>Transferencia física</td>
+                <td>Mover TB/PB sin ancho de banda suficiente</td>
+                <td>Entornos remotos o poca conexión</td>
+                <td>Dispositivos físicos (Snowcone/Snowball)</td>
+              </tr>
+              <tr>
+                <td><strong>AWS MGN</strong></td>
+                <td>Migración servidores</td>
+                <td>Trasladar servidores completos a EC2</td>
+                <td>Migración rápida Lift-and-Shift</td>
+                <td>Rehost sin reescribir aplicaciones</td>
+              </tr>
+              <tr>
+                <td><strong>AWS DMS</strong></td>
+                <td>Migración BD</td>
+                <td>Migrar bases de datos con mínimo corte</td>
+                <td>Oracle/SQL Server hacia Aurora/RDS</td>
+                <td>Migración homogénea y heterogénea</td>
+              </tr>
+              <tr>
+                <td><strong>AWS Backup</strong></td>
+                <td>Respaldo centralizado</td>
+                <td>Evitar backups manuales dispersos</td>
+                <td>Políticas automáticas de copia en AWS</td>
+                <td>Gobierno centralizado de backups</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Vista 2: Las 8 comparaciones obligatorias interactivas -->
+        <div id="compDuelsView" style="display: none">
+          <div
+            class="grid-2"
+            id="duelsContainer"
+            style="max-height: 410px; overflow-y: auto; padding-right: 0.25rem"
+          >
+            <!-- Se genera con JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+         SECCIÓN 10: REPASO Y EVALUACIÓN (12 PREGUNTAS CLF-C02)
+         ====================================================================== -->
+      <section class="slide" data-section="10">
+        <div class="slide-header">
+          <div>
+            <span class="section-tag">Sección 10 • Simulador CLF-C02</span>
+            <h1 class="slide-title">
+              Evaluación práctica de certificación (12 preguntas)
+            </h1>
+          </div>
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 11l3 3L22 4" />
+              <path
+                d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div id="quizContainer">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 1rem;
+            "
+          >
+            <span id="quizProgressText" class="badge orange"
+              >Pregunta 1 de 12</span
+            >
+            <span id="quizScoreBadge" class="badge green">Aciertos: 0</span>
+          </div>
+
+          <div class="card" style="margin-bottom: 1rem">
+            <h3
+              id="quizQuestionText"
+              style="font-size: 1.1rem; line-height: 1.45"
+            >
+              Cargando pregunta...
+            </h3>
+          </div>
+
+          <div id="quizOptionsList"></div>
+
+          <div id="quizFeedbackBox" class="quiz-feedback"></div>
+
+          <div
+            style="margin-top: 1.1rem; display: flex; justify-content: flex-end"
+          >
+            <button
+              id="nextQuestionBtn"
+              class="btn-nav primary"
+              onclick="nextQuizQuestion()"
+              style="display: none"
+            >
+              Siguiente pregunta ➡️
+            </button>
+          </div>
+        </div>
+
+        <!-- Pantalla de resultado final -->
+        <div
+          id="quizResultContainer"
+          style="display: none; text-align: center; padding: 1.5rem 0"
+        >
+          <div style="font-size: 3rem; margin-bottom: 0.5rem">🏆</div>
+          <h2 style="font-size: 1.6rem; margin-bottom: 0.5rem">
+            ¡Cuestionario completado!
+          </h2>
+          <p
+            id="finalScoreText"
+            style="
+              font-size: 1.15rem;
+              color: var(--aws-orange);
+              font-weight: 700;
+              margin-bottom: 0.75rem;
+            "
+          ></p>
+          <p
+            id="finalMessageText"
+            style="
+              color: var(--text-muted);
+              max-width: 600px;
+              margin: 0 auto 1.5rem auto;
+            "
+          ></p>
+          <button class="btn-nav primary" onclick="restartQuiz()">
+            🔄 Reiniciar cuestionario
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- PIE DE PÁGINA CON CONTROLES -->
+    <footer>
+      <button id="prevBtn" class="btn-nav" onclick="changeSlide(-1)">
+        ⬅️ Anterior
+      </button>
+      <div class="keyboard-hint">
+        Usa las teclas <kbd>←</kbd> y <kbd>→</kbd> para navegar entre
+        diapositivas
+      </div>
+      <button id="nextBtn" class="btn-nav primary" onclick="changeSlide(1)">
+        Siguiente ➡️
+      </button>
+    </footer>
+
+    <!-- ==========================================================================
+       LÓGICA JAVASCRIPT (Navegación, Diagramas Interactivos, Tablas y Quiz)
+       ========================================================================== -->
+    <script>
+      /* --------------------------------------------------------------------------
+       1. NAVEGACIÓN ENTRE DIAPOSITIVAS Y MENÚ DE SECCIONES
+       -------------------------------------------------------------------------- */
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+      const sectionSelect = document.getElementById("sectionSelect");
+      const slideCounter = document.getElementById("slideCounter");
+      const progressBar = document.getElementById("progressBar");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      function updateSlideUI() {
+        slides.forEach((slide, index) => {
+          slide.classList.toggle("active", index === currentSlide);
+        });
+
+        sectionSelect.value = currentSlide.toString();
+        slideCounter.textContent = `Diapositiva ${currentSlide + 1} / ${totalSlides}`;
+        progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === totalSlides - 1;
+      }
+
+      function changeSlide(direction) {
+        const nextIndex = currentSlide + direction;
+        if (nextIndex >= 0 && nextIndex < totalSlides) {
+          currentSlide = nextIndex;
+          updateSlideUI();
+        }
+      }
+
+      sectionSelect.addEventListener("change", (e) => {
+        currentSlide = parseInt(e.target.value, 10);
+        updateSlideUI();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") changeSlide(1);
+        if (e.key === "ArrowLeft") changeSlide(-1);
+      });
+
+      /* --------------------------------------------------------------------------
+       2. INTERACTIVIDAD SECCIÓN 1 (Modelos de almacenamiento)
+       -------------------------------------------------------------------------- */
+      const storageModelsInfo = {
+        block:
+          "<strong>Almacenamiento de Bloques (Ej. Amazon EBS):</strong> Divide los datos en fragmentos de tamaño fijo (bloques). <em>Analogía:</em> Es como el disco duro interno o SSD de tu computador conectado directamente a un servidor; es ultrarrápido y permite instalar un sistema operativo o base de datos.",
+        file: "<strong>Almacenamiento de Archivos (Ej. Amazon EFS / FSx):</strong> Organiza los datos en carpetas y subcarpetas jerárquicas. <em>Analogía:</em> Es como una carpeta compartida en la red de la oficina donde varios empleados (servidores) abren y editan documentos al mismo tiempo.",
+        object:
+          "<strong>Almacenamiento de Objetos (Ej. Amazon S3):</strong> Guarda cada archivo como un objeto independiente dentro de un contenedor (bucket) con una URL y metadatos. <em>Analogía:</em> Es como un servicio de valet parking: entregas tu auto (archivo), recibes un ticket único (clave) y no te preocupas en qué piso o espacio lo estacionaron.",
+      };
+
+      function selectStorageModel(type, element) {
+        document
+          .querySelectorAll('.slide[data-section="0"] .interactive-node')
+          .forEach((el) => el.classList.remove("selected"));
+        element.classList.add("selected");
+        document.getElementById("storageModelDetail").innerHTML =
+          storageModelsInfo[type];
+      }
+
+      /* --------------------------------------------------------------------------
+       3. INTERACTIVIDAD SECCIÓN 2 (Diagrama EC2 + EBS)
+       -------------------------------------------------------------------------- */
+      const ebsTipsInfo = {
+        ec2: "<strong>Instancia Amazon EC2:</strong> Es tu servidor virtual en la nube. Necesita un disco de arranque (volumen raíz EBS) para cargar Linux o Windows.",
+        ebs: "<strong>Volumen EBS:</strong> Si detienes la instancia EC2 y la vuelves a encender mañana, tus archivos y el sistema operativo siguen intactos en el volumen EBS.",
+        snap: "<strong>EBS Snapshot:</strong> Copia de seguridad incremental almacenada de forma duradera en Amazon S3. Solo respalda los bloques modificados desde el último snapshot, ahorrando costos.",
+      };
+
+      function showEbsTip(key) {
+        const nodes = document.querySelectorAll(
+          '.slide[data-section="1"] .interactive-node',
+        );
+        nodes.forEach((n) => n.classList.remove("selected"));
+        event.currentTarget.classList.add("selected");
+        document.getElementById("ebsTipPanel").innerHTML = ebsTipsInfo[key];
+      }
+
+      /* --------------------------------------------------------------------------
+       4. INTERACTIVIDAD SECCIÓN 5 (Clases de Almacenamiento S3)
+       -------------------------------------------------------------------------- */
+      const s3ClassesData = [
+        {
+          name: "S3 Standard",
+          cat: "freq",
+          desc: "Acceso frecuente. Baja latencia y alto rendimiento (webs, apps, videos).",
+        },
+        {
+          name: "S3 Intelligent-Tiering",
+          cat: "freq",
+          desc: "Mueve datos automáticamente entre niveles según patrones de acceso cambiantes.",
+        },
+        {
+          name: "S3 Standard-IA",
+          cat: "ia",
+          desc: "Acceso poco frecuente, pero recuperación inmediata cuando se necesita (Multi-AZ).",
+        },
+        {
+          name: "S3 One Zone-IA",
+          cat: "ia",
+          desc: "Acceso poco frecuente en una sola AZ (más económico; ideal para datos recreables).",
+        },
+        {
+          name: "S3 Glacier Instant Retrieval",
+          cat: "glacier",
+          desc: "Archivado a largo plazo con recuperación en milisegundos (ej. imágenes médicas).",
+        },
+        {
+          name: "S3 Glacier Flexible Retrieval",
+          cat: "glacier",
+          desc: "Archivado con recuperación de minutos a horas (respaldos históricos).",
+        },
+        {
+          name: "S3 Glacier Deep Archive",
+          cat: "glacier",
+          desc: "El costo más bajo de AWS. Recuperación en 12 a 48 horas (retención legal 7-10 años).",
+        },
+      ];
+
+      function renderS3Classes(filter = "all") {
+        const container = document.getElementById("s3ClassesList");
+        const filtered =
+          filter === "all"
+            ? s3ClassesData
+            : s3ClassesData.filter((item) => item.cat === filter);
+        container.innerHTML = filtered
+          .map(
+            (c) => `
+        <div class="card" style="padding: 0.75rem;">
+          <div style="font-weight: 700; color: var(--aws-orange); font-size: 0.86rem; margin-bottom: 0.25rem;">${c.name}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">${c.desc}</div>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      function filterS3(cat, btn) {
+        document
+          .querySelectorAll('.slide[data-section="4"] .tab-btn')
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderS3Classes(cat);
+      }
+
+      /* --------------------------------------------------------------------------
+       5. INTERACTIVIDAD SECCIÓN 9 (8 Comparaciones Obligatorias)
+       -------------------------------------------------------------------------- */
+      const eightDuels = [
+        {
+          title: "1. EBS vs. EFS vs. FSx",
+          body: "<strong>EBS:</strong> Disco de bloques para 1 instancia EC2 (1 AZ).<br><strong>EFS:</strong> Sistema de archivos compartido NFS para múltiples EC2 Linux (Multi-AZ).<br><strong>FSx:</strong> Sistemas administrados especializados (Windows/SMB o Lustre HPC).",
+        },
+        {
+          title: "2. S3 vs. EBS",
+          body: "<strong>S3:</strong> Almacenamiento de objetos accesible por internet/API; no puedes instalar un sistema operativo en él.<br><strong>EBS:</strong> Disco virtual de bloques conectado a una instancia EC2 para instalar SO y bases de datos.",
+        },
+        {
+          title: "3. EFS vs. FSx",
+          body: "<strong>EFS:</strong> Sistema de archivos elástico nativo de AWS basado en NFS (ideal para Linux).<br><strong>FSx:</strong> Sistemas comerciales o especializados listos para usar, como Windows File Server (SMB/AD) o Lustre.",
+        },
+        {
+          title: "4. Storage Gateway vs. DataSync",
+          body: "<strong>Storage Gateway:</strong> Conexión híbrida continua con caché local para que apps on-premises lean/escriban en AWS.<br><strong>DataSync:</strong> Herramienta de transferencia rápida para migrar o sincronizar grandes volúmenes de datos.",
+        },
+        {
+          title: "5. Transfer Family vs. DataSync",
+          body: "<strong>Transfer Family:</strong> Intercambio de archivos con terceros externos usando protocolos tradicionales <strong>SFTP, FTPS o FTP</strong>.<br><strong>DataSync:</strong> Movimiento masivo y acelerado de archivos internos hacia o entre servicios AWS.",
+        },
+        {
+          title: "6. DataSync vs. Snow Family",
+          body: "<strong>DataSync:</strong> Transferencia online a través de la red cuando hay buen ancho de banda.<br><strong>Snow Family:</strong> Envío de dispositivos físicos offline (Snowcone/Snowball) cuando la red es lenta o limitada.",
+        },
+        {
+          title: "7. Application Migration Service (MGN) vs. DMS",
+          body: "<strong>MGN:</strong> Migra <strong>servidores completos</strong> y aplicaciones (Lift-and-Shift) hacia EC2.<br><strong>DMS:</strong> Migra exclusivamente <strong>bases de datos</strong> (homogéneas o heterogéneas) con mínimo tiempo de inactividad.",
+        },
+        {
+          title: "8. AWS Backup vs. Snapshots de EBS",
+          body: "<strong>Snapshots de EBS:</strong> Respaldos puntuales creados manualmente o por volumen individual.<br><strong>AWS Backup:</strong> Servicio centralizado que automatiza y gobierna políticas de respaldo en múltiples servicios (EBS, EFS, RDS, FSx).",
+        },
+      ];
+
+      function renderDuels() {
+        const container = document.getElementById("duelsContainer");
+        container.innerHTML = eightDuels
+          .map(
+            (d, i) => `
+        <div>
+          <button class="accordion-btn" onclick="toggleDuel(${i})">
+            <span>${d.title}</span>
+            <span>▼</span>
+          </button>
+          <div id="duelContent-${i}" class="accordion-content open">${d.body}</div>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      function toggleDuel(idx) {
+        document.getElementById(`duelContent-${idx}`).classList.toggle("open");
+      }
+
+      function switchComparisonView(view, btn) {
+        document
+          .querySelectorAll('.slide[data-section="9"] .tab-btn')
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("compTableView").style.display =
+          view === "table" ? "block" : "none";
+        document.getElementById("compDuelsView").style.display =
+          view === "duels" ? "block" : "none";
+      }
+
+      /* --------------------------------------------------------------------------
+       6. CUESTIONARIO INTERACTIVO DE 12 PREGUNTAS (SECCIÓN 10)
+       -------------------------------------------------------------------------- */
+      const quizQuestions = [
+        {
+          q: "1. Una empresa ejecuta una aplicación web en múltiples instancias Amazon EC2 distribuidas en varias Zonas de Disponibilidad y necesita que todas accedan simultáneamente a una misma carpeta compartida en Linux. ¿Qué servicio debe utilizar?",
+          options: [
+            "Amazon EBS",
+            "Amazon EFS",
+            "Amazon S3 Glacier",
+            "AWS Snowcone",
+          ],
+          correct: 1,
+          explanation:
+            "<strong>Correcto: Amazon EFS.</strong> EFS ofrece un sistema de archivos compartido (NFS) elástico que permite acceso simultáneo desde múltiples instancias EC2 en distintas Zonas de Disponibilidad.<br>• <em>Por qué no las otras:</em> EBS se conecta normalmente a una sola instancia en una AZ; S3 Glacier es para archivado de objetos; Snowcone es un dispositivo físico de transferencia.",
+        },
+        {
+          q: "2. Una aplicación crítica en Amazon EC2 requiere un volumen de almacenamiento de bloques persistente de baja latencia para su sistema operativo y base de datos local, manteniendo los datos aunque la instancia se detenga. ¿Qué servicio cumple este requisito?",
+          options: [
+            "Amazon S3",
+            "Amazon EBS",
+            "AWS Transfer Family",
+            "AWS DataSync",
+          ],
+          correct: 1,
+          explanation:
+            "<strong>Correcto: Amazon EBS.</strong> Proporciona volúmenes de bloques persistentes que funcionan como discos duros virtuales para instancias EC2.<br>• <em>Por qué no las otras:</em> S3 es almacenamiento de objetos (no admite instalación de SO); Transfer Family y DataSync son servicios de transferencia de datos.",
+        },
+        {
+          q: "3. Una plataforma de comercio electrónico necesita almacenar millones de imágenes de productos, facturas en PDF y videos promocionales con alta durabilidad y acceso mediante API web sin administrar servidores. ¿Qué servicio es el más adecuado?",
+          options: [
+            "Amazon S3",
+            "Amazon FSx for Lustre",
+            "AWS Application Migration Service",
+            "Amazon EBS",
+          ],
+          correct: 0,
+          explanation:
+            "<strong>Correcto: Amazon S3.</strong> Está diseñado para almacenar cantidades prácticamente ilimitadas de objetos (imágenes, documentos, videos) con 99.999999999% de durabilidad.<br>• <em>Por qué no las otras:</em> FSx for Lustre es para computación de alto rendimiento; MGN migra servidores; EBS es un disco de bloques acoplado a EC2.",
+        },
+        {
+          q: "4. Una organización intercambia diariamente archivos de nómina con un proveedor externo que exige conectarse mediante el protocolo SFTP sin modificar sus sistemas actuales. ¿Qué servicio de AWS permite recibir estos archivos directamente en Amazon S3 sin administrar servidores?",
+          options: [
+            "AWS DataSync",
+            "AWS Transfer Family",
+            "AWS Storage Gateway",
+            "AWS Snowball Edge",
+          ],
+          correct: 1,
+          explanation:
+            "<strong>Correcto: AWS Transfer Family.</strong> Ofrece soporte totalmente administrado para los protocolos SFTP, FTPS y FTP directamente sobre S3 o EFS.<br>• <em>Por qué no las otras:</em> DataSync usa su propio protocolo acelerado para migraciones internas; Storage Gateway conecta redes híbridas locales; Snowball Edge es un dispositivo físico.",
+        },
+        {
+          q: "5. Una empresa necesita migrar 80 millones de archivos desde su servidor de archivos local hacia Amazon EFS a través de su conexión de red de alta velocidad de forma rápida y automatizada. ¿Qué servicio debe elegir?",
+          options: [
+            "AWS DataSync",
+            "AWS Transfer Family",
+            "Amazon S3 Glacier Deep Archive",
+            "AWS Database Migration Service",
+          ],
+          correct: 0,
+          explanation:
+            "<strong>Correcto: AWS DataSync.</strong> Está diseñado específicamente para acelerar y automatizar transferencias masivas de archivos por red hacia servicios como S3, EFS o FSx.<br>• <em>Por qué no las otras:</em> Transfer Family está orientado a intercambio externo SFTP/FTP; Glacier Deep Archive es una clase de archivado; DMS migra bases de datos.",
+        },
+        {
+          q: "6. Una compañía desea migrar una base de datos Oracle local hacia Amazon Aurora PostgreSQL reduciendo al máximo el tiempo de inactividad durante el proceso. ¿Qué servicio de AWS debe utilizar?",
+          options: [
+            "AWS Application Migration Service (MGN)",
+            "AWS Database Migration Service (DMS)",
+            "AWS Backup",
+            "Amazon EBS Snapshots",
+          ],
+          correct: 1,
+          explanation:
+            "<strong>Correcto: AWS Database Migration Service (DMS).</strong> Soporta migraciones de bases de datos homogéneas y heterogéneas (como Oracle a Aurora PostgreSQL) replicando datos continuamente con mínimo downtime.<br>• <em>Por qué no las otras:</em> MGN migra servidores completos (Lift-and-Shift), no motores de bases de datos heterogéneos; AWS Backup y Snapshots son para copias de seguridad.",
+        },
+        {
+          q: '7. Una empresa desea trasladar 40 servidores virtuales locales hacia Amazon EC2 rápidamente mediante una estrategia "lift-and-shift" sin modificar el código de sus aplicaciones. ¿Qué servicio debe seleccionar?',
+          options: [
+            "AWS Application Migration Service (MGN)",
+            "AWS Database Migration Service (DMS)",
+            "Amazon FSx for Windows File Server",
+            "AWS Transfer Family",
+          ],
+          correct: 0,
+          explanation:
+            "<strong>Correcto: AWS Application Migration Service (MGN).</strong> Automatiza la migración lift-and-shift de servidores físicos, virtuales o de otras nubes hacia instancias EC2.<br>• <em>Por qué no las otras:</em> DMS es exclusivo para bases de datos; FSx es un sistema de archivos; Transfer Family es para transferencias SFTP/FTPS/FTP.",
+        },
+        {
+          q: "8. Una empresa minera ubicada en una zona remota con conexión a internet muy lenta necesita transferir 120 TB de datos geológicos a Amazon S3. ¿Cuál es la mejor solución?",
+          options: [
+            "AWS Snow Family (Snowball Edge)",
+            "AWS Transfer Family",
+            "Amazon EFS",
+            "AWS DataSync",
+          ],
+          correct: 0,
+          explanation:
+            "<strong>Correcto: AWS Snow Family (Snowball Edge).</strong> Permite copiar grandes volúmenes de datos en dispositivos físicos enviados por AWS cuando el ancho de banda es limitado o inexistente.<br>• <em>Por qué no las otras:</em> Transfer Family y DataSync dependen de una conexión de red estable; EFS es un sistema de archivos compartido en la nube.",
+        },
+        {
+          q: "9. Una empresa con aplicaciones empresariales basadas en Microsoft Windows necesita un sistema de archivos compartido administrado en AWS compatible con el protocolo SMB y Active Directory. ¿Qué servicio debe elegir?",
+          options: [
+            "Amazon FSx for Windows File Server",
+            "Amazon EFS",
+            "Amazon S3 One Zone-IA",
+            "Amazon EBS",
+          ],
+          correct: 0,
+          explanation:
+            "<strong>Correcto: Amazon FSx for Windows File Server.</strong> Proporciona almacenamiento de archivos Windows nativo administrado con soporte completo para SMB, NTFS y Active Directory.<br>• <em>Por qué no las otras:</em> EFS utiliza protocolo NFS orientado a Linux; S3 es almacenamiento de objetos; EBS es almacenamiento de bloques para una sola instancia.",
+        },
+        {
+          q: "10. Un hospital debe conservar registros médicos antiguos durante 10 años por exigencia legal. Raramente se consultan, pero cuando se solicitan es aceptable esperar entre 12 y 48 horas para recuperarlos al menor costo posible. ¿Qué clase de Amazon S3 conviene?",
+          options: [
+            "S3 Standard",
+            "S3 Standard-IA",
+            "S3 Glacier Deep Archive",
+            "S3 Intelligent-Tiering",
+          ],
+          correct: 2,
+          explanation:
+            "<strong>Correcto: S3 Glacier Deep Archive.</strong> Es la clase de almacenamiento más económica de AWS, ideal para retención normativa a largo plazo con tiempos de recuperación de 12 a 48 horas.<br>• <em>Por qué no las otras:</em> S3 Standard, Standard-IA e Intelligent-Tiering ofrecen acceso inmediato a mayor costo por GB almacenado.",
+        },
+        {
+          q: "11. Una empresa mantiene servidores locales que necesitan acceso rápido (baja latencia) a los archivos más recientes, mientras respalda automáticamente todos sus datos en Amazon S3 sin reescribir sus aplicaciones locales. ¿Qué servicio cumple esta función?",
+          options: [
+            "AWS Storage Gateway",
+            "AWS Application Migration Service",
+            "Amazon FSx for Lustre",
+            "AWS Snowcone",
+          ],
+          correct: 0,
+          explanation:
+            "<strong>Correcto: AWS Storage Gateway.</strong> Conecta la infraestructura local con el almacenamiento en la nube de AWS ofreciendo caché local de baja latencia y respaldo continuo.<br>• <em>Por qué no las otras:</em> MGN migra servidores completos para apagar los locales; FSx for Lustre es para HPC en la nube; Snowcone es para transporte físico puntual.",
+        },
+        {
+          q: "12. Un administrador de nube quiere configurar y supervisar desde un único lugar las políticas automáticas de respaldo de sus volúmenes Amazon EBS, sistemas EFS y bases de datos Amazon RDS. ¿Qué servicio debe utilizar?",
+          options: [
+            "AWS Backup",
+            "AWS DataSync",
+            "Amazon S3 Lifecycle",
+            "AWS Transfer Family",
+          ],
+          correct: 0,
+          explanation:
+            "<strong>Correcto: AWS Backup.</strong> Centraliza y automatiza las políticas de copias de seguridad y retención en múltiples servicios compatibles de AWS.<br>• <em>Por qué no las otras:</em> DataSync transfiere archivos; S3 Lifecycle gestiona transiciones dentro de S3; Transfer Family gestiona transferencias SFTP/FTPS/FTP.",
+        },
+      ];
+
+      let currentQuizIndex = 0;
+      let quizScore = 0;
+      let questionAnswered = false;
+
+      function renderQuizQuestion() {
+        const q = quizQuestions[currentQuizIndex];
+        questionAnswered = false;
+
+        document.getElementById("quizProgressText").textContent =
+          `Pregunta ${currentQuizIndex + 1} de ${quizQuestions.length}`;
+        document.getElementById("quizScoreBadge").textContent =
+          `Aciertos: ${quizScore}`;
+        document.getElementById("quizQuestionText").textContent = q.q;
+        document.getElementById("quizFeedbackBox").classList.remove("show");
+        document.getElementById("quizFeedbackBox").innerHTML = "";
+        document.getElementById("nextQuestionBtn").style.display = "none";
+
+        const optionsList = document.getElementById("quizOptionsList");
+        const letters = ["A", "B", "C", "D"];
+        optionsList.innerHTML = q.options
+          .map(
+            (opt, idx) => `
+        <button class="quiz-option" onclick="selectQuizOption(${idx}, this)">
+          <strong>${letters[idx]}.</strong> ${opt}
+        </button>
+      `,
+          )
+          .join("");
+      }
+
+      function selectQuizOption(selectedIdx, btnElement) {
+        if (questionAnswered) return;
+        questionAnswered = true;
+
+        const q = quizQuestions[currentQuizIndex];
+        const allOptions = document.querySelectorAll(".quiz-option");
+
+        allOptions.forEach((btn, idx) => {
+          btn.disabled = true;
+          if (idx === q.correct) {
+            btn.classList.add("correct");
+          } else if (idx === selectedIdx && selectedIdx !== q.correct) {
+            btn.classList.add("wrong");
+          }
+        });
+
+        if (selectedIdx === q.correct) {
+          quizScore++;
+          document.getElementById("quizScoreBadge").textContent =
+            `Aciertos: ${quizScore}`;
+        }
+
+        const feedbackBox = document.getElementById("quizFeedbackBox");
+        feedbackBox.innerHTML = q.explanation;
+        feedbackBox.classList.add("show");
+
+        const nextBtn = document.getElementById("nextQuestionBtn");
+        nextBtn.textContent =
+          currentQuizIndex === quizQuestions.length - 1
+            ? "Ver puntuación final 🏆"
+            : "Siguiente pregunta ➡️";
+        nextBtn.style.display = "inline-flex";
+      }
+
+      function nextQuizQuestion() {
+        if (currentQuizIndex < quizQuestions.length - 1) {
+          currentQuizIndex++;
+          renderQuizQuestion();
+        } else {
+          showFinalQuizResult();
+        }
+      }
+
+      function showFinalQuizResult() {
+        document.getElementById("quizContainer").style.display = "none";
+        document.getElementById("quizResultContainer").style.display = "block";
+
+        const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+        document.getElementById("finalScoreText").textContent =
+          `Puntuación final: ${quizScore} de ${quizQuestions.length} (${percentage}%)`;
+
+        let msg = "";
+        if (percentage >= 80) {
+          msg =
+            "¡Excelente dominio! Identificas con claridad las diferencias clave entre bloques, archivos, objetos, transferencia y migración para el examen CLF-C02.";
+        } else if (percentage >= 60) {
+          msg =
+            "¡Buen trabajo! Repasa la Sección 9 (Comparación general y los 8 duelos clave) para afianzar las diferencias entre servicios similares.";
+        } else {
+          msg =
+            "Buen intento inicial. Te recomendamos revisar las ideas clave de cada diapositiva y volver a realizar el simulador.";
+        }
+        document.getElementById("finalMessageText").textContent = msg;
+      }
+
+      function restartQuiz() {
+        currentQuizIndex = 0;
+        quizScore = 0;
+        document.getElementById("quizResultContainer").style.display = "none";
+        document.getElementById("quizContainer").style.display = "block";
+        renderQuizQuestion();
+      }
+
+      /* --------------------------------------------------------------------------
+       INICIALIZACIÓN AL CARGAR LA PÁGINA
+       -------------------------------------------------------------------------- */
+      updateSlideUI();
+      renderS3Classes("all");
+      renderDuels();
+      renderQuizQuestion();
+    </script>
+  </body>
+</html>
